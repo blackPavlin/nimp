@@ -12,6 +12,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(1);
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('2x2 paletted file', () => {
@@ -22,6 +23,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(2);
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('3x3 paletted file', () => {
@@ -32,6 +34,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(3);
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('4x4 paletted file', () => {
@@ -42,6 +45,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(4);
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('5x5 paletted file', () => {
@@ -52,6 +56,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(5);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('6x6 paletted file', () => {
@@ -62,6 +67,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(6);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('7x7 paletted file', () => {
@@ -72,6 +78,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(7);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('8x8 paletted file', () => {
@@ -82,6 +89,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(8);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('9x9 paletted file', () => {
@@ -92,6 +100,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(9);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('32x32 paletted file', () => {
@@ -102,6 +111,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('33x33 paletted file', () => {
@@ -112,6 +122,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(33);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('34x34 paletted file', () => {
@@ -122,6 +133,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(34);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('35x35 paletted file', () => {
@@ -132,6 +144,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(35);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('36x36 paletted file', () => {
@@ -142,6 +155,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(36);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('37x37 paletted file', () => {
@@ -152,6 +166,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(37);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('38x38 paletted file', () => {
@@ -162,6 +177,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(38);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('39x39 paletted file', () => {
@@ -172,6 +188,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(39);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 
 	it('40x40 paletted file', () => {
@@ -182,5 +199,6 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(40);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.butmap).toMatchSnapshot();
 	});
 });

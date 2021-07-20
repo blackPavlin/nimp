@@ -197,6 +197,7 @@ export default class Decoder {
 			throw new Error('Bad PLTE length');
 		}
 
+		// TODO: Имеет смысл сразу преобразовать palette в буфер
 		for (let i = 0; i < paletteEntris; i += 1) {
 			this.palette.push([chunk[3 * i + 0], chunk[3 * i + 1], chunk[3 * i + 2], 0xff]);
 		}
@@ -293,6 +294,86 @@ export default class Decoder {
 			throw new Error('Unsupported interlace method');
 		}
 
+		// TODO: Можно вынести в метод
+		if (this.bitDepth === 1) {
+			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
+				const normalized = Buffer.alloc(this.width);
+
+				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
+					const byte = this._unFilteredChunks[i][k];
+
+					const b = Buffer.from([
+						(byte >> 7) & 1,
+						(byte >> 6) & 1,
+						(byte >> 5) & 1,
+						(byte >> 4) & 1,
+						(byte >> 3) & 1,
+						(byte >> 2) & 1,
+						(byte >> 1) & 1,
+						(byte >> 0) & 1,
+					]);
+
+					b.copy(normalized, k * 8);
+				}
+
+				this._unFilteredChunks[i] = normalized;
+			}
+		}
+
+		if (this.bitDepth === 2) {
+			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
+				const normalized = Buffer.alloc(this.width);
+
+				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
+					const byte = this._unFilteredChunks[i][k];
+
+					const b = Buffer.from([
+						(byte >> 6) & 3,
+						(byte >> 4) & 3,
+						(byte >> 2) & 3,
+						(byte >> 0) & 3,
+					]);
+
+					b.copy(normalized, k * 4);
+				}
+
+				this._unFilteredChunks[i] = normalized;
+			}
+		}
+
+		if (this.bitDepth === 4) {
+			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
+				const normalized = Buffer.alloc(this.width);
+
+				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
+					const byte = this._unFilteredChunks[i][k];
+
+					const b = Buffer.from([byte >> 4, byte & 0x0f]);
+
+					b.copy(normalized, k * 4);
+				}
+
+				this._unFilteredChunks[i] = normalized;
+			}
+		}
+
+		if (this.bitDepth === 16) {
+			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
+				const normalized = Buffer.alloc(this.width);
+
+				for (let k = 0; k < this._unFilteredChunks[i].length; k += 2) {
+					const byte = this._unFilteredChunks[i][k];
+					const byte2 = this._unFilteredChunks[i][k + 1];
+
+					const b = Buffer.from([(byte << 8) + byte2]);
+
+					b.copy(normalized, k * 4);
+				}
+
+				this._unFilteredChunks[i] = normalized;
+			}
+		}
+
 		if (this.colorType === ColorTypeE.IndexedColor) {
 			if (this.palette.length === 0) {
 				// TODO: Error message
@@ -300,18 +381,16 @@ export default class Decoder {
 				throw new Error('Palette not found');
 			}
 
-			// for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-			//     const buff = Buffer.alloc(this._unFilteredChunks[i].length * 4);
+			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
+				const buff = Buffer.alloc(this._unFilteredChunks[i].length * 4);
 
-			//     for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
-			//         buff[k] = this.palette[this._unFilteredChunks[i][k]][0];
-			//         buff[k + 1] = this.palette[this._unFilteredChunks[i][k]][1];
-			//         buff[k + 2] = this.palette[this._unFilteredChunks[i][k]][2];
-			//         buff[k + 3] = this.palette[this._unFilteredChunks[i][k]][3];
-			//     }
+				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
+					// TODO: Имеет смысл сразу преобразовать palette в буфер
+					Buffer.from(this.palette[this._unFilteredChunks[i][k]]).copy(buff, k * 4);
+				}
 
-			//     this._unFilteredChunks[i] = buff;
-			// }
+				this._unFilteredChunks[i] = buff;
+			}
 		}
 
 		if (this.colorType === ColorTypeE.TrueColor) {
@@ -319,7 +398,9 @@ export default class Decoder {
 		}
 
 		this.butmap = Buffer.concat(this._unFilteredChunks);
-		this._deflatedIDAT = []; // TODO: Можно сделать
+
+		// TODO: Можно сделать раньше
+		this._deflatedIDAT = [];
 		this._unFilteredChunks = [];
 	}
 
