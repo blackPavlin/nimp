@@ -287,7 +287,7 @@ export default class Decoder {
 		return zlib.inflateSync(Buffer.concat(this._deflatedIDAT));
 	}
 
-	public butmap!: Buffer;
+	public bitmap!: Buffer;
 
 	private _decodePixels(): void {
 		if (this.interlaceMethod === 1) {
@@ -297,7 +297,7 @@ export default class Decoder {
 		// TODO: Можно вынести в метод
 		if (this.bitDepth === 1) {
 			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const normalized = Buffer.alloc(this.width);
+				const normalized = Buffer.alloc(this.width * this._channels);
 
 				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
 					const byte = this._unFilteredChunks[i][k];
@@ -322,7 +322,7 @@ export default class Decoder {
 
 		if (this.bitDepth === 2) {
 			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const normalized = Buffer.alloc(this.width);
+				const normalized = Buffer.alloc(this.width * this._channels);
 
 				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
 					const byte = this._unFilteredChunks[i][k];
@@ -343,14 +343,14 @@ export default class Decoder {
 
 		if (this.bitDepth === 4) {
 			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const normalized = Buffer.alloc(this.width);
+				const normalized = Buffer.alloc(this.width * this._channels);
 
 				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
 					const byte = this._unFilteredChunks[i][k];
 
 					const b = Buffer.from([byte >> 4, byte & 0x0f]);
 
-					b.copy(normalized, k * 4);
+					b.copy(normalized, k * 2);
 				}
 
 				this._unFilteredChunks[i] = normalized;
@@ -358,8 +358,9 @@ export default class Decoder {
 		}
 
 		if (this.bitDepth === 16) {
+			// TODO: Не работает
 			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const normalized = Buffer.alloc(this.width);
+				const normalized = Buffer.alloc(this.width * this._channels);
 
 				for (let k = 0; k < this._unFilteredChunks[i].length; k += 2) {
 					const byte = this._unFilteredChunks[i][k];
@@ -367,10 +368,36 @@ export default class Decoder {
 
 					const b = Buffer.from([(byte << 8) + byte2]);
 
-					b.copy(normalized, k * 4);
+					b.copy(normalized, k / 2);
 				}
 
 				this._unFilteredChunks[i] = normalized;
+			}
+		}
+
+		if (this.colorType === ColorTypeE.Grayscale) {
+			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
+				const buff = Buffer.alloc(this.width * 4).fill(0xff);
+
+				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
+					Buffer.alloc(3)
+						.fill(this._unFilteredChunks[i][k])
+						.copy(buff, k * 4);
+				}
+
+				this._unFilteredChunks[i] = buff;
+			}
+		}
+
+		if (this.colorType === ColorTypeE.TrueColor) {
+			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
+				const buff = Buffer.alloc(this.width * 4).fill(0xff);
+
+				for (let k = 0; k < this._unFilteredChunks[i].length / 3; k += 1) {
+					this._unFilteredChunks[i].copy(buff, k * 4, k * 3, k * 3 + 3);
+				}
+
+				this._unFilteredChunks[i] = buff;
 			}
 		}
 
@@ -393,11 +420,11 @@ export default class Decoder {
 			}
 		}
 
-		if (this.colorType === ColorTypeE.TrueColor) {
+		if (this.colorType === ColorTypeE.GrayscaleAlpha) {
 			// TODO: ???
 		}
 
-		this.butmap = Buffer.concat(this._unFilteredChunks);
+		this.bitmap = Buffer.concat(this._unFilteredChunks);
 
 		// TODO: Можно сделать раньше
 		this._deflatedIDAT = [];
@@ -455,7 +482,7 @@ export default class Decoder {
 		if (this._unFilteredChunks.length === 0) {
 			this._unFilteredChunks.push(chunk);
 		} else {
-			for (let i = 0, len = chunk.length; i < len; i += 1) {
+			for (let i = 0; i < chunk.length; i += 1) {
 				chunk[i] = (chunk[i] + this._unFilteredChunks[this._unFilteredChunks.length - 1][i]) & 0xff;
 			}
 
@@ -465,8 +492,8 @@ export default class Decoder {
 
 	private _unFilterAverage(chunk: Buffer, bitsPerPixel: number): void {
 		if (this._unFilteredChunks.length === 0) {
-			for (let i = bitsPerPixel, len = chunk.length; i < len; i += 1) {
-				chunk[i] = ((chunk[i] + chunk[i - bitsPerPixel]) >> 1) & 0xff;
+			for (let i = bitsPerPixel; i < chunk.length; i += 1) {
+				chunk[i] = (chunk[i] + (chunk[i - bitsPerPixel] >> 1)) & 0xff;
 			}
 
 			this._unFilteredChunks.push(chunk);
@@ -476,7 +503,7 @@ export default class Decoder {
 					(chunk[i] + (this._unFilteredChunks[this._unFilteredChunks.length - 1][i] >> 1)) & 0xff;
 			}
 
-			for (let i = bitsPerPixel, len = chunk.length; i < len; i += 1) {
+			for (let i = bitsPerPixel; i < chunk.length; i += 1) {
 				chunk[i] =
 					(chunk[i] +
 						((chunk[i - bitsPerPixel] +
@@ -497,7 +524,7 @@ export default class Decoder {
 				chunk[i] = (chunk[i] + this._unFilteredChunks[this._unFilteredChunks.length - 1][i]) & 0xff;
 			}
 
-			for (let i = bitsPerPixel, len = chunk.length; i < len; i += 1) {
+			for (let i = bitsPerPixel; i < chunk.length; i += 1) {
 				chunk[i] =
 					(chunk[i] +
 						this._paethPredictor(

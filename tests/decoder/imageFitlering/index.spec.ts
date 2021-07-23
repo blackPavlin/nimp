@@ -12,6 +12,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Color, no interlacing, filter-type 0', () => {
@@ -22,6 +23,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Grayscale, no interlacing, filter-type 1', () => {
@@ -32,6 +34,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Color, no interlacing, filter-type 1', () => {
@@ -42,6 +45,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Grayscale, no interlacing, filter-type 2', () => {
@@ -52,6 +56,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Color, no interlacing, filter-type 2', () => {
@@ -62,6 +67,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Grayscale, no interlacing, filter-type 3', () => {
@@ -72,6 +78,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Color, no interlacing, filter-type 3', () => {
@@ -82,6 +89,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Grayscale, no interlacing, filter-type 4', () => {
@@ -92,6 +100,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Color, no interlacing, filter-type 4', () => {
@@ -102,6 +111,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Bit-depth 4, filter changing per scanline', () => {
@@ -112,5 +122,6 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		// TODO: Не работает
 	});
 });
