@@ -12,6 +12,7 @@ describe('Zlib compression level', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Color, no interlacing, compression level 3', () => {
@@ -22,6 +23,7 @@ describe('Zlib compression level', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Color, no interlacing, compression level 6 (default)', () => {
@@ -32,6 +34,7 @@ describe('Zlib compression level', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Color, no interlacing, compression level 9 (maximum)', () => {
@@ -42,5 +45,6 @@ describe('Zlib compression level', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 });

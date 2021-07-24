@@ -377,12 +377,19 @@ export default class Decoder {
 
 		if (this.colorType === ColorTypeE.Grayscale) {
 			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const buff = Buffer.alloc(this.width * 4).fill(0xff);
+				const buff = Buffer.alloc(this.width * 4);
 
 				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
-					Buffer.alloc(3)
-						.fill(this._unFilteredChunks[i][k])
-						.copy(buff, k * 4);
+					if (this._unFilteredChunks[i][k] === this.transparent[0]) {
+						continue;
+					}
+
+					Buffer.from([
+						this._unFilteredChunks[i][k],
+						this._unFilteredChunks[i][k],
+						this._unFilteredChunks[i][k],
+						0xff,
+					]).copy(buff, k * 4);
 				}
 
 				this._unFilteredChunks[i] = buff;
@@ -421,7 +428,20 @@ export default class Decoder {
 		}
 
 		if (this.colorType === ColorTypeE.GrayscaleAlpha) {
-			// TODO: ???
+			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
+				const buff = Buffer.alloc(this.width * 4);
+
+				for (let k = 0; k < this._unFilteredChunks[i].length; k += 2) {
+					Buffer.from([
+						this._unFilteredChunks[i][k],
+						this._unFilteredChunks[i][k],
+						this._unFilteredChunks[i][k],
+						this._unFilteredChunks[i][k + 1],
+					]).copy(buff, (k / 2) * 4);
+				}
+
+				this._unFilteredChunks[i] = buff;
+			}
 		}
 
 		this.bitmap = Buffer.concat(this._unFilteredChunks);

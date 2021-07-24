@@ -1,0 +1,95 @@
+import fs from 'fs';
+import path from 'path';
+import Decoder from '../../../src/decoder';
+
+describe('Gamma values', () => {
+	it('Grayscale, file-gamma = 0.35', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g03n0g16.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Color, file-gamma = 0.35', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g03n2c08.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Paletted, file-gamma = 0.35', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g03n3p04.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Grayscale, file-gamma = 0.45', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g04n0g16.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Color, file-gamma = 0.45', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g04n2c08.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Paletted, file-gamma = 0.45', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g04n3p04.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Grayscale, file-gamma = 0.55', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g05n0g16.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Color, file-gamma = 0.55', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g05n2c08.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Paletted, file-gamma = 0.55', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g05n3p04.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Grayscale, file-gamma = 0.70', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g07n0g16.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Color, file-gamma = 0.70', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g07n2c08.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Paletted, file-gamma = 0.70', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g07n3p04.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Grayscale, file-gamma = 1.00', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g10n0g16.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Color, file-gamma = 1.00', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g10n2c08.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Paletted, file-gamma = 1.00', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g10n3p04.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Grayscale, file-gamma = 2.50', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g25n0g16.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Color, file-gamma = 2.50', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g25n2c08.png'));
+		const png = new Decoder(image);
+	});
+
+	it('Paletted, file-gamma = 2.50', () => {
+		const image = fs.readFileSync(path.join(__dirname, './images/g25n3p04.png'));
+		const png = new Decoder(image);
+	});
+});
