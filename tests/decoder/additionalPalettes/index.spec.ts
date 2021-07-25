@@ -22,9 +22,10 @@ describe('Additional palettes', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColorAlpha);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it('Six-cube suggested palette (1 byte) in grayscale image', () => {
+	it('Six-cube suggested palette (1 byte) in grayscale image, 8 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ps1n0g08.png'));
 		const png = new Decoder(image);
 
@@ -32,9 +33,10 @@ describe('Additional palettes', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it('Six-cube suggested palette (1 byte) in true-color image', () => {
+	it('Six-cube suggested palette (1 byte) in true-color image, 16 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ps1n2c16.png'));
 		const png = new Decoder(image);
 
@@ -44,7 +46,7 @@ describe('Additional palettes', () => {
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
 	});
 
-	it('Six-cube suggested palette (2 bytes) in grayscale image', () => {
+	it('Six-cube suggested palette (2 bytes) in grayscale image, 8 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ps2n0g08.png'));
 		const png = new Decoder(image);
 
@@ -52,6 +54,7 @@ describe('Additional palettes', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Six-cube suggested palette (2 bytes) in true-color image', () => {

@@ -40,6 +40,9 @@ export default class Decoder {
 				case ChunkTypeE.IHDR:
 					this._parseIHDR(chunk);
 					break;
+				case ChunkTypeE.gAMA:
+					this._parseGAMA(chunk);
+					break;
 				case ChunkTypeE.PLTE:
 					this._parsePLTE(chunk);
 					break;
@@ -48,6 +51,12 @@ export default class Decoder {
 					break;
 				case ChunkTypeE.tIME:
 					this._parseTIME(chunk);
+					break;
+				case ChunkTypeE.iTXt:
+					break;
+				case ChunkTypeE.tEXt:
+					break;
+				case ChunkTypeE.zTXt:
 					break;
 				case ChunkTypeE.IDAT:
 					this._parseIDAT(chunk);
@@ -111,7 +120,7 @@ export default class Decoder {
 	public interlaceMethod!: InterlaceMethod;
 
 	/**
-	 * https://www.w3.org/TR/2003/REC-PNG-20031110/#11IHDR
+	 * https://www.w3.org/TR/PNG/#11IHDR
 	 * @param {Buffer} chunk
 	 */
 	private _parseIHDR(chunk: Buffer): void {
@@ -183,7 +192,7 @@ export default class Decoder {
 	public palette: [number, number, number, number][] = [];
 
 	/**
-	 * https://www.w3.org/TR/2003/REC-PNG-20031110/#11PLTE
+	 * https://www.w3.org/TR/PNG/#11PLTE
 	 * @param {Buffer} chunk
 	 */
 	private _parsePLTE(chunk: Buffer): void {
@@ -203,10 +212,21 @@ export default class Decoder {
 		}
 	}
 
+	public gamma!: number;
+
+	/**
+	 * https://www.w3.org/TR/PNG/#11gAMA
+	 * @param {Buffer} chunk
+	 */
+	private _parseGAMA(chunk: Buffer): void {
+		// TODO: Вынести 100000 в константы
+		this.gamma = chunk.readUInt32BE() / 100000;
+	}
+
 	public transparent: number[] = [];
 
 	/**
-	 * https://www.w3.org/TR/2003/REC-PNG-20031110/#11tRNS
+	 * https://www.w3.org/TR/PNG/#11tRNS
 	 * @param {Buffer} chunk
 	 */
 	private _parseTRNS(chunk: Buffer): void {
@@ -252,7 +272,7 @@ export default class Decoder {
 	public time: number | undefined;
 
 	/**
-	 * https://www.w3.org/TR/2003/REC-PNG-20031110/#11tIME
+	 * https://www.w3.org/TR/PNG/#11tIME
 	 * @param {Buffer} chunk
 	 */
 	private _parseTIME(chunk: Buffer): void {
@@ -273,7 +293,7 @@ export default class Decoder {
 	private _deflatedIDAT: Buffer[] = [];
 
 	/**
-	 * https://www.w3.org/TR/2003/REC-PNG-20031110/#11IDAT
+	 * https://www.w3.org/TR/PNG/#11IDAT
 	 * @param {Buffer} chunk
 	 */
 	private _parseIDAT(chunk: Buffer): void {
@@ -397,11 +417,25 @@ export default class Decoder {
 		}
 
 		if (this.colorType === ColorTypeE.TrueColor) {
-			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const buff = Buffer.alloc(this.width * 4).fill(0xff);
+			const trns =
+				this.transparent.length !== 0
+					? Buffer.from([this.transparent[0], this.transparent[1], this.transparent[2]])
+					: null;
 
-				for (let k = 0; k < this._unFilteredChunks[i].length / 3; k += 1) {
-					this._unFilteredChunks[i].copy(buff, k * 4, k * 3, k * 3 + 3);
+			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
+				const buff = Buffer.alloc(this.width * 4);
+
+				for (let k = 0; k < this._unFilteredChunks[i].length; k += 3) {
+					if (trns && trns.compare(this._unFilteredChunks[i], k, k + 3) === 0) {
+						continue;
+					}
+
+					Buffer.from([
+						this._unFilteredChunks[i][k],
+						this._unFilteredChunks[i][k + 1],
+						this._unFilteredChunks[i][k + 2],
+						0xff,
+					]).copy(buff, (k / 3) * 4);
 				}
 
 				this._unFilteredChunks[i] = buff;
@@ -454,7 +488,7 @@ export default class Decoder {
 	private _unFilteredChunks: Buffer[] = [];
 
 	/**
-	 * https://www.w3.org/TR/2003/REC-PNG-20031110/#13Filtering
+	 * https://www.w3.org/TR/PNG/#9Filters
 	 * @param {Buffer} chunk
 	 * @param {number} bitsPerPixel
 	 * @param {number} bitsPerLine
@@ -575,7 +609,7 @@ export default class Decoder {
 	}
 
 	/**
-	 * https://www.w3.org/TR/2003/REC-PNG-20031110/#11IEND
+	 * https://www.w3.org/TR/PNG/#11IEND
 	 * @param {Buffer} chunk
 	 */
 	private _parseIEND(chunk: Buffer): void {
