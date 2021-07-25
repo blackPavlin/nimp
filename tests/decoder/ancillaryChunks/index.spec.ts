@@ -29,40 +29,63 @@ describe('Text chunk', () => {
 	it('No textual data', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ct0n0g04.png'));
 		const png = new Decoder(image);
+
+		expect(png.text).toHaveLength(0);
 	});
 
 	it('With textual data', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ct1n0g04.png'));
 		const png = new Decoder(image);
+
+		expect(png.text).toHaveLength(6);
+		expect(png.text).toMatchSnapshot();
 	});
 
 	it('With compressed textual data', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ctzn0g04.png'));
 		const png = new Decoder(image);
+
+		expect(png.text).toHaveLength(6);
+		expect(png.text).toMatchSnapshot();
 	});
 
 	it('UTF-8 international text - english', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/cten0g04.png'));
 		const png = new Decoder(image);
+
+		expect(png.text).toHaveLength(6);
+		expect(png.text).toMatchSnapshot();
 	});
 
 	it('UTF-8 international text - finnish', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ctfn0g04.png'));
 		const png = new Decoder(image);
+
+		expect(png.text).toHaveLength(6);
+		expect(png.text).toMatchSnapshot();
 	});
 
 	it('UTF-8 international text - greek', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ctgn0g04.png'));
 		const png = new Decoder(image);
+
+		expect(png.text).toHaveLength(6);
+		expect(png.text).toMatchSnapshot();
 	});
 
 	it('UTF-8 international text - hindi', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/cthn0g04.png'));
 		const png = new Decoder(image);
+
+		expect(png.text).toHaveLength(6);
+		expect(png.text).toMatchSnapshot();
 	});
 
 	it('UTF-8 international text - japanese', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ctjn0g04.png'));
 		const png = new Decoder(image);
+
+		expect(png.text).toHaveLength(6);
+		expect(png.text).toMatchSnapshot();
 	});
 });

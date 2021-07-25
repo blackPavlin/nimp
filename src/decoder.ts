@@ -11,6 +11,7 @@ import {
 	Channels,
 	ColorTypeE,
 	FilterTypeE,
+	TextData,
 } from './types';
 
 export default class Decoder {
@@ -53,10 +54,13 @@ export default class Decoder {
 					this._parseTIME(chunk);
 					break;
 				case ChunkTypeE.iTXt:
+					this._parseITXT(chunk);
 					break;
 				case ChunkTypeE.tEXt:
+					this._parseTEXT(chunk);
 					break;
 				case ChunkTypeE.zTXt:
+					this._parseZTXT(chunk);
 					break;
 				case ChunkTypeE.IDAT:
 					this._parseIDAT(chunk);
@@ -288,6 +292,54 @@ export default class Decoder {
 			chunk.readUInt8(5),
 			chunk.readUInt8(6),
 		);
+	}
+
+	public text: TextData[] = [];
+
+	/**
+	 * https://www.w3.org/TR/PNG/#11iTXt
+	 * @param {Buffer} chunk
+	 */
+	private _parseITXT(chunk: Buffer): void {
+		const separator1 = chunk.indexOf(0x00);
+		const separator2 = chunk.indexOf(0x00, separator1 + 3);
+		const separator3 = chunk.indexOf(0x00, separator2 + 2);
+
+		this.text.push({
+			keyword: chunk.toString('utf8', 0, separator1),
+			languageTag: chunk.subarray(separator1 + 3, separator2).toString('utf8'),
+			translatedKeyword: chunk.subarray(separator2 + 1, separator3).toString('utf8'),
+			text:
+				chunk[separator1 + 1] === 0x00
+					? chunk.toString('utf8', separator3 + 1)
+					: zlib.inflateSync(chunk.subarray(separator3 + 1)).toString('latin1'),
+		});
+	}
+
+	/**
+	 * https://www.w3.org/TR/PNG/#11tEXt
+	 * @param {Buffer} chunk
+	 */
+	private _parseTEXT(chunk: Buffer): void {
+		const separator = chunk.indexOf(0x00);
+
+		this.text.push({
+			keyword: chunk.toString('utf8', 0, separator),
+			text: chunk.toString('utf8', separator + 1),
+		});
+	}
+
+	/**
+	 * https://www.w3.org/TR/PNG/#11zTXt
+	 * @param {Buffer} chunk
+	 */
+	private _parseZTXT(chunk: Buffer): void {
+		const separator = chunk.indexOf(0x00);
+
+		this.text.push({
+			keyword: chunk.toString('utf8', 0, separator),
+			text: zlib.inflateSync(chunk.subarray(separator + 2)).toString('latin1'),
+		});
 	}
 
 	private _deflatedIDAT: Buffer[] = [];

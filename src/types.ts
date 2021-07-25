@@ -39,3 +39,10 @@ export enum FilterTypeE {
 	Average = 3,
 	Paeth = 4,
 }
+
+export type TextData = {
+	keyword: string;
+	text: string;
+	languageTag?: string;
+	translatedKeyword?: string;
+};
