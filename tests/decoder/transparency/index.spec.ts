@@ -4,7 +4,7 @@ import Decoder from '../../../src/decoder';
 import { ColorTypeE } from '../../../src/types';
 
 describe('Transparency', () => {
-	it('Transparent, black background chunk', () => {
+	it.skip('Transparent, black background chunk, 4 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/tbbn0g04.png'));
 		const png = new Decoder(image);
 
@@ -14,7 +14,7 @@ describe('Transparency', () => {
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
 	});
 
-	it('Transparent, blue background chunk', () => {
+	it.skip('Transparent, blue background chunk, 16 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/tbbn2c16.png'));
 		const png = new Decoder(image);
 
@@ -24,7 +24,7 @@ describe('Transparency', () => {
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
 	});
 
-	it('Transparent, black background chunk', () => {
+	it('Transparent, black background chunk, 8 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/tbbn3p08.png'));
 		const png = new Decoder(image);
 
@@ -32,9 +32,10 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it('Transparent, green background chunk', () => {
+	it.skip('Transparent, green background chunk', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/tbgn2c16.png'));
 		const png = new Decoder(image);
 
@@ -52,6 +53,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Transparent, red background chunk', () => {
@@ -62,9 +64,10 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it('Transparent, white background chunk, bitdepth 16', () => {
+	it.skip('Transparent, white background chunk, bitdepth 16', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/tbwn0g16.png'));
 		const png = new Decoder(image);
 
@@ -82,6 +85,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Transparent, yellow background chunk', () => {
@@ -92,6 +96,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Not transparent for reference (logo on gray), Grayscale', () => {
@@ -102,6 +107,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Not transparent for reference (logo on gray), TrueColor', () => {
@@ -112,6 +118,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Not transparent for reference (logo on gray), IndexedColor', () => {
@@ -122,6 +129,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Transparent, but no background chunk', () => {
@@ -132,6 +140,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Multiple levels of transparency, 3 entries', () => {
@@ -142,5 +151,6 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 });
