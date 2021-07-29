@@ -4,7 +4,7 @@ import Decoder from '../../../src/decoder';
 import { ColorTypeE } from '../../../src/types';
 
 describe('Additional palettes', () => {
-	it('Six-cube palette-chunk in true-color image', () => {
+	it.skip('Six-cube palette-chunk in true-color image', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/pp0n2c16.png'));
 		const png = new Decoder(image);
 
@@ -36,7 +36,7 @@ describe('Additional palettes', () => {
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it('Six-cube suggested palette (1 byte) in true-color image, 16 bit depth', () => {
+	it.skip('Six-cube suggested palette (1 byte) in true-color image, 16 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ps1n2c16.png'));
 		const png = new Decoder(image);
 
@@ -57,7 +57,7 @@ describe('Additional palettes', () => {
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it('Six-cube suggested palette (2 bytes) in true-color image', () => {
+	it.skip('Six-cube suggested palette (2 bytes) in true-color image', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ps2n2c16.png'));
 		const png = new Decoder(image);
 
