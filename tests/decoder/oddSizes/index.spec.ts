@@ -12,6 +12,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(1);
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -23,6 +24,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(2);
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -34,6 +36,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(3);
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -45,6 +48,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(4);
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -56,6 +60,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(5);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -67,6 +72,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(6);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -78,6 +84,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(7);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -89,6 +96,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(8);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -100,6 +108,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(9);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -111,6 +120,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -122,6 +132,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(33);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -133,6 +144,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(34);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -144,6 +156,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(35);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -155,6 +168,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(36);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -166,6 +180,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(37);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -177,6 +192,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(38);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -188,6 +204,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(39);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -199,6 +216,7 @@ describe('Odd sizes no interlacing', () => {
 		expect(png.height).toBe(40);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 });

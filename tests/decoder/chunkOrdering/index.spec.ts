@@ -12,6 +12,7 @@ describe('Chunk ordering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('Color mother image with 1 idat-chunk', () => {
@@ -22,6 +23,7 @@ describe('Chunk ordering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('Grayscale image with 2 idat-chunks', () => {
@@ -32,6 +34,7 @@ describe('Chunk ordering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('Color image with 2 idat-chunks', () => {
@@ -42,6 +45,7 @@ describe('Chunk ordering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('Grayscale image with 4 unequal sized idat-chunks', () => {
@@ -52,6 +56,7 @@ describe('Chunk ordering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('Color image with 4 unequal sized idat-chunks', () => {
@@ -62,6 +67,7 @@ describe('Chunk ordering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('Grayscale image with all idat-chunks length one', () => {
@@ -72,6 +78,7 @@ describe('Chunk ordering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('Color image with all idat-chunks length one', () => {
@@ -82,5 +89,6 @@ describe('Chunk ordering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 });

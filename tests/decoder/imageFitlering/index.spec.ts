@@ -12,6 +12,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -23,6 +24,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -34,6 +36,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -45,6 +48,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -56,6 +60,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -67,6 +72,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -78,6 +84,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -89,6 +96,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -100,6 +108,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -111,6 +120,7 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -122,5 +132,6 @@ describe('Image filtering', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 });

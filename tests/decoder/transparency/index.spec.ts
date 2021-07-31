@@ -12,6 +12,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('Transparent, blue background chunk, 16 bit depth', () => {
@@ -22,6 +23,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it('Transparent, black background chunk, 8 bit depth', () => {
@@ -32,6 +34,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -43,6 +46,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it('Transparent, light-gray background chunk', () => {
@@ -53,6 +57,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -64,6 +69,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -75,6 +81,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it('Transparent, white background chunk, bitdepth 8', () => {
@@ -85,6 +92,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -96,6 +104,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -107,6 +116,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -118,6 +128,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -129,6 +140,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -140,6 +152,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -151,6 +164,7 @@ describe('Transparency', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 });

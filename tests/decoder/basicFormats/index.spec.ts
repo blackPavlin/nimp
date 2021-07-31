@@ -12,6 +12,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('2 bit (4 level) grayscale', () => {
@@ -22,6 +23,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('4 bit (16 level) grayscale', () => {
@@ -32,6 +34,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it('8 bit (256 level) grayscale', () => {
@@ -42,6 +45,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -53,6 +57,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it('3x8 bits rgb color', () => {
@@ -63,6 +68,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -74,6 +80,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it('1 bit (2 color) paletted', () => {
@@ -84,6 +91,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -95,6 +103,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -106,6 +115,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -117,6 +127,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -128,6 +139,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.GrayscaleAlpha);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -139,6 +151,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.GrayscaleAlpha);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it('3x8 bits rgb color + 8 bit alpha-channel', () => {
@@ -149,6 +162,7 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColorAlpha);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -160,5 +174,6 @@ describe('Basic formats', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.TrueColorAlpha);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 });

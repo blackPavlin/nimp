@@ -14,6 +14,10 @@ import {
 	TextData,
 } from './types';
 
+import unfilters from './unfilters';
+import converter from './converter';
+import bitmapper from './bitmapper';
+
 export default class Decoder {
 	constructor(file: Buffer) {
 		if (!Buffer.isBuffer(file)) {
@@ -76,14 +80,78 @@ export default class Decoder {
 		}
 		// TODO: Добавить проверки
 
+		if (this.interlaceMethod === 1) {
+			throw new Error('Unsupported interlace method');
+		}
+
 		const inflatedChunks = this._inflateChunks();
+		this._deflatedIDAT = [];
 
 		const bitsPerPixel = Math.ceil((this._channels * this.bitDepth) / 8);
 		const bitsPerLine = Math.ceil(((this._channels * this.bitDepth) / 8) * this.width);
 
-		this._unFilterPixels(inflatedChunks, bitsPerPixel, bitsPerLine);
+		this.bitmap = Buffer.alloc(this.width * this.height * 4);
+		let tmp: Buffer | undefined;
 
-		this._decodePixels();
+		for (let i = 0, k = 0; i < inflatedChunks.length; i += bitsPerLine, k += 1) {
+			const filterType = inflatedChunks.readUInt8(i);
+			const chunk = inflatedChunks.subarray((i += 1), i + bitsPerLine);
+
+			let unfiltered: Buffer | undefined;
+
+			switch (filterType) {
+				case FilterTypeE.None:
+					unfiltered = unfilters[FilterTypeE.None](chunk);
+					break;
+				case FilterTypeE.Sub:
+					unfiltered = unfilters[FilterTypeE.Sub](chunk, bitsPerPixel);
+					break;
+				case FilterTypeE.Up:
+					unfiltered = unfilters[FilterTypeE.Up](chunk, tmp);
+					break;
+				case FilterTypeE.Average:
+					unfiltered = unfilters[FilterTypeE.Average](chunk, bitsPerPixel, tmp);
+					break;
+				case FilterTypeE.Paeth:
+					unfiltered = unfilters[FilterTypeE.Paeth](chunk, bitsPerPixel, tmp);
+					break;
+				default:
+					throw new Error(`Bad filter type ${filterType}`);
+			}
+
+			tmp = unfiltered;
+
+			const normilized = converter[this.bitDepth](chunk, this.width * this._channels);
+
+			switch (this.colorType) {
+				case ColorTypeE.Grayscale:
+					bitmapper[ColorTypeE.Grayscale](normilized, this.transparent).copy(
+						this.bitmap,
+						k * (this.width * 4),
+					);
+					break;
+				case ColorTypeE.TrueColor:
+					bitmapper[ColorTypeE.TrueColor](normilized, this.transparent).copy(
+						this.bitmap,
+						k * (this.width * 4),
+					);
+					break;
+				case ColorTypeE.IndexedColor:
+					bitmapper[ColorTypeE.IndexedColor](normilized, this.palette).copy(
+						this.bitmap,
+						k * (this.width * 4),
+					);
+					break;
+				case ColorTypeE.GrayscaleAlpha:
+					bitmapper[ColorTypeE.GrayscaleAlpha](normilized).copy(this.bitmap, k * (this.width * 4));
+					break;
+				case ColorTypeE.TrueColorAlpha:
+					bitmapper[ColorTypeE.TrueColorAlpha](normilized).copy(this.bitmap, k * (this.width * 4));
+					break;
+				default:
+					throw new Error(`Bad color type ${this.colorType}`);
+			}
+		}
 	}
 
 	/**
@@ -122,6 +190,8 @@ export default class Decoder {
 	public filterMethod!: FilterMethod;
 
 	public interlaceMethod!: InterlaceMethod;
+
+	public bitmap!: Buffer;
 
 	/**
 	 * https://www.w3.org/TR/PNG/#11IHDR
@@ -193,7 +263,7 @@ export default class Decoder {
 		}
 	}
 
-	public palette: [number, number, number, number][] = [];
+	public palette: number[][] = [];
 
 	/**
 	 * https://www.w3.org/TR/PNG/#11PLTE
@@ -357,307 +427,6 @@ export default class Decoder {
 	 */
 	private _inflateChunks(): Buffer {
 		return zlib.inflateSync(Buffer.concat(this._deflatedIDAT));
-	}
-
-	public bitmap!: Buffer;
-
-	private _decodePixels(): void {
-		if (this.interlaceMethod === 1) {
-			throw new Error('Unsupported interlace method');
-		}
-
-		// TODO: Можно вынести в метод
-		if (this.bitDepth === 1) {
-			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const normalized = Buffer.alloc(this.width * this._channels);
-
-				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
-					const byte = this._unFilteredChunks[i][k];
-
-					const b = Buffer.from([
-						(byte >> 7) & 1,
-						(byte >> 6) & 1,
-						(byte >> 5) & 1,
-						(byte >> 4) & 1,
-						(byte >> 3) & 1,
-						(byte >> 2) & 1,
-						(byte >> 1) & 1,
-						(byte >> 0) & 1,
-					]);
-
-					b.copy(normalized, k * 8);
-				}
-
-				this._unFilteredChunks[i] = normalized;
-			}
-		}
-
-		if (this.bitDepth === 2) {
-			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const normalized = Buffer.alloc(this.width * this._channels);
-
-				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
-					const byte = this._unFilteredChunks[i][k];
-
-					const b = Buffer.from([
-						(byte >> 6) & 3,
-						(byte >> 4) & 3,
-						(byte >> 2) & 3,
-						(byte >> 0) & 3,
-					]);
-
-					b.copy(normalized, k * 4);
-				}
-
-				this._unFilteredChunks[i] = normalized;
-			}
-		}
-
-		if (this.bitDepth === 4) {
-			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const normalized = Buffer.alloc(this.width * this._channels);
-
-				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
-					const byte = this._unFilteredChunks[i][k];
-
-					const b = Buffer.from([byte >> 4, byte & 0x0f]);
-
-					b.copy(normalized, k * 2);
-				}
-
-				this._unFilteredChunks[i] = normalized;
-			}
-		}
-
-		if (this.bitDepth === 16) {
-			// TODO: Не работает
-			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const normalized = Buffer.alloc(this.width * this._channels);
-
-				for (let k = 0; k < this._unFilteredChunks[i].length; k += 2) {
-					const byte = this._unFilteredChunks[i][k];
-					const byte2 = this._unFilteredChunks[i][k + 1];
-
-					const b = Buffer.from([(byte << 8) + byte2]);
-
-					b.copy(normalized, k / 2);
-				}
-
-				this._unFilteredChunks[i] = normalized;
-			}
-		}
-
-		if (this.colorType === ColorTypeE.Grayscale) {
-			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const buff = Buffer.alloc(this.width * 4);
-
-				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
-					if (this._unFilteredChunks[i][k] === this.transparent[0]) {
-						continue;
-					}
-
-					Buffer.from([
-						this._unFilteredChunks[i][k],
-						this._unFilteredChunks[i][k],
-						this._unFilteredChunks[i][k],
-						0xff,
-					]).copy(buff, k * 4);
-				}
-
-				this._unFilteredChunks[i] = buff;
-			}
-		}
-
-		if (this.colorType === ColorTypeE.TrueColor) {
-			const trns =
-				this.transparent.length !== 0
-					? Buffer.from([this.transparent[0], this.transparent[1], this.transparent[2]])
-					: null;
-
-			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const buff = Buffer.alloc(this.width * 4);
-
-				for (let k = 0; k < this._unFilteredChunks[i].length; k += 3) {
-					if (trns && trns.compare(this._unFilteredChunks[i], k, k + 3) === 0) {
-						continue;
-					}
-
-					Buffer.from([
-						this._unFilteredChunks[i][k],
-						this._unFilteredChunks[i][k + 1],
-						this._unFilteredChunks[i][k + 2],
-						0xff,
-					]).copy(buff, (k / 3) * 4);
-				}
-
-				this._unFilteredChunks[i] = buff;
-			}
-		}
-
-		if (this.colorType === ColorTypeE.IndexedColor) {
-			if (this.palette.length === 0) {
-				// TODO: Error message
-				// TODO: Стоит сделать проверку раньше
-				throw new Error('Palette not found');
-			}
-
-			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const buff = Buffer.alloc(this._unFilteredChunks[i].length * 4);
-
-				for (let k = 0; k < this._unFilteredChunks[i].length; k += 1) {
-					// TODO: Имеет смысл сразу преобразовать palette в буфер
-					Buffer.from(this.palette[this._unFilteredChunks[i][k]]).copy(buff, k * 4);
-				}
-
-				this._unFilteredChunks[i] = buff;
-			}
-		}
-
-		if (this.colorType === ColorTypeE.GrayscaleAlpha) {
-			for (let i = 0; i < this._unFilteredChunks.length; i += 1) {
-				const buff = Buffer.alloc(this.width * 4);
-
-				for (let k = 0; k < this._unFilteredChunks[i].length; k += 2) {
-					Buffer.from([
-						this._unFilteredChunks[i][k],
-						this._unFilteredChunks[i][k],
-						this._unFilteredChunks[i][k],
-						this._unFilteredChunks[i][k + 1],
-					]).copy(buff, (k / 2) * 4);
-				}
-
-				this._unFilteredChunks[i] = buff;
-			}
-		}
-
-		this.bitmap = Buffer.concat(this._unFilteredChunks);
-
-		// TODO: Можно сделать раньше
-		this._deflatedIDAT = [];
-		this._unFilteredChunks = [];
-	}
-
-	private _unFilteredChunks: Buffer[] = [];
-
-	/**
-	 * https://www.w3.org/TR/PNG/#9Filters
-	 * @param {Buffer} chunk
-	 * @param {number} bitsPerPixel
-	 * @param {number} bitsPerLine
-	 */
-	private _unFilterPixels(chunk: Buffer, bitsPerPixel: number, bitsPerLine: number): void {
-		for (let i = 0; i < chunk.length; i += bitsPerLine) {
-			const filterType = chunk.readUInt8(i);
-			const line = chunk.subarray((i += 1), i + bitsPerLine);
-
-			switch (filterType) {
-				case FilterTypeE.None:
-					this._unFilterNone(line);
-					break;
-				case FilterTypeE.Sub:
-					this._unFilterSub(line, bitsPerPixel);
-					break;
-				case FilterTypeE.Up:
-					this._unFilterUp(line);
-					break;
-				case FilterTypeE.Average:
-					this._unFilterAverage(line, bitsPerPixel);
-					break;
-				case FilterTypeE.Paeth:
-					this._unFilterPaeth(line, bitsPerPixel);
-					break;
-				default:
-					throw new Error(`Bad filter type ${filterType}`);
-			}
-		}
-	}
-
-	private _unFilterNone(chunk: Buffer): void {
-		this._unFilteredChunks.push(chunk);
-	}
-
-	private _unFilterSub(chunk: Buffer, bitsPerPixel: number): void {
-		for (let i = bitsPerPixel; i < chunk.length; i += 1) {
-			chunk[i] = (chunk[i] + chunk[i - bitsPerPixel]) & 0xff;
-		}
-
-		this._unFilteredChunks.push(chunk);
-	}
-
-	private _unFilterUp(chunk: Buffer): void {
-		if (this._unFilteredChunks.length === 0) {
-			this._unFilteredChunks.push(chunk);
-		} else {
-			for (let i = 0; i < chunk.length; i += 1) {
-				chunk[i] = (chunk[i] + this._unFilteredChunks[this._unFilteredChunks.length - 1][i]) & 0xff;
-			}
-
-			this._unFilteredChunks.push(chunk);
-		}
-	}
-
-	private _unFilterAverage(chunk: Buffer, bitsPerPixel: number): void {
-		if (this._unFilteredChunks.length === 0) {
-			for (let i = bitsPerPixel; i < chunk.length; i += 1) {
-				chunk[i] = (chunk[i] + (chunk[i - bitsPerPixel] >> 1)) & 0xff;
-			}
-
-			this._unFilteredChunks.push(chunk);
-		} else {
-			for (let i = 0; i < bitsPerPixel; i += 1) {
-				chunk[i] =
-					(chunk[i] + (this._unFilteredChunks[this._unFilteredChunks.length - 1][i] >> 1)) & 0xff;
-			}
-
-			for (let i = bitsPerPixel; i < chunk.length; i += 1) {
-				chunk[i] =
-					(chunk[i] +
-						((chunk[i - bitsPerPixel] +
-							this._unFilteredChunks[this._unFilteredChunks.length - 1][i]) >>
-							1)) &
-					0xff;
-			}
-
-			this._unFilteredChunks.push(chunk);
-		}
-	}
-
-	private _unFilterPaeth(chunk: Buffer, bitsPerPixel: number): void {
-		if (this._unFilteredChunks.length === 0) {
-			this._unFilterSub(chunk, bitsPerPixel);
-		} else {
-			for (let i = 0; i < bitsPerPixel; i += 1) {
-				chunk[i] = (chunk[i] + this._unFilteredChunks[this._unFilteredChunks.length - 1][i]) & 0xff;
-			}
-
-			for (let i = bitsPerPixel; i < chunk.length; i += 1) {
-				chunk[i] =
-					(chunk[i] +
-						this._paethPredictor(
-							chunk[i - bitsPerPixel],
-							this._unFilteredChunks[this._unFilteredChunks.length - 1][i],
-							this._unFilteredChunks[this._unFilteredChunks.length - 1][i - bitsPerPixel],
-						)) &
-					0xff;
-			}
-
-			this._unFilteredChunks.push(chunk);
-		}
-	}
-
-	private _paethPredictor(a: number, b: number, c: number): number {
-		const p = a + b - c;
-		const pa = Math.abs(p - a);
-		const pb = Math.abs(p - b);
-		const pc = Math.abs(p - c);
-
-		if (pa <= pb && pa <= pc) {
-			return a;
-		} else if (pb <= pc) {
-			return b;
-		} else {
-			return c;
-		}
 	}
 
 	/**
