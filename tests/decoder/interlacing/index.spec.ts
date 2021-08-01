@@ -12,6 +12,7 @@ describe('Interlacing', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('2 bit (4 level) grayscale', () => {
@@ -22,6 +23,7 @@ describe('Interlacing', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('4 bit (16 level) grayscale', () => {
@@ -32,6 +34,7 @@ describe('Interlacing', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('8 bit (256 level) grayscale', () => {
@@ -42,6 +45,7 @@ describe('Interlacing', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it.skip('16 bit (64k level) grayscale', () => {

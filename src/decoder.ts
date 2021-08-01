@@ -10,11 +10,10 @@ import {
 	InterlaceMethod,
 	Channels,
 	ColorTypeE,
-	FilterTypeE,
 	TextData,
 } from './types';
 
-import unfilters from './unfilters';
+import Unfilter from './unfilter';
 import converter from './converter';
 import bitmapper from './bitmapper';
 
@@ -91,62 +90,30 @@ export default class Decoder {
 		const bitsPerLine = Math.ceil(((this._channels * this.bitDepth) / 8) * this.width);
 
 		this.bitmap = Buffer.alloc(this.width * this.height * 4);
-		let tmp: Buffer | undefined;
+		const unfilter = new Unfilter(bitsPerPixel);
 
-		for (let i = 0, k = 0; i < inflatedChunks.length; i += bitsPerLine, k += 1) {
+		for (let i = 0, k = 0; i < inflatedChunks.length; i += bitsPerLine, k += this.width * 4) {
 			const filterType = inflatedChunks.readUInt8(i);
 			const chunk = inflatedChunks.subarray((i += 1), i + bitsPerLine);
 
-			let unfiltered: Buffer | undefined;
-
-			switch (filterType) {
-				case FilterTypeE.None:
-					unfiltered = unfilters[FilterTypeE.None](chunk);
-					break;
-				case FilterTypeE.Sub:
-					unfiltered = unfilters[FilterTypeE.Sub](chunk, bitsPerPixel);
-					break;
-				case FilterTypeE.Up:
-					unfiltered = unfilters[FilterTypeE.Up](chunk, tmp);
-					break;
-				case FilterTypeE.Average:
-					unfiltered = unfilters[FilterTypeE.Average](chunk, bitsPerPixel, tmp);
-					break;
-				case FilterTypeE.Paeth:
-					unfiltered = unfilters[FilterTypeE.Paeth](chunk, bitsPerPixel, tmp);
-					break;
-				default:
-					throw new Error(`Bad filter type ${filterType}`);
-			}
-
-			tmp = unfiltered;
-
-			const normilized = converter[this.bitDepth](chunk, this.width * this._channels);
+			const unfiltered = unfilter.recon(chunk, filterType);
+			const normilized = converter[this.bitDepth](unfiltered, this.width * this._channels);
 
 			switch (this.colorType) {
 				case ColorTypeE.Grayscale:
-					bitmapper[ColorTypeE.Grayscale](normilized, this.transparent).copy(
-						this.bitmap,
-						k * (this.width * 4),
-					);
+					bitmapper[ColorTypeE.Grayscale](normilized, this.transparent).copy(this.bitmap, k);
 					break;
 				case ColorTypeE.TrueColor:
-					bitmapper[ColorTypeE.TrueColor](normilized, this.transparent).copy(
-						this.bitmap,
-						k * (this.width * 4),
-					);
+					bitmapper[ColorTypeE.TrueColor](normilized, this.transparent).copy(this.bitmap, k);
 					break;
 				case ColorTypeE.IndexedColor:
-					bitmapper[ColorTypeE.IndexedColor](normilized, this.palette).copy(
-						this.bitmap,
-						k * (this.width * 4),
-					);
+					bitmapper[ColorTypeE.IndexedColor](normilized, this.palette).copy(this.bitmap, k);
 					break;
 				case ColorTypeE.GrayscaleAlpha:
-					bitmapper[ColorTypeE.GrayscaleAlpha](normilized).copy(this.bitmap, k * (this.width * 4));
+					bitmapper[ColorTypeE.GrayscaleAlpha](normilized).copy(this.bitmap, k);
 					break;
 				case ColorTypeE.TrueColorAlpha:
-					bitmapper[ColorTypeE.TrueColorAlpha](normilized).copy(this.bitmap, k * (this.width * 4));
+					bitmapper[ColorTypeE.TrueColorAlpha](normilized).copy(this.bitmap, k);
 					break;
 				default:
 					throw new Error(`Bad color type ${this.colorType}`);

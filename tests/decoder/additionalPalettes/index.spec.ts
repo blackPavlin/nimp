@@ -12,6 +12,7 @@ describe('Additional palettes', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it('Six-cube palette-chunk in true-color+alpha image', () => {
@@ -22,6 +23,7 @@ describe('Additional palettes', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.TrueColorAlpha);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -33,6 +35,7 @@ describe('Additional palettes', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -44,6 +47,7 @@ describe('Additional palettes', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
 	it('Six-cube suggested palette (2 bytes) in grayscale image, 8 bit depth', () => {
@@ -54,6 +58,7 @@ describe('Additional palettes', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
@@ -65,5 +70,6 @@ describe('Additional palettes', () => {
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 });
