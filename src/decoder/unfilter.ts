@@ -1,4 +1,4 @@
-import { FilterTypeE } from './types';
+import { FilterTypeE } from '../types';
 
 /** https://www.w3.org/TR/PNG/#9Filters */
 export default class Unfilter {

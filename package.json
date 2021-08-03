@@ -1,7 +1,7 @@
 {
   "name": "nimp",
-  "version": "1.0.0",
-  "description": "Node image manipulation",
+  "version": "0.0.1",
+  "description": "Nodejs image manipulation package",
   "main": "lib/index.js",
   "files": [
     "lib/**/*"
@@ -12,7 +12,10 @@
     "lint": "tsc --noEmit && eslint ./src/**/*.ts",
     "lint:fix": "eslint ./src/**/*.ts --fix"
   },
-  "keywords": [],
+  "keywords": [
+    "png",
+    "decoder"
+  ],
   "author": "Boykiv Bogdan <boikiv.bogdan@gmail.com>",
   "license": "MIT",
   "private": false,

@@ -66,3 +66,42 @@ export type TextData = {
 	languageTag?: string;
 	translatedKeyword?: string;
 };
+
+type BaseEncoderOptions = {
+	width: number;
+	height: number;
+	bitmap: Buffer;
+	interlaceMethod?: 0 | 1;
+};
+
+type EncodeGrayscaleOptios = BaseEncoderOptions & {
+	colorType: 0;
+	bitDepth?: 1 | 2 | 4 | 8 | 16;
+};
+
+type EncodeTrueColorOptions = BaseEncoderOptions & {
+	colorType: 2;
+	bitDepth?: 8 | 16;
+};
+
+type EncodeIndexedColorOptions = BaseEncoderOptions & {
+	colorType: 3;
+	bitDepth?: 1 | 2 | 4 | 8;
+};
+
+type EncodeGrayscaleAlphaOptions = BaseEncoderOptions & {
+	colorType: 4;
+	bitDepth?: 8 | 16;
+};
+
+type EncodeTrueColorAlpha = BaseEncoderOptions & {
+	colorType: 6;
+	bitDepth?: 8 | 16;
+};
+
+export type EncodePNGOptions =
+	| EncodeGrayscaleOptios
+	| EncodeTrueColorOptions
+	| EncodeIndexedColorOptions
+	| EncodeGrayscaleAlphaOptions
+	| EncodeTrueColorAlpha;

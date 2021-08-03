@@ -1,4 +1,4 @@
-import { ColorTypeE } from './types';
+import { ColorTypeE } from '../types';
 
 export default {
 	[ColorTypeE.Grayscale]: (chunk: Buffer, transperent: number[]): Buffer => {
@@ -7,7 +7,8 @@ export default {
 		for (let i = 0, k = 0; i < chunk.length; i += 1, k += 4) {
 			if (transperent.length) {
 				// TODO: Не работает
-				console.log('trns');
+
+				continue;
 			}
 
 			Buffer.from([chunk[i], chunk[i], chunk[i], 0xff]).copy(buff, k);
@@ -26,6 +27,7 @@ export default {
 				chunk[i + 1] === transparent[1] &&
 				chunk[i + 2] === transparent[2]
 			) {
+				// TODO: Не работает
 				// Buffer.from([chunk[i], chunk[i + 1], chunk[i + 2], 0x00]).copy(buff, k);
 
 				continue;

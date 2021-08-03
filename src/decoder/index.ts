@@ -1,5 +1,5 @@
 import zlib from 'zlib';
-import crc from './crc';
+import crc from '../crc';
 import {
 	PngHeader,
 	ChunkTypeE,
@@ -11,7 +11,7 @@ import {
 	Channels,
 	ColorTypeE,
 	TextData,
-} from './types';
+} from '../types';
 
 import Unfilter from './unfilter';
 import converter from './converter';

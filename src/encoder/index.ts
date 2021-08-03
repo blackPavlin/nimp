@@ -1,37 +1,104 @@
-// import zlib from 'zlib';
-// import { PngHeader, ChunkTypeE, ColorTypeE, FilterTypeE } from './types';
-// import crc from './crc';
+import zlib from 'zlib';
+import crc from '../crc';
+import {
+	PngHeader,
+	EncodePNGOptions,
+	BitDepth,
+	ColorType,
+	ColorTypeE,
+	Channels,
+	ChunkTypeE,
+} from '../types';
 
-// interface EncodePNGOptions {
-// 	width: number;
-// 	height: number;
-// 	bitDepth?: 1 | 2 | 4 | 8 | 16;
-// 	colorType?: 0 | 2 | 3 | 4 | 6;
-// 	interlaceMethod?: 0 | 1;
-// 	filterType?: 0 | 1 | 2 | 3 | 4;
-// 	bitmap: Buffer;
-// }
+export default class Encoder {
+	constructor(options: EncodePNGOptions) {
+		if (options.width <= 0 || options.height <= 0) {
+			throw new Error('Non-positive dimension');
+		}
+
+		this._width = options.width;
+		this._height = options.height;
+
+		switch (options.colorType) {
+			case ColorTypeE.Grayscale:
+				this._channels = 1;
+				break;
+			case ColorTypeE.TrueColor:
+				this._channels = 3;
+				break;
+			case ColorTypeE.IndexedColor:
+				this._channels = 1;
+				break;
+			case ColorTypeE.GrayscaleAlpha:
+				this._channels = 2;
+				break;
+			case ColorTypeE.TrueColorAlpha:
+				this._channels = 4;
+				break;
+			default:
+				throw new Error(`Bad color type ${options.colorType}`);
+		}
+
+		// TODO: Добавить проверки
+		this._bitDepth = options.bitDepth ?? 8;
+		this._colorType = options.colorType;
+
+		this._interlaceMethod = options.interlaceMethod ?? 0;
+	}
+
+	private readonly _width!: number;
+
+	private readonly _height!: number;
+
+	private readonly _bitDepth!: BitDepth;
+
+	private readonly _colorType!: ColorType;
+
+	private readonly _compressionMethod = 0;
+
+	private readonly _filterMethod = 0;
+
+	private readonly _interlaceMethod!: 0 | 1;
+
+	private readonly _channels!: Channels;
+
+	private _encodeChunk(chunk: Buffer): Buffer {
+		const buff = Buffer.alloc(chunk.length + 8);
+
+		buff.writeInt32BE(chunk.length, 0); // write length
+		chunk.copy(buff, 4); // write chunk
+		buff.writeInt32BE(crc.crc32(chunk), buff.length - 4); // write crc
+
+		return buff;
+	}
+
+	private _encodeIHDR(): Buffer {
+		const chunk = Buffer.alloc(17);
+
+		chunk.writeUInt32BE(ChunkTypeE.IHDR, 0); // write chunk type
+		chunk.writeUInt32BE(this._width, 4); // write width
+		chunk.writeUInt32BE(this._height, 8); // write height
+		chunk.writeUInt8(this._bitDepth, 12); // write bitDepth
+		chunk.writeUInt8(this._colorType, 13); // write colorType
+		chunk.writeUInt8(this._compressionMethod, 14); // write compressionMethod
+		chunk.writeUInt8(this._filterMethod, 15); // write filterMethod
+		chunk.writeUInt8(this._interlaceMethod, 16); // write interlaceMethod
+
+		return this._encodeChunk(chunk);
+	}
+
+	private _encodeIDAT() {}
+
+	private _encodeIEND(): Buffer {
+		const chunk = Buffer.alloc(4);
+
+		chunk.writeUInt32BE(ChunkTypeE.IEND, 0);
+
+		return this._encodeChunk(chunk);
+	}
+}
 
 // export default class Encoder {
-// 	private width!: number;
-
-// 	private height!: number;
-
-// 	private bitDepth!: 1 | 2 | 4 | 8 | 16;
-
-// 	private colorType!: 0 | 2 | 3 | 4 | 6;
-
-// 	private compressionMethod = 0;
-
-// 	private filterMethod = 0;
-
-// 	private interlaceMethod!: 0 | 1;
-
-// 	private alpha = false;
-
-// 	private colors!: number;
-
-// 	private filterType!: 0 | 1 | 2 | 3 | 4;
 
 // 	private imageChunks: Buffer[] = [];
 
@@ -97,31 +164,6 @@
 // 		this.imageChunks.push(pngSignature);
 // 	}
 
-// 	private encodeChunk(chunk: Buffer): void {
-// 		const buf = Buffer.alloc(chunk.length + 8);
-
-// 		buf.writeInt32BE(chunk.length, 0); // write length
-// 		chunk.copy(buf, 4); // write chunk
-// 		buf.writeInt32BE(crc.crc32(chunk), buf.length - 4); // write crc
-
-// 		this.imageChunks.push(buf);
-// 	}
-
-// 	private encodeIHDR(): void {
-// 		const chunk = Buffer.alloc(17);
-
-// 		chunk.writeUInt32BE(ChunkType.IHDR, 0); // write chunk type
-// 		chunk.writeUInt32BE(this.width, 4); // write width
-// 		chunk.writeUInt32BE(this.height, 8); // write height
-// 		chunk.writeUInt8(this.bitDepth, 12); // write bitDepth
-// 		chunk.writeUInt8(this.colorType, 13); // write colorType
-// 		chunk.writeUInt8(this.compressionMethod, 14); // write compressionMethod
-// 		chunk.writeUInt8(this.filterMethod, 15); // write filterMethod
-// 		chunk.writeUInt8(this.interlaceMethod, 16); // write interlaceMethod
-
-// 		this.encodeChunk(chunk);
-// 	}
-
 // 	private encodeIDAT(bitmap: Buffer): void {
 // 		const bytesPerLine = 4 * this.width;
 // 		const filteredChunks: Buffer[] = [];
@@ -165,23 +207,5 @@
 
 // 		//     this.encodeChunk(chunk);
 // 		// }
-// 	}
-
-// 	private filterNone(): void {}
-
-// 	private filterSub(): void {}
-
-// 	private filterUp(): void {}
-
-// 	private filterAverage(): void {}
-
-// 	private filterPaeth(): void {}
-
-// 	private encodeIEND(): void {
-// 		const chunk = Buffer.alloc(4);
-
-// 		chunk.writeUInt32BE(ChunkType.IEND, 0);
-
-// 		this.encodeChunk(chunk);
 // 	}
 // }
