@@ -5,8 +5,9 @@ export default {
 		const buff = Buffer.alloc(chunk.length * 4);
 
 		for (let i = 0, k = 0; i < chunk.length; i += 1, k += 4) {
-			if (transperent.length) {
+			if (transperent.length && chunk[i] === transperent[0]) {
 				// TODO: Не работает
+				// Buffer.from([chunk[i], chunk[i], chunk[i], 0x00]).copy(buff, k);
 
 				continue;
 			}
