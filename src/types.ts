@@ -71,6 +71,7 @@ type BaseEncoderOptions = {
 	width: number;
 	height: number;
 	bitmap: Buffer;
+	filterType?: 0 | 1 | 2 | 3 | 4;
 	interlaceMethod?: 0 | 1;
 };
 

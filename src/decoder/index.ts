@@ -23,7 +23,9 @@ export default class Decoder {
 			throw new Error('Not a buffer');
 		}
 
-		this._checkSignature(file);
+		if (!Decoder.isPNG(file)) {
+			throw new Error('Not a PNG file');
+		}
 
 		for (let i = 8; i < file.length; i += 4) {
 			const length = file.readUInt32BE(i);
@@ -53,6 +55,16 @@ export default class Decoder {
 				case ChunkTypeE.tRNS:
 					this._parseTRNS(chunk);
 					break;
+				case ChunkTypeE.IDAT:
+					this._parseIDAT(chunk);
+					break;
+				case ChunkTypeE.IEND:
+					this._parseIEND(chunk);
+					break;
+			}
+
+			// TODO: Добавить параметр, нужно ли декодировать ancillary chunks
+			switch (type) {
 				case ChunkTypeE.tIME:
 					this._parseTIME(chunk);
 					break;
@@ -65,18 +77,13 @@ export default class Decoder {
 				case ChunkTypeE.zTXt:
 					this._parseZTXT(chunk);
 					break;
-				case ChunkTypeE.IDAT:
-					this._parseIDAT(chunk);
-					break;
-				case ChunkTypeE.IEND:
-					this._parseIEND(chunk);
-					break;
 			}
 		}
 
 		if (this._deflatedIDAT.length === 0) {
 			throw new Error('Missing IDAT chunk');
 		}
+		// TODO: Добавить проверку последовательности чанков
 		// TODO: Добавить проверки
 
 		if (this.interlaceMethod === 1) {
@@ -123,12 +130,14 @@ export default class Decoder {
 
 	/**
 	 * https://www.w3.org/TR/2003/REC-PNG-20031110/#5PNG-file-signature
-	 * @param {Buffer} chunk
+	 * @param {Buffer} buff
 	 */
-	private _checkSignature(chunk: Buffer): void {
-		if (PngHeader.compare(chunk, 0, 8) !== 0) {
-			throw new Error('Not a PNG file');
+	static isPNG(buff: Buffer): boolean {
+		if (buff.length < 8) {
+			return false;
 		}
+
+		return PngHeader.compare(buff, 0, 8) === 0;
 	}
 
 	/**
@@ -230,7 +239,7 @@ export default class Decoder {
 		}
 	}
 
-	public palette: number[][] = [];
+	public palette: Buffer[] = [];
 
 	/**
 	 * https://www.w3.org/TR/PNG/#11PLTE
@@ -247,9 +256,8 @@ export default class Decoder {
 			throw new Error('Bad PLTE length');
 		}
 
-		// TODO: Имеет смысл сразу преобразовать palette в буфер
-		for (let i = 0; i < paletteEntris; i += 1) {
-			this.palette.push([chunk[3 * i + 0], chunk[3 * i + 1], chunk[3 * i + 2], 0xff]);
+		for (let i = 0; i < chunk.length; i += 3) {
+			this.palette.push(Buffer.from([chunk[i], chunk[i + 1], chunk[i + 2], 0xff]));
 		}
 	}
 
@@ -296,7 +304,6 @@ export default class Decoder {
 
 		if (this.colorType === ColorTypeE.IndexedColor) {
 			if (this.palette.length === 0) {
-				// TODO: Error message
 				throw new Error('Palette not found');
 			}
 

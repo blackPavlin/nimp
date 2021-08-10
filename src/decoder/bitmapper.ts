@@ -40,13 +40,17 @@ export default {
 		return buff;
 	},
 
-	[ColorTypeE.IndexedColor]: (chunk: Buffer, palette: number[][]): Buffer => {
+	[ColorTypeE.IndexedColor]: (chunk: Buffer, palette: Buffer[]): Buffer => {
 		const buff = Buffer.alloc(chunk.length * 4);
 
 		for (let i = 0, k = 0; i < chunk.length; i += 1, k += 4) {
-			// TODO: Добавит проверку на наличие записи в palette
-			// TODO: Имеет смысл сразу преобразовать palette в буфер
-			Buffer.from(palette[chunk[i]]).copy(buff, k);
+			const patelleEntry = palette[chunk[i]];
+
+			if (!patelleEntry) {
+				throw new Error('Missing palette entry');
+			}
+
+			patelleEntry.copy(buff, k);
 		}
 
 		return buff;
