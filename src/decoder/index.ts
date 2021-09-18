@@ -1,4 +1,4 @@
-import zlib from 'zlib';
+import zlib, { ZlibOptions } from 'zlib';
 import crc from '../crc';
 import {
 	PngHeader,
@@ -123,7 +123,7 @@ export default class Decoder {
 					bitmapper[ColorTypeE.TrueColorAlpha](normilized).copy(this.bitmap, k);
 					break;
 				default:
-					throw new Error(`Bad color type ${this.colorType}`);
+					throw new Error('Bad color type');
 			}
 		}
 	}
@@ -185,13 +185,14 @@ export default class Decoder {
 			throw new Error('Non-positive dimension');
 		}
 
-		this.bitDepth = chunk.readUInt8(8) as BitDepth;
-		this.colorType = chunk.readUInt8(9) as ColorType;
-
+		const bitDepth = chunk.readUInt8(8);
 		if (![1, 2, 4, 8, 16].includes(this.bitDepth)) {
 			throw new Error(`Bad bit depth ${this.bitDepth}`);
 		}
 
+		this.bitDepth = bitDepth as BitDepth;
+
+		const colorType = chunk.readUInt8(9);
 		switch (this.colorType) {
 			case ColorTypeE.Grayscale:
 				this._channels = 1;
@@ -209,8 +210,10 @@ export default class Decoder {
 				this._channels = 4;
 				break;
 			default:
-				throw new Error(`Bad color type ${this.colorType}`);
+				throw new Error(`Bad color type ${colorType}`);
 		}
+
+		this.colorType = colorType as ColorType;
 
 		if ([2, 4, 6].includes(this.colorType) && ![8, 16].includes(this.bitDepth)) {
 			throw new Error(`Unsupported bit depth ${this.bitDepth}, color type ${this.colorType}`);
@@ -399,8 +402,8 @@ export default class Decoder {
 	/**
 	 *
 	 */
-	private _inflateChunks(): Buffer {
-		return zlib.inflateSync(Buffer.concat(this._deflatedIDAT));
+	private _inflateChunks(options?: ZlibOptions): Buffer {
+		return zlib.inflateSync(Buffer.concat(this._deflatedIDAT), options);
 	}
 
 	/**

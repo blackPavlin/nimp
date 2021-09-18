@@ -1,4 +1,4 @@
-import zlib from 'zlib';
+import zlib, { ZlibOptions } from 'zlib';
 import crc from '../crc';
 import {
 	PngHeader,
@@ -36,7 +36,7 @@ export default class Encoder {
 				this._channels = 4;
 				break;
 			default:
-				throw new Error(`Bad color type ${options.colorType}`);
+				throw new Error('Bad color type');
 		}
 
 		// TODO: Добавить проверки
@@ -89,6 +89,12 @@ export default class Encoder {
 
 	private _encodeIDAT() {}
 
+	private _inflatedIDAT: Buffer[] = [];
+
+	private _deflateChunks(options?: ZlibOptions): Buffer {
+		return zlib.deflateSync(Buffer.concat(this._inflatedIDAT), options);
+	}
+
 	private _encodeIEND(): Buffer {
 		const chunk = Buffer.alloc(4);
 
@@ -103,20 +109,6 @@ export default class Encoder {
 // 	private imageChunks: Buffer[] = [];
 
 // 	constructor(options: EncodePNGOptions) {
-// 		if (options.width <= 0 || options.height <= 0) {
-// 			throw Error('Non-positive dimension');
-// 		}
-
-// 		this.width = options.width;
-// 		this.height = options.height;
-
-// 		this.bitDepth = options.bitDepth || 8;
-
-// 		if (![1, 2, 4, 8, 16].includes(this.bitDepth)) {
-// 			throw Error('Bad bit depth');
-// 		}
-
-// 		this.colorType = options.colorType || 6;
 
 // 		switch (this.colorType) {
 // 			case ColorTypeE.Grayscale:
