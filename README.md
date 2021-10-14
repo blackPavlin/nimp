@@ -1,6 +1,9 @@
 # <div align="center">Nodejs image manipulation package</div>
 
 ## <div align="center">PNG</div>
+
+Portable Network Graphics, is a ubiquitous, lossless image file format, based on the zlib compression format.
+
 ## Decoder
 ### Features:
 - Support 1, 2, 4, 8 bit depth images;
