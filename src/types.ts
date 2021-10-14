@@ -4,7 +4,7 @@
  */
 export const PngHeader = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
-type ValueeOf<T> = T[keyof T];
+type ValueOf<T> = T[keyof T];
 
 /**
  * Chunk types
@@ -55,11 +55,12 @@ export const FilterTypeE = {
 	Paeth: 4,
 } as const;
 
+export type ChunkType = ValueOf<typeof ChunkTypeE>;
 export type BitDepth = 1 | 2 | 4 | 8 | 16;
-export type ColorType = ValueeOf<typeof ColorTypeE>;
+export type ColorType = ValueOf<typeof ColorTypeE>;
 export type CompressionMethod = 0;
 export type FilterMethod = 0;
-export type FilterType = ValueeOf<typeof FilterTypeE>;
+export type FilterType = ValueOf<typeof FilterTypeE>;
 export type InterlaceMethod = 0 | 1;
 export type Channels = 1 | 2 | 3 | 4;
 

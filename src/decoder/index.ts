@@ -186,14 +186,20 @@ export default class Decoder {
 		}
 
 		const bitDepth = chunk.readUInt8(8);
-		if (![1, 2, 4, 8, 16].includes(this.bitDepth)) {
-			throw new Error(`Bad bit depth ${this.bitDepth}`);
+		switch (bitDepth) {
+			case 1:
+			case 2:
+			case 4:
+			case 8:
+			case 16:
+				this.bitDepth = bitDepth;
+				break;
+			default:
+				throw new Error(`Bad bit depth ${this.bitDepth}`);
 		}
 
-		this.bitDepth = bitDepth as BitDepth;
-
 		const colorType = chunk.readUInt8(9);
-		switch (this.colorType) {
+		switch (colorType) {
 			case ColorTypeE.Grayscale:
 				this._channels = 1;
 				break;
@@ -213,7 +219,7 @@ export default class Decoder {
 				throw new Error(`Bad color type ${colorType}`);
 		}
 
-		this.colorType = colorType as ColorType;
+		this.colorType = colorType;
 
 		if ([2, 4, 6].includes(this.colorType) && ![8, 16].includes(this.bitDepth)) {
 			throw new Error(`Unsupported bit depth ${this.bitDepth}, color type ${this.colorType}`);
