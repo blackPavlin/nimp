@@ -34,6 +34,7 @@ export default class Decoder {
 				throw new Error('Bad chunk length');
 			}
 
+			// TODO: Добавить параметр пропускать проверку контрольных сумм
 			this._verifyChecksum(
 				file.subarray(i + 4, i + 4 + 4 + length),
 				file.readInt32BE(i + 4 + 4 + length),
@@ -195,7 +196,7 @@ export default class Decoder {
 				this.bitDepth = bitDepth;
 				break;
 			default:
-				throw new Error(`Bad bit depth ${this.bitDepth}`);
+				throw new Error(`Bad bit depth ${bitDepth}`);
 		}
 
 		const colorType = chunk.readUInt8(9);
@@ -406,7 +407,8 @@ export default class Decoder {
 	}
 
 	/**
-	 *
+	 * @param {ZlibOptions} options
+	 * @returns {Buffer}
 	 */
 	private _inflateChunks(options?: ZlibOptions): Buffer {
 		return zlib.inflateSync(Buffer.concat(this._deflatedIDAT), options);

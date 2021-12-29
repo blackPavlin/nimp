@@ -54,6 +54,7 @@ describe('Interlacing', () => {
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
+		expect(png.bitDepth).toBe(16);
 	});
 
 	it.skip('3x8 bits rgb color', () => {
