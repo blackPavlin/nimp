@@ -1,4 +1,5 @@
 import zlib from 'zlib';
+import { unfilter } from './unfilter';
 
 import crc from '../crc';
 import {
@@ -238,5 +239,27 @@ export default class Decoder extends PNG {
 
 		const bitsPerPixel = Math.ceil((this.channels * this.bitDepth) / 8);
 		const bitsPerLine = Math.ceil(((this.channels * this.bitDepth) / 8) * this.width);
+
+		const unfilteredChunks = unfilter(data, bitsPerPixel, bitsPerLine);
+
+		switch (this.colorType) {
+			case ColorTypeE.Grayscale:
+				// bitmapper[ColorTypeE.Grayscale](normilized, this.transparent).copy(this.bitmap, k);
+				break;
+			case ColorTypeE.TrueColor:
+				// bitmapper[ColorTypeE.TrueColor](normilized, this.transparent).copy(this.bitmap, k);
+				break;
+			case ColorTypeE.IndexedColor:
+				// bitmapper[ColorTypeE.IndexedColor](normilized, this.palette).copy(this.bitmap, k);
+				break;
+			case ColorTypeE.GrayscaleAlpha:
+				// bitmapper[ColorTypeE.GrayscaleAlpha](normilized).copy(this.bitmap, k);
+				break;
+			case ColorTypeE.TrueColorAlpha:
+				// bitmapper[ColorTypeE.TrueColorAlpha](normilized).copy(this.bitmap, k);
+				break;
+			default:
+				throw new Error('Bad color type');
+		}
 	}
 }
