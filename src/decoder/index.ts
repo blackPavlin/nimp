@@ -11,16 +11,19 @@ import {
 	Channels,
 	ColorTypeE,
 	TextData,
+	Chromaticities,
+	PhisicalDimensions,
+	SuggestedPalette,
 } from '../types';
 
-import Unfilter from './unfilter';
+import unFilter from './unfilter';
 import converter from './converter';
 import bitmapper from './bitmapper';
 
 export default class Decoder {
 	constructor(file: Buffer) {
 		if (!Buffer.isBuffer(file)) {
-			throw new Error('Not a buffer');
+			throw new TypeError('Not a buffer');
 		}
 
 		if (!Decoder.isPNG(file)) {
@@ -35,7 +38,7 @@ export default class Decoder {
 			}
 
 			// TODO: Добавить параметр пропускать проверку контрольных сумм
-			this._verifyChecksum(
+			Decoder.verifyChecksum(
 				file.subarray(i + 4, i + 4 + 4 + length),
 				file.readInt32BE(i + 4 + 4 + length),
 			);
@@ -43,18 +46,13 @@ export default class Decoder {
 			const type = file.readUInt32BE((i += 4));
 			const chunk = file.subarray((i += 4), (i += length));
 
+			// TODO: Добавить параметр, нужно ли декодировать ancillary chunks
 			switch (type) {
 				case ChunkTypeE.IHDR:
 					this._parseIHDR(chunk);
 					break;
-				case ChunkTypeE.gAMA:
-					this._parseGAMA(chunk);
-					break;
 				case ChunkTypeE.PLTE:
 					this._parsePLTE(chunk);
-					break;
-				case ChunkTypeE.tRNS:
-					this._parseTRNS(chunk);
 					break;
 				case ChunkTypeE.IDAT:
 					this._parseIDAT(chunk);
@@ -62,15 +60,32 @@ export default class Decoder {
 				case ChunkTypeE.IEND:
 					this._parseIEND(chunk);
 					break;
-			}
-
-			// TODO: Добавить параметр, нужно ли декодировать ancillary chunks
-			switch (type) {
-				case ChunkTypeE.tIME:
-					this._parseTIME(chunk);
+				case ChunkTypeE.cHRM:
+					this._parseCHRM(chunk);
 					break;
-				case ChunkTypeE.iTXt:
-					this._parseITXT(chunk);
+				case ChunkTypeE.gAMA:
+					this._parseGAMA(chunk);
+					break;
+				case ChunkTypeE.iCCP:
+					this._parseICCP(chunk);
+					break;
+				case ChunkTypeE.sBIT:
+					this._parseSBIT(chunk);
+					break;
+				case ChunkTypeE.bKGD:
+					this._parseBKGD(chunk);
+					break;
+				case ChunkTypeE.hIST:
+					this._parseHIST(chunk);
+					break;
+				case ChunkTypeE.tRNS:
+					this._parseTRNS(chunk);
+					break;
+				case ChunkTypeE.pHYs:
+					this._parsePHYs(chunk);
+					break;
+				case ChunkTypeE.sPLT:
+					this._parseSPLT(chunk);
 					break;
 				case ChunkTypeE.tEXt:
 					this._parseTEXT(chunk);
@@ -78,6 +93,14 @@ export default class Decoder {
 				case ChunkTypeE.zTXt:
 					this._parseZTXT(chunk);
 					break;
+				case ChunkTypeE.iTXt:
+					this._parseITXT(chunk);
+					break;
+				case ChunkTypeE.tIME:
+					this._parseTIME(chunk);
+					break;
+				default:
+					console.log(type);
 			}
 		}
 
@@ -94,34 +117,32 @@ export default class Decoder {
 		const inflatedChunks = this._inflateChunks();
 		this._deflatedIDAT = [];
 
-		const bitsPerPixel = Math.ceil((this._channels * this.bitDepth) / 8);
-		const bitsPerLine = Math.ceil(((this._channels * this.bitDepth) / 8) * this.width);
+		const bitsPerPixel = this._channels * this.bitDepth;
+		const bytesPerPixel = bitsPerPixel >> 3 || 1;
+		// TODO: Переписать
+		const bytesPerLine = Math.ceil(((this._channels * this.bitDepth) / 8) * this.width);
 
 		this.bitmap = Buffer.alloc(this.width * this.height * 4);
-		const unfilter = new Unfilter(bitsPerPixel);
+		const unfilteredChunks = unFilter(inflatedChunks, bytesPerPixel, bytesPerLine);
 
-		for (let i = 0, k = 0; i < inflatedChunks.length; i += bitsPerLine, k += this.width * 4) {
-			const filterType = inflatedChunks.readUInt8(i);
-			const chunk = inflatedChunks.subarray((i += 1), i + bitsPerLine);
-
-			const unfiltered = unfilter.recon(chunk, filterType);
-			const normilized = converter[this.bitDepth](unfiltered, this.width * this._channels);
+		for (let i = 0, k = 0; i < unfilteredChunks.length; i += 1, k += this.width * 4) {
+			const normalized = converter[this.bitDepth](unfilteredChunks[i], this.width * this._channels);
 
 			switch (this.colorType) {
 				case ColorTypeE.Grayscale:
-					bitmapper[ColorTypeE.Grayscale](normilized, this.transparent).copy(this.bitmap, k);
+					bitmapper[ColorTypeE.Grayscale](normalized, this.transparent).copy(this.bitmap, k);
 					break;
 				case ColorTypeE.TrueColor:
-					bitmapper[ColorTypeE.TrueColor](normilized, this.transparent).copy(this.bitmap, k);
+					bitmapper[ColorTypeE.TrueColor](normalized, this.transparent).copy(this.bitmap, k);
 					break;
 				case ColorTypeE.IndexedColor:
-					bitmapper[ColorTypeE.IndexedColor](normilized, this.palette).copy(this.bitmap, k);
+					bitmapper[ColorTypeE.IndexedColor](normalized, this.palette).copy(this.bitmap, k);
 					break;
 				case ColorTypeE.GrayscaleAlpha:
-					bitmapper[ColorTypeE.GrayscaleAlpha](normilized).copy(this.bitmap, k);
+					bitmapper[ColorTypeE.GrayscaleAlpha](normalized).copy(this.bitmap, k);
 					break;
 				case ColorTypeE.TrueColorAlpha:
-					bitmapper[ColorTypeE.TrueColorAlpha](normilized).copy(this.bitmap, k);
+					bitmapper[ColorTypeE.TrueColorAlpha](normalized).copy(this.bitmap, k);
 					break;
 				default:
 					throw new Error('Bad color type');
@@ -146,7 +167,7 @@ export default class Decoder {
 	 * @param {Buffer} chunk
 	 * @param {number} checkSum
 	 */
-	private _verifyChecksum(chunk: Buffer, checkSum: number): void {
+	static verifyChecksum(chunk: Buffer, checkSum: number): void {
 		if (crc.crc32(chunk) !== checkSum) {
 			throw new Error('Invalid checksum');
 		}
@@ -260,15 +281,47 @@ export default class Decoder {
 			throw new Error('PLTE, color type mismatch');
 		}
 
-		const paletteEntris = chunk.length / 3;
+		const paletteEntries = chunk.length / 3;
 
-		if (chunk.length % 3 !== 0 || paletteEntris > 256 || paletteEntris > 2 ** this.bitDepth) {
+		if (chunk.length % 3 !== 0 || paletteEntries > 256 || paletteEntries > 2 ** this.bitDepth) {
 			throw new Error('Bad PLTE length');
 		}
 
 		for (let i = 0; i < chunk.length; i += 3) {
 			this.palette.push(Buffer.from([chunk[i], chunk[i + 1], chunk[i + 2], 0xff]));
 		}
+	}
+
+	public chromaticities!: Chromaticities;
+
+	/**
+	 * https://www.w3.org/TR/PNG/#11cHRM
+	 * @param chunk
+	 */
+	private _parseCHRM(chunk: Buffer): void {
+		if (chunk.length !== 32) {
+			throw new Error('Bad cHRM length');
+		}
+
+		// TODO: Вынести 10000 в константы
+		this.chromaticities = {
+			white: {
+				x: chunk.readUInt32BE(0) / 100000,
+				y: chunk.readUInt32BE(4) / 100000,
+			},
+			red: {
+				x: chunk.readUInt32BE(8) / 100000,
+				y: chunk.readUInt32BE(12) / 100000,
+			},
+			green: {
+				x: chunk.readUInt32BE(16) / 100000,
+				y: chunk.readUInt32BE(20) / 100000,
+			},
+			blue: {
+				x: chunk.readUInt32BE(24) / 100000,
+				y: chunk.readUInt32BE(28) / 100000,
+			},
+		};
 	}
 
 	public gamma!: number;
@@ -280,6 +333,152 @@ export default class Decoder {
 	private _parseGAMA(chunk: Buffer): void {
 		// TODO: Вынести 100000 в константы
 		this.gamma = chunk.readUInt32BE() / 100000;
+	}
+
+	private _parseICCP(chunk: Buffer): void {
+		throw new Error('iccp');
+	}
+
+	public physicalDimensions!: PhisicalDimensions;
+
+	/**
+	 * https://www.w3.org/TR/PNG/#11pHYs
+	 * @param chunk
+	 */
+	private _parsePHYs(chunk: Buffer): void {
+		if (chunk.length !== 9) {
+			throw new Error('Bad pHYs length');
+		}
+
+		const pixelPerUnitX = chunk.readUInt32BE(0);
+		const pixelPerUnitY = chunk.readUInt32BE(4);
+		const unitSpecifier = chunk.readUInt8(8);
+
+		if (unitSpecifier !== 0 && unitSpecifier !== 1) {
+			throw new Error('Bad unit specifier');
+		}
+
+		this.physicalDimensions = {
+			pixelPerUnitX,
+			pixelPerUnitY,
+			unitSpecifier,
+		};
+	}
+
+	public suggestedPalette: SuggestedPalette = {};
+
+	/**
+	 * https://www.w3.org/TR/PNG/#11sPLT
+	 * @param chunk
+	 */
+	private _parseSPLT(chunk: Buffer) {
+		const separator = chunk.indexOf(0x00);
+		const name = chunk.toString('latin1', 0, separator);
+		const depth = chunk.readUInt8(separator + 1);
+
+		// TODO: Проверка depth
+
+		const palette: [number, number, number, number, number][] = [];
+
+		if (depth === 8) {
+			for (let i = separator + 2; i < chunk.length; i += 6) {
+				palette.push([
+					chunk.readUInt8(i + 0),
+					chunk.readUInt8(i + 1),
+					chunk.readUInt8(i + 2),
+					chunk.readUInt8(i + 3),
+					chunk.readUInt16BE(i + 4),
+				]);
+			}
+		}
+
+		if (depth === 16) {
+			for (let i = separator + 2; i < chunk.length; i += 10) {
+				palette.push([
+					chunk.readUInt16BE(i + 0),
+					chunk.readUInt16BE(i + 2),
+					chunk.readUInt16BE(i + 4),
+					chunk.readUInt16BE(i + 6),
+					chunk.readUInt16BE(i + 8),
+				]);
+			}
+		}
+
+		this.suggestedPalette[name] = palette;
+	}
+
+	public significantBits!: [number, number, number, number];
+
+	/**
+	 * https://www.w3.org/TR/PNG/#11sBIT
+	 * @param chunk
+	 */
+	private _parseSBIT(chunk: Buffer): void {
+		if (this.colorType === ColorTypeE.Grayscale) {
+			const sBit = chunk.readUInt8();
+			this.significantBits = [sBit, sBit, sBit, this.bitDepth];
+		}
+
+		if (this.colorType === ColorTypeE.TrueColor || this.colorType === ColorTypeE.IndexedColor) {
+			this.significantBits = [
+				chunk.readUInt8(0),
+				chunk.readUInt8(1),
+				chunk.readUInt8(2),
+				this.bitDepth,
+			];
+		}
+
+		if (this.colorType === ColorTypeE.GrayscaleAlpha) {
+			const sBit = chunk.readUInt8();
+			this.significantBits = [sBit, sBit, sBit, chunk.readUInt8(1)];
+		}
+
+		if (this.colorType === ColorTypeE.TrueColorAlpha) {
+			this.significantBits = [
+				chunk.readUInt8(0),
+				chunk.readUInt8(1),
+				chunk.readUInt8(2),
+				chunk.readUInt8(3),
+			];
+		}
+	}
+
+	public background!: [number, number, number, number];
+
+	/**
+	 * https://www.w3.org/TR/PNG/#11bKGD
+	 * @param chunk
+	 */
+	private _parseBKGD(chunk: Buffer): void {
+		if (this.colorType === ColorTypeE.Grayscale || this.colorType === ColorTypeE.GrayscaleAlpha) {}
+
+		if (this.colorType === ColorTypeE.TrueColor || this.colorType === ColorTypeE.TrueColorAlpha) {}
+
+		if (this.colorType === ColorTypeE.IndexedColor) {
+			if (!this.palette.length) {
+				throw new Error('Missing palette');
+			}
+		}
+	}
+
+	public histogram: number[] = [];
+
+	/**
+	 * https://www.w3.org/TR/PNG/#11hIST
+	 * @param chunk
+	 */
+	private _parseHIST(chunk: Buffer): void {
+		if (this.palette.length === 0) {
+			throw new Error('Missing palette');
+		}
+
+		if (chunk.length % 2 !== 0 || this.palette.length !== chunk.length / 2) {
+			throw new Error('Bad histogram length');
+		}
+
+		for (let i = 0; i < chunk.length; i += 2) {
+			this.histogram.push(chunk.readUInt16BE(i));
+		}
 	}
 
 	public transparent: number[] = [];

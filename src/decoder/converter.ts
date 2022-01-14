@@ -68,7 +68,7 @@ export default {
 		for (let i = 0; i < chunk.length; i += 1) {
 			const byte = chunk[i];
 
-			const bytes = Buffer.from([byte >> 4, byte & 0x0f]);
+			const bytes = Buffer.from([(byte >> 4) & 0x0f, byte & 0x0f]);
 
 			bytes.copy(buff, i * 2);
 		}
@@ -97,7 +97,7 @@ export default {
 			const byte = chunk[i];
 			const byte2 = chunk[i + 1];
 
-			const bytes = Buffer.from([(byte << 8) + byte2]);
+			const bytes = Buffer.from([(byte << 8) | byte2]);
 
 			bytes.copy(buff, i * 0.5);
 		}

@@ -71,6 +71,33 @@ export type TextData = {
 	translatedKeyword?: string;
 };
 
+export type Chromaticities = {
+	white: {
+		x: number;
+		y: number;
+	};
+	red: {
+		x: number;
+		y: number;
+	};
+	green: {
+		x: number;
+		y: number;
+	};
+	blue: {
+		x: number;
+		y: number;
+	};
+};
+
+export type PhisicalDimensions = {
+	pixelPerUnitX: number;
+	pixelPerUnitY: number;
+	unitSpecifier: 0 | 1;
+};
+
+export type SuggestedPalette = Record<string, [number, number, number, number, number][]>;
+
 type BaseEncoderOptions = {
 	width: number;
 	height: number;

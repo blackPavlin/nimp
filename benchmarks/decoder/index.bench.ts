@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { Suite, Event } from 'benchmark';
 import { PNG } from 'pngjs';
-// import Decoder from '../../lib/decoder';
-import Decoder from '../../src/decoder/main';
+import Decoder from '../../src/decoder';
+// import Decoder from '../../src/decoder/main';
 const suite = new Suite();
 
 const image256x256 = fs.readFileSync(path.join(__dirname, './images/PngSuite.png'));

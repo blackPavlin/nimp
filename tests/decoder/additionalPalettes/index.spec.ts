@@ -37,6 +37,9 @@ describe('Additional palettes', () => {
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
+
+		expect(png.suggestedPalette['six-cube']).toBeDefined();
+		expect(png.suggestedPalette['six-cube']).toHaveLength(216);
 	});
 
 	it.skip('Six-cube suggested palette (1 byte) in true-color image, 16 bit depth', () => {
@@ -60,6 +63,9 @@ describe('Additional palettes', () => {
 		expect(png.colorType).toBe(ColorTypeE.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
+
+		expect(png.suggestedPalette['six-cube']).toBeDefined();
+		expect(png.suggestedPalette['six-cube']).toHaveLength(216);
 	});
 
 	it.skip('Six-cube suggested palette (2 bytes) in true-color image', () => {
