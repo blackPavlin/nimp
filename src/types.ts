@@ -10,7 +10,7 @@ type ValueOf<T> = T[keyof T];
  * Chunk types
  * https://www.w3.org/TR/PNG/#4Concepts.FormatTypes
  */
-export const ChunkTypeE = {
+export const ChunkTypes = {
 	IHDR: 0x49484452,
 	cHRM: 0x6348524d,
 	gAMA: 0x67414d41,
@@ -28,6 +28,7 @@ export const ChunkTypeE = {
 	zTXt: 0x7a545874,
 	iTXt: 0x69545874,
 	tIME: 0x74494d45,
+	eXIf: 0x65584966,
 	IEND: 0x49454e44,
 } as const;
 
@@ -35,7 +36,7 @@ export const ChunkTypeE = {
  * Colour types
  * https://www.w3.org/TR/PNG/#6Colour-values
  */
-export const ColorTypeE = {
+export const ColorTypes = {
 	Grayscale: 0,
 	TrueColor: 2,
 	IndexedColor: 3,
@@ -47,7 +48,7 @@ export const ColorTypeE = {
  * Filter types
  * https://www.w3.org/TR/PNG/#9Filter-types
  */
-export const FilterTypeE = {
+export const FilterTypes = {
 	None: 0,
 	Sub: 1,
 	Up: 2,
@@ -55,12 +56,12 @@ export const FilterTypeE = {
 	Paeth: 4,
 } as const;
 
-export type ChunkType = ValueOf<typeof ChunkTypeE>;
+export type ChunkType = ValueOf<typeof ChunkTypes>;
 export type BitDepth = 1 | 2 | 4 | 8 | 16;
-export type ColorType = ValueOf<typeof ColorTypeE>;
+export type ColorType = ValueOf<typeof ColorTypes>;
 export type CompressionMethod = 0;
 export type FilterMethod = 0;
-export type FilterType = ValueOf<typeof FilterTypeE>;
+export type FilterType = ValueOf<typeof FilterTypes>;
 export type InterlaceMethod = 0 | 1;
 export type Channels = 1 | 2 | 3 | 4;
 
@@ -97,6 +98,11 @@ export type PhisicalDimensions = {
 };
 
 export type SuggestedPalette = Record<string, [number, number, number, number, number][]>;
+
+export type IccProfile = {
+	name: string;
+	profile: Buffer;
+};
 
 type BaseEncoderOptions = {
 	width: number;

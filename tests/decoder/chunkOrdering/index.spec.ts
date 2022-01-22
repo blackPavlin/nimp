@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import Decoder from '../../../src/decoder';
-import { ColorTypeE } from '../../../src/types';
+import { ColorTypes } from '../../../src/types';
 
 describe('Chunk ordering', () => {
 	it.skip('Grayscale mother image with 1 idat-chunk', () => {
@@ -11,7 +11,7 @@ describe('Chunk ordering', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
-		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
@@ -22,7 +22,7 @@ describe('Chunk ordering', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
-		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
@@ -33,7 +33,7 @@ describe('Chunk ordering', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
-		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
@@ -44,7 +44,7 @@ describe('Chunk ordering', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
-		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
@@ -55,7 +55,7 @@ describe('Chunk ordering', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
-		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
@@ -66,7 +66,7 @@ describe('Chunk ordering', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
-		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
@@ -77,7 +77,7 @@ describe('Chunk ordering', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
-		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
@@ -88,7 +88,7 @@ describe('Chunk ordering', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
-		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 });

@@ -1,4 +1,4 @@
-import { FilterTypeE } from '../types';
+import { FilterTypes } from '../types';
 
 /**
  * @see https://www.w3.org/TR/PNG/#9Filters
@@ -19,19 +19,19 @@ export default function unFilter(
 		const chunk = buffer.subarray((i += 1), i + bitsPerLine);
 
 		switch (filterType) {
-			case FilterTypeE.None:
+			case FilterTypes.None:
 				chunks.push(unFilterNone(chunk));
 				break;
-			case FilterTypeE.Sub:
+			case FilterTypes.Sub:
 				chunks.push(unFilterSub(chunk, bitsPerPixel));
 				break;
-			case FilterTypeE.Up:
+			case FilterTypes.Up:
 				chunks.push(unFilterUp(chunk, chunks[k - 1]));
 				break;
-			case FilterTypeE.Average:
+			case FilterTypes.Average:
 				chunks.push(unFilterAverage(chunk, bitsPerPixel, chunks[k - 1]));
 				break;
-			case FilterTypeE.Paeth:
+			case FilterTypes.Paeth:
 				chunks.push(unFilterPaeth(chunk, bitsPerPixel, chunks[k - 1]));
 				break;
 			default:

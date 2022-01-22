@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import Decoder from '../../../src/decoder';
-import { ColorTypeE } from '../../../src/types';
+import { ColorTypes } from '../../../src/types';
 
 describe('Zlib compression level', () => {
 	it('Color, no interlacing, compression level 0 (none)', () => {
@@ -11,7 +11,7 @@ describe('Zlib compression level', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
-		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
@@ -23,7 +23,7 @@ describe('Zlib compression level', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
-		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
@@ -35,7 +35,7 @@ describe('Zlib compression level', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
-		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
@@ -47,7 +47,7 @@ describe('Zlib compression level', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
-		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import Decoder from '../../../src/decoder';
-import { ColorTypeE } from '../../../src/types';
+import { ColorTypes } from '../../../src/types';
 
 describe('Background colors', () => {
 	it.skip('8 bit grayscale, alpha, no background chunk, interlaced', () => {

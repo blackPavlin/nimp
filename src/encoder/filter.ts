@@ -1,4 +1,4 @@
-import { FilterTypeE } from '../types';
+import { FilterTypes } from '../types';
 
 /** https://www.w3.org/TR/PNG/#9Filters */
 export default class Filter {
@@ -12,19 +12,19 @@ export default class Filter {
 	 */
 	public filt(chunk: Buffer, filterType: number): Buffer {
 		switch (filterType) {
-			case FilterTypeE.None:
+			case FilterTypes.None:
 				this._temporary = this._filterNone(chunk);
 				break;
-			case FilterTypeE.Sub:
+			case FilterTypes.Sub:
 				this._temporary = this._filterSub(chunk, this._bitsPerPixel);
 				break;
-			case FilterTypeE.Up:
+			case FilterTypes.Up:
 				this._temporary = this._filterUp(chunk, this._temporary);
 				break;
-			case FilterTypeE.Average:
+			case FilterTypes.Average:
 				this._temporary = this._filterAverage(chunk, this._bitsPerPixel, this._temporary);
 				break;
-			case FilterTypeE.Paeth:
+			case FilterTypes.Paeth:
 				this._temporary = this._filterPaeth(chunk, this._bitsPerPixel, this._temporary);
 				break;
 			default:

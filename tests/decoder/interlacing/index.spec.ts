@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import Decoder from '../../../src/decoder';
-import { ColorTypeE } from '../../../src/types';
+import { ColorTypes } from '../../../src/types';
 
 describe('Interlacing', () => {
 	it.skip('black & white', () => {
@@ -11,7 +11,7 @@ describe('Interlacing', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(1);
-		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
@@ -22,7 +22,7 @@ describe('Interlacing', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(2);
-		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
@@ -33,7 +33,7 @@ describe('Interlacing', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(4);
-		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
@@ -44,7 +44,7 @@ describe('Interlacing', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
-		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 

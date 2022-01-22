@@ -1,7 +1,7 @@
-import { ColorTypeE } from '../types';
+import { ColorTypes } from '../types';
 
 export default {
-	[ColorTypeE.Grayscale]: (chunk: Buffer, transparent: number[]): Buffer => {
+	[ColorTypes.Grayscale]: (chunk: Buffer, transparent: number[]): Buffer => {
 		const buff = Buffer.alloc(chunk.length * 4);
 
 		for (let i = 0, k = 0; i < chunk.length; i += 1, k += 4) {
@@ -18,7 +18,7 @@ export default {
 		return buff;
 	},
 
-	[ColorTypeE.TrueColor]: (chunk: Buffer, transparent: number[]): Buffer => {
+	[ColorTypes.TrueColor]: (chunk: Buffer, transparent: number[]): Buffer => {
 		const buff = Buffer.alloc((chunk.length / 3) * 4);
 
 		for (let i = 0, k = 0; i < chunk.length; i += 3, k += 4) {
@@ -40,7 +40,7 @@ export default {
 		return buff;
 	},
 
-	[ColorTypeE.IndexedColor]: (chunk: Buffer, palette: Buffer[]): Buffer => {
+	[ColorTypes.IndexedColor]: (chunk: Buffer, palette: Buffer[]): Buffer => {
 		const buff = Buffer.alloc(chunk.length * 4);
 
 		for (let i = 0, k = 0; i < chunk.length; i += 1, k += 4) {
@@ -56,7 +56,7 @@ export default {
 		return buff;
 	},
 
-	[ColorTypeE.GrayscaleAlpha]: (chunk: Buffer): Buffer => {
+	[ColorTypes.GrayscaleAlpha]: (chunk: Buffer): Buffer => {
 		const buff = Buffer.alloc(chunk.length * 2);
 
 		for (let i = 0, k = 0; i < chunk.length; i += 2, k += 4) {
@@ -66,5 +66,5 @@ export default {
 		return buff;
 	},
 
-	[ColorTypeE.TrueColorAlpha]: (chunk: Buffer): Buffer => chunk,
+	[ColorTypes.TrueColorAlpha]: (chunk: Buffer): Buffer => chunk,
 };

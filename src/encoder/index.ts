@@ -5,9 +5,9 @@ import {
 	EncodePNGOptions,
 	BitDepth,
 	ColorType,
-	ColorTypeE,
+	ColorTypes,
 	Channels,
-	ChunkTypeE,
+	ChunkTypes,
 	FilterType,
 	CompressionMethod,
 	FilterMethod,
@@ -105,17 +105,17 @@ class E {
 		buff.writeUInt8(this._filterMethod, 11); // write filterMethod
 		buff.writeUInt8(this._interlaceMethod, 12); // write interlaceMethod
 
-		this._encodeChunk(ChunkTypeE.IHDR, buff);
+		this._encodeChunk(ChunkTypes.IHDR, buff);
 	}
 
 	private _encodeIDAT(chunk: Buffer): void {
-		this._encodeChunk(ChunkTypeE.IDAT, chunk);
+		this._encodeChunk(ChunkTypes.IDAT, chunk);
 	}
 
 	private _encodeIEND(): void {
 		const buff = Buffer.alloc(0);
 
-		this._encodeChunk(ChunkTypeE.IEND, buff);
+		this._encodeChunk(ChunkTypes.IEND, buff);
 	}
 
 	private _encodeChunk(type: ChunkType, chunk: Buffer): void {
@@ -144,19 +144,19 @@ export default class Encoder {
 		this._height = options.height;
 
 		switch (options.colorType) {
-			case ColorTypeE.Grayscale:
+			case ColorTypes.Grayscale:
 				this._channels = 1;
 				break;
-			case ColorTypeE.TrueColor:
+			case ColorTypes.TrueColor:
 				this._channels = 3;
 				break;
-			case ColorTypeE.IndexedColor:
+			case ColorTypes.IndexedColor:
 				this._channels = 1;
 				break;
-			case ColorTypeE.GrayscaleAlpha:
+			case ColorTypes.GrayscaleAlpha:
 				this._channels = 2;
 				break;
-			case ColorTypeE.TrueColorAlpha:
+			case ColorTypes.TrueColorAlpha:
 				this._channels = 4;
 				break;
 			default:
@@ -199,7 +199,7 @@ export default class Encoder {
 	private _encodeIHDR(): Buffer {
 		const chunk = Buffer.alloc(17);
 
-		chunk.writeUInt32BE(ChunkTypeE.IHDR, 0); // write chunk type
+		chunk.writeUInt32BE(ChunkTypes.IHDR, 0); // write chunk type
 		chunk.writeUInt32BE(this._width, 4); // write width
 		chunk.writeUInt32BE(this._height, 8); // write height
 		chunk.writeUInt8(this._bitDepth, 12); // write bitDepth
@@ -222,7 +222,7 @@ export default class Encoder {
 	private _encodeIEND(): Buffer {
 		const chunk = Buffer.alloc(4);
 
-		chunk.writeUInt32BE(ChunkTypeE.IEND, 0);
+		chunk.writeUInt32BE(ChunkTypes.IEND, 0);
 
 		return this._encodeChunk(chunk);
 	}

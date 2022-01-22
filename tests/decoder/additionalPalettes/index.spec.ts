@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import Decoder from '../../../src/decoder';
-import { ColorTypeE } from '../../../src/types';
+import { ColorTypes } from '../../../src/types';
 
 describe('Additional palettes', () => {
 	it.skip('Six-cube palette-chunk in true-color image', () => {
@@ -11,7 +11,7 @@ describe('Additional palettes', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
-		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
@@ -22,7 +22,7 @@ describe('Additional palettes', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
-		expect(png.colorType).toBe(ColorTypeE.TrueColorAlpha);
+		expect(png.colorType).toBe(ColorTypes.TrueColorAlpha);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 	});
@@ -34,7 +34,7 @@ describe('Additional palettes', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
-		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 
@@ -49,7 +49,7 @@ describe('Additional palettes', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
-		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 
@@ -60,7 +60,7 @@ describe('Additional palettes', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(8);
-		expect(png.colorType).toBe(ColorTypeE.Grayscale);
+		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 		expect(png.bitmap).toMatchSnapshot();
 
@@ -75,7 +75,7 @@ describe('Additional palettes', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
-		expect(png.colorType).toBe(ColorTypeE.TrueColor);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
 	});
 });

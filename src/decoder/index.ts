@@ -2,26 +2,57 @@ import zlib, { ZlibOptions } from 'zlib';
 import crc from '../crc';
 import {
 	PngHeader,
-	ChunkTypeE,
+	ChunkTypes,
 	BitDepth,
 	ColorType,
 	CompressionMethod,
 	FilterMethod,
 	InterlaceMethod,
 	Channels,
-	ColorTypeE,
+	ColorTypes,
 	TextData,
 	Chromaticities,
 	PhisicalDimensions,
 	SuggestedPalette,
+	IccProfile,
 } from '../types';
 
 import unFilter from './unfilter';
 import converter from './converter';
 import bitmapper from './bitmapper';
 
+type DecoderOptions = {
+	checkCrc?: boolean; // Default true
+	skipAncillary?: boolean; // Default false
+};
+
 export default class Decoder {
-	constructor(file: Buffer) {
+	private readonly mainChunkMapping: Record<number, ((chunk: Buffer) => void) | undefined> = {
+		[ChunkTypes.IHDR]: this._parseIHDR.bind(this),
+		[ChunkTypes.PLTE]: this._parsePLTE.bind(this),
+		[ChunkTypes.IDAT]: this._parseIDAT.bind(this),
+		[ChunkTypes.IEND]: this._parseIEND.bind(this),
+	};
+
+	private readonly acillaryChunkMapping: Record<number, ((chunk: Buffer) => void) | undefined> = {
+		[ChunkTypes.cHRM]: this._parseCHRM.bind(this),
+		[ChunkTypes.gAMA]: this._parseGAMA.bind(this),
+		[ChunkTypes.iCCP]: this._parseICCP.bind(this),
+		[ChunkTypes.sBIT]: this._parseSBIT.bind(this),
+		[ChunkTypes.sRGB]: this._parseSRGB.bind(this),
+		[ChunkTypes.bKGD]: this._parseBKGD.bind(this),
+		[ChunkTypes.hIST]: this._parseHIST.bind(this),
+		[ChunkTypes.tRNS]: this._parseTRNS.bind(this),
+		[ChunkTypes.pHYs]: this._parsePHYS.bind(this),
+		[ChunkTypes.sPLT]: this._parseSPLT.bind(this),
+		[ChunkTypes.tEXt]: this._parseTEXT.bind(this),
+		[ChunkTypes.zTXt]: this._parseZTXT.bind(this),
+		[ChunkTypes.iTXt]: this._parseITXT.bind(this),
+		[ChunkTypes.tIME]: this._parseTIME.bind(this),
+		[ChunkTypes.eXIf]: this._parseEXIF.bind(this),
+	};
+
+	constructor(file: Buffer, options: DecoderOptions = {}) {
 		if (!Buffer.isBuffer(file)) {
 			throw new TypeError('Not a buffer');
 		}
@@ -30,6 +61,14 @@ export default class Decoder {
 			throw new Error('Not a PNG file');
 		}
 
+		const checkCrc = options.checkCrc ?? true;
+		const skipAncillary = options.skipAncillary ?? false;
+
+		const chunkMapping = {
+			...this.mainChunkMapping,
+			...(skipAncillary ? {} : this.acillaryChunkMapping),
+		};
+
 		for (let i = 8; i < file.length; i += 4) {
 			const length = file.readUInt32BE(i);
 
@@ -37,71 +76,26 @@ export default class Decoder {
 				throw new Error('Bad chunk length');
 			}
 
-			// TODO: Добавить параметр пропускать проверку контрольных сумм
-			Decoder.verifyChecksum(
-				file.subarray(i + 4, i + 4 + 4 + length),
-				file.readInt32BE(i + 4 + 4 + length),
-			);
+			if (
+				checkCrc &&
+				!Decoder.verifyCheckSum(
+					file.subarray(i + 4, i + 4 + 4 + length),
+					file.readInt32BE(i + 4 + 4 + length),
+				)
+			) {
+				throw new Error('Invalid checksum');
+			}
 
 			const type = file.readUInt32BE((i += 4));
-			const chunk = file.subarray((i += 4), (i += length));
 
-			// TODO: Добавить параметр, нужно ли декодировать ancillary chunks
-			switch (type) {
-				case ChunkTypeE.IHDR:
-					this._parseIHDR(chunk);
-					break;
-				case ChunkTypeE.PLTE:
-					this._parsePLTE(chunk);
-					break;
-				case ChunkTypeE.IDAT:
-					this._parseIDAT(chunk);
-					break;
-				case ChunkTypeE.IEND:
-					this._parseIEND(chunk);
-					break;
-				case ChunkTypeE.cHRM:
-					this._parseCHRM(chunk);
-					break;
-				case ChunkTypeE.gAMA:
-					this._parseGAMA(chunk);
-					break;
-				case ChunkTypeE.iCCP:
-					this._parseICCP(chunk);
-					break;
-				case ChunkTypeE.sBIT:
-					this._parseSBIT(chunk);
-					break;
-				case ChunkTypeE.bKGD:
-					this._parseBKGD(chunk);
-					break;
-				case ChunkTypeE.hIST:
-					this._parseHIST(chunk);
-					break;
-				case ChunkTypeE.tRNS:
-					this._parseTRNS(chunk);
-					break;
-				case ChunkTypeE.pHYs:
-					this._parsePHYs(chunk);
-					break;
-				case ChunkTypeE.sPLT:
-					this._parseSPLT(chunk);
-					break;
-				case ChunkTypeE.tEXt:
-					this._parseTEXT(chunk);
-					break;
-				case ChunkTypeE.zTXt:
-					this._parseZTXT(chunk);
-					break;
-				case ChunkTypeE.iTXt:
-					this._parseITXT(chunk);
-					break;
-				case ChunkTypeE.tIME:
-					this._parseTIME(chunk);
-					break;
-				default:
-					console.log(type);
+			const handler = chunkMapping[type];
+			if (!handler) {
+				i += 4 + length;
+				continue;
 			}
+
+			const chunk = file.subarray((i += 4), (i += length));
+			handler(chunk);
 		}
 
 		if (this._deflatedIDAT.length === 0) {
@@ -129,20 +123,20 @@ export default class Decoder {
 			const normalized = converter[this.bitDepth](unfilteredChunks[i], this.width * this._channels);
 
 			switch (this.colorType) {
-				case ColorTypeE.Grayscale:
-					bitmapper[ColorTypeE.Grayscale](normalized, this.transparent).copy(this.bitmap, k);
+				case ColorTypes.Grayscale:
+					bitmapper[ColorTypes.Grayscale](normalized, this.transparent).copy(this.bitmap, k);
 					break;
-				case ColorTypeE.TrueColor:
-					bitmapper[ColorTypeE.TrueColor](normalized, this.transparent).copy(this.bitmap, k);
+				case ColorTypes.TrueColor:
+					bitmapper[ColorTypes.TrueColor](normalized, this.transparent).copy(this.bitmap, k);
 					break;
-				case ColorTypeE.IndexedColor:
-					bitmapper[ColorTypeE.IndexedColor](normalized, this.palette).copy(this.bitmap, k);
+				case ColorTypes.IndexedColor:
+					bitmapper[ColorTypes.IndexedColor](normalized, this.palette).copy(this.bitmap, k);
 					break;
-				case ColorTypeE.GrayscaleAlpha:
-					bitmapper[ColorTypeE.GrayscaleAlpha](normalized).copy(this.bitmap, k);
+				case ColorTypes.GrayscaleAlpha:
+					bitmapper[ColorTypes.GrayscaleAlpha](normalized).copy(this.bitmap, k);
 					break;
-				case ColorTypeE.TrueColorAlpha:
-					bitmapper[ColorTypeE.TrueColorAlpha](normalized).copy(this.bitmap, k);
+				case ColorTypes.TrueColorAlpha:
+					bitmapper[ColorTypes.TrueColorAlpha](normalized).copy(this.bitmap, k);
 					break;
 				default:
 					throw new Error('Bad color type');
@@ -167,10 +161,8 @@ export default class Decoder {
 	 * @param {Buffer} chunk
 	 * @param {number} checkSum
 	 */
-	static verifyChecksum(chunk: Buffer, checkSum: number): void {
-		if (crc.crc32(chunk) !== checkSum) {
-			throw new Error('Invalid checksum');
-		}
+	static verifyCheckSum(buffer: Buffer, checkSum: number): boolean {
+		return crc.crc32(buffer) === checkSum;
 	}
 
 	public width!: number;
@@ -222,19 +214,19 @@ export default class Decoder {
 
 		const colorType = chunk.readUInt8(9);
 		switch (colorType) {
-			case ColorTypeE.Grayscale:
+			case ColorTypes.Grayscale:
 				this._channels = 1;
 				break;
-			case ColorTypeE.TrueColor:
+			case ColorTypes.TrueColor:
 				this._channels = 3;
 				break;
-			case ColorTypeE.IndexedColor:
+			case ColorTypes.IndexedColor:
 				this._channels = 1;
 				break;
-			case ColorTypeE.GrayscaleAlpha:
+			case ColorTypes.GrayscaleAlpha:
 				this._channels = 2;
 				break;
-			case ColorTypeE.TrueColorAlpha:
+			case ColorTypes.TrueColorAlpha:
 				this._channels = 4;
 				break;
 			default:
@@ -277,7 +269,7 @@ export default class Decoder {
 	 * @param {Buffer} chunk
 	 */
 	private _parsePLTE(chunk: Buffer): void {
-		if (this.colorType === ColorTypeE.Grayscale || this.colorType === ColorTypeE.GrayscaleAlpha) {
+		if (this.colorType === ColorTypes.Grayscale || this.colorType === ColorTypes.GrayscaleAlpha) {
 			throw new Error('PLTE, color type mismatch');
 		}
 
@@ -292,7 +284,7 @@ export default class Decoder {
 		}
 	}
 
-	public chromaticities!: Chromaticities;
+	public chromaticities?: Chromaticities;
 
 	/**
 	 * https://www.w3.org/TR/PNG/#11cHRM
@@ -324,7 +316,7 @@ export default class Decoder {
 		};
 	}
 
-	public gamma!: number;
+	public gamma?: number;
 
 	/**
 	 * https://www.w3.org/TR/PNG/#11gAMA
@@ -335,17 +327,38 @@ export default class Decoder {
 		this.gamma = chunk.readUInt32BE() / 100000;
 	}
 
+	public iccProfile?: IccProfile;
+
+	/**
+	 * https://www.w3.org/TR/PNG/#11iCCP
+	 * @param chunk
+	 */
 	private _parseICCP(chunk: Buffer): void {
-		throw new Error('iccp');
+		if (this.sRGB) {
+			throw new Error();
+		}
+
+		const separator = chunk.indexOf(0x00);
+		const name = chunk.toString('latin1', 0, separator);
+
+		const compressionMethod = chunk.readUInt8(separator + 1);
+		if (compressionMethod !== 0) {
+			throw new Error(`Bad compression method iccp: ${compressionMethod}`);
+		}
+
+		this.iccProfile = {
+			name,
+			profile: zlib.inflateSync(chunk.subarray(separator + 2)),
+		};
 	}
 
-	public physicalDimensions!: PhisicalDimensions;
+	public physicalDimensions?: PhisicalDimensions;
 
 	/**
 	 * https://www.w3.org/TR/PNG/#11pHYs
 	 * @param chunk
 	 */
-	private _parsePHYs(chunk: Buffer): void {
+	private _parsePHYS(chunk: Buffer): void {
 		if (chunk.length !== 9) {
 			throw new Error('Bad pHYs length');
 		}
@@ -407,19 +420,19 @@ export default class Decoder {
 		this.suggestedPalette[name] = palette;
 	}
 
-	public significantBits!: [number, number, number, number];
+	public significantBits?: [number, number, number, number];
 
 	/**
 	 * https://www.w3.org/TR/PNG/#11sBIT
 	 * @param chunk
 	 */
 	private _parseSBIT(chunk: Buffer): void {
-		if (this.colorType === ColorTypeE.Grayscale) {
+		if (this.colorType === ColorTypes.Grayscale) {
 			const sBit = chunk.readUInt8();
 			this.significantBits = [sBit, sBit, sBit, this.bitDepth];
 		}
 
-		if (this.colorType === ColorTypeE.TrueColor || this.colorType === ColorTypeE.IndexedColor) {
+		if (this.colorType === ColorTypes.TrueColor || this.colorType === ColorTypes.IndexedColor) {
 			this.significantBits = [
 				chunk.readUInt8(0),
 				chunk.readUInt8(1),
@@ -428,12 +441,12 @@ export default class Decoder {
 			];
 		}
 
-		if (this.colorType === ColorTypeE.GrayscaleAlpha) {
+		if (this.colorType === ColorTypes.GrayscaleAlpha) {
 			const sBit = chunk.readUInt8();
 			this.significantBits = [sBit, sBit, sBit, chunk.readUInt8(1)];
 		}
 
-		if (this.colorType === ColorTypeE.TrueColorAlpha) {
+		if (this.colorType === ColorTypes.TrueColorAlpha) {
 			this.significantBits = [
 				chunk.readUInt8(0),
 				chunk.readUInt8(1),
@@ -443,18 +456,34 @@ export default class Decoder {
 		}
 	}
 
-	public background!: [number, number, number, number];
+	public sRGB?: number;
+
+	/**
+	 * https://www.w3.org/TR/PNG/#11sRGB
+	 * @param chunk
+	 */
+	private _parseSRGB(chunk: Buffer): void {
+		if (this.iccProfile) {
+			throw new Error();
+		}
+
+		this.sRGB = chunk.readUInt8();
+	}
+
+	public background?: [number, number, number, number];
 
 	/**
 	 * https://www.w3.org/TR/PNG/#11bKGD
 	 * @param chunk
 	 */
 	private _parseBKGD(chunk: Buffer): void {
-		if (this.colorType === ColorTypeE.Grayscale || this.colorType === ColorTypeE.GrayscaleAlpha) {}
+		if (this.colorType === ColorTypes.Grayscale || this.colorType === ColorTypes.GrayscaleAlpha) {
+		}
 
-		if (this.colorType === ColorTypeE.TrueColor || this.colorType === ColorTypeE.TrueColorAlpha) {}
+		if (this.colorType === ColorTypes.TrueColor || this.colorType === ColorTypes.TrueColorAlpha) {
+		}
 
-		if (this.colorType === ColorTypeE.IndexedColor) {
+		if (this.colorType === ColorTypes.IndexedColor) {
 			if (!this.palette.length) {
 				throw new Error('Missing palette');
 			}
@@ -489,13 +518,13 @@ export default class Decoder {
 	 */
 	private _parseTRNS(chunk: Buffer): void {
 		if (
-			this.colorType === ColorTypeE.GrayscaleAlpha ||
-			this.colorType === ColorTypeE.TrueColorAlpha
+			this.colorType === ColorTypes.GrayscaleAlpha ||
+			this.colorType === ColorTypes.TrueColorAlpha
 		) {
 			throw new Error('tRNS, color type mismatch');
 		}
 
-		if (this.colorType === ColorTypeE.Grayscale) {
+		if (this.colorType === ColorTypes.Grayscale) {
 			if (chunk.length !== 2) {
 				throw new Error('Bad tRNS length');
 			}
@@ -503,7 +532,7 @@ export default class Decoder {
 			this.transparent = [chunk.readUInt16BE(0)];
 		}
 
-		if (this.colorType === ColorTypeE.TrueColor) {
+		if (this.colorType === ColorTypes.TrueColor) {
 			if (chunk.length !== 6) {
 				throw new Error('Bad tRNS length');
 			}
@@ -511,7 +540,7 @@ export default class Decoder {
 			this.transparent = [chunk.readUInt16BE(0), chunk.readUInt16BE(2), chunk.readUInt16BE(4)];
 		}
 
-		if (this.colorType === ColorTypeE.IndexedColor) {
+		if (this.colorType === ColorTypes.IndexedColor) {
 			if (this.palette.length === 0) {
 				throw new Error('Palette not found');
 			}
@@ -526,7 +555,7 @@ export default class Decoder {
 		}
 	}
 
-	public time: number | undefined;
+	public time?: number;
 
 	/**
 	 * https://www.w3.org/TR/PNG/#11tIME
@@ -593,6 +622,10 @@ export default class Decoder {
 			keyword: chunk.toString('utf8', 0, separator),
 			text: zlib.inflateSync(chunk.subarray(separator + 2)).toString('latin1'),
 		});
+	}
+
+	private _parseEXIF(chunk: Buffer): void {
+		console.log('eXIf');
 	}
 
 	private _deflatedIDAT: Buffer[] = [];
