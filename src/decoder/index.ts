@@ -1,4 +1,4 @@
-import zlib, { ZlibOptions } from 'zlib';
+import zlib from 'zlib';
 import crc from '../crc';
 import {
 	PngHeader,
@@ -19,7 +19,7 @@ import {
 
 import unFilter from './unfilter';
 import converter from './converter';
-import bitmapper from './bitmapper';
+import normalize from './bitmapper';
 
 type DecoderOptions = {
 	checkCrc?: boolean; // Default true
@@ -98,62 +98,46 @@ export default class Decoder {
 			handler(chunk);
 		}
 
+		// TODO: Добавить проверку последовательности чанков
+		// TODO: Добавить проверки
+
+		this.decodeImageData();
+	}
+
+	private decodeImageData(): void {
 		if (this._deflatedIDAT.length === 0) {
 			throw new Error('Missing IDAT chunk');
 		}
-		// TODO: Добавить проверку последовательности чанков
-		// TODO: Добавить проверки
 
 		if (this.interlaceMethod === 1) {
 			throw new Error('Unsupported interlace method');
 		}
 
-		const inflatedChunks = this._inflateChunks();
+		const iflatedData = zlib.inflateSync(Buffer.concat(this._deflatedIDAT));
 		this._deflatedIDAT = [];
 
 		const bitsPerPixel = this._channels * this.bitDepth;
 		const bytesPerPixel = bitsPerPixel >> 3 || 1;
 		// TODO: Переписать
-		const bytesPerLine = Math.ceil(((this._channels * this.bitDepth) / 8) * this.width);
+		const bytesPerLine = Math.ceil((bitsPerPixel / 8) * this.width);
 
-		this.bitmap = Buffer.alloc(this.width * this.height * 4);
-		const unfilteredChunks = unFilter(inflatedChunks, bytesPerPixel, bytesPerLine);
+		const unfilteredChunks = unFilter(iflatedData, bytesPerPixel, bytesPerLine);
 
-		for (let i = 0, k = 0; i < unfilteredChunks.length; i += 1, k += this.width * 4) {
-			const normalized = converter[this.bitDepth](unfilteredChunks[i], this.width * this._channels);
-
-			switch (this.colorType) {
-				case ColorTypes.Grayscale:
-					bitmapper[ColorTypes.Grayscale](normalized, this.transparent).copy(this.bitmap, k);
-					break;
-				case ColorTypes.TrueColor:
-					bitmapper[ColorTypes.TrueColor](normalized, this.transparent).copy(this.bitmap, k);
-					break;
-				case ColorTypes.IndexedColor:
-					bitmapper[ColorTypes.IndexedColor](normalized, this.palette).copy(this.bitmap, k);
-					break;
-				case ColorTypes.GrayscaleAlpha:
-					bitmapper[ColorTypes.GrayscaleAlpha](normalized).copy(this.bitmap, k);
-					break;
-				case ColorTypes.TrueColorAlpha:
-					bitmapper[ColorTypes.TrueColorAlpha](normalized).copy(this.bitmap, k);
-					break;
-				default:
-					throw new Error('Bad color type');
-			}
+		const convertedData = new Array<Buffer>(unfilteredChunks.length);
+		for (let i = 0; i < unfilteredChunks.length; i += 1) {
+			convertedData[i] = converter[this.bitDepth](unfilteredChunks[i], this.width * this._channels);
 		}
+
+		const normalizedData = normalize(convertedData, this.colorType, this.transparent, this.palette);
+		this.bitmap = Buffer.concat(normalizedData);
 	}
 
 	/**
 	 * https://www.w3.org/TR/2003/REC-PNG-20031110/#5PNG-file-signature
-	 * @param {Buffer} buff
+	 * @param {Buffer} buffer
 	 */
-	static isPNG(buff: Buffer): boolean {
-		if (buff.length < 8) {
-			return false;
-		}
-
-		return PngHeader.compare(buff, 0, 8) === 0;
+	static isPNG(buffer: Buffer): boolean {
+		return buffer.length > 8 && PngHeader.compare(buffer, 0, 8) === 0;
 	}
 
 	/**
@@ -477,11 +461,11 @@ export default class Decoder {
 	 * @param chunk
 	 */
 	private _parseBKGD(chunk: Buffer): void {
-		if (this.colorType === ColorTypes.Grayscale || this.colorType === ColorTypes.GrayscaleAlpha) {
-		}
+		// if (this.colorType === ColorTypes.Grayscale || this.colorType === ColorTypes.GrayscaleAlpha) {
+		// }
 
-		if (this.colorType === ColorTypes.TrueColor || this.colorType === ColorTypes.TrueColorAlpha) {
-		}
+		// if (this.colorType === ColorTypes.TrueColor || this.colorType === ColorTypes.TrueColorAlpha) {
+		// }
 
 		if (this.colorType === ColorTypes.IndexedColor) {
 			if (!this.palette.length) {
@@ -636,14 +620,6 @@ export default class Decoder {
 	 */
 	private _parseIDAT(chunk: Buffer): void {
 		this._deflatedIDAT.push(chunk);
-	}
-
-	/**
-	 * @param {ZlibOptions} options
-	 * @returns {Buffer}
-	 */
-	private _inflateChunks(options?: ZlibOptions): Buffer {
-		return zlib.inflateSync(Buffer.concat(this._deflatedIDAT), options);
 	}
 
 	/**

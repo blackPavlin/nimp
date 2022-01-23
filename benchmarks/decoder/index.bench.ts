@@ -20,5 +20,10 @@ suite.on('cycle', (event: Event) => {
 
 suite.run();
 
+// Before refactoring
 // Nimp - sync decode image 256x256 x 123 ops/sec ±0.38% (79 runs sampled)
 // Pngjs - sync decode image 256x256 x 502 ops/sec ±2.31% (83 runs sampled)
+
+// After refactoring
+// Nimp - sync decode image 256x256 x 560 ops/sec ±2.27% (84 runs sampled)
+// Pngjs - sync decode image 256x256 x 482 ops/sec ±2.28% (75 runs sampled)

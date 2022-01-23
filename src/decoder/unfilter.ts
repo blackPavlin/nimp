@@ -35,7 +35,7 @@ export default function unFilter(
 				chunks.push(unFilterPaeth(chunk, bitsPerPixel, chunks[k - 1]));
 				break;
 			default:
-				throw new Error(`Bad filter type ${filterType}`);
+				throw new Error(`Bad filter type: ${filterType}`);
 		}
 	}
 
@@ -159,32 +159,50 @@ function paethPredictor(a: number, b: number, c: number): number {
 	}
 }
 
-// export function u(buffer: Buffer, height: number, bitsPerPixel: number, bitsPerLine: number): Buffer {
+// export function u(
+// 	buffer: Buffer,
+// 	height: number,
+// 	bitsPerPixel: number,
+// 	bitsPerLine: number,
+// ): Buffer {
 // 	const buff = Buffer.alloc(buffer.length - height);
-//
-// 	for (let i = 0; i < height; i += 1) {
-// 		const filterType = buffer.readUInt8(i * (bitsPerLine + 1));
-//
+
+// 	for (let i = 0, k = 0; i < buffer.length; i += bitsPerLine, k += bitsPerLine) {
+// 		const filterType = buffer.readUInt8((i += 1));
+
 // 		switch (filterType) {
-// 			case FilterTypeE.None:
-// 				// chunks.push(unFilterNone(chunk));
+// 			case FilterTypes.None:
+// 				buff.copy(buffer, k);
 // 				break;
-// 			case FilterTypeE.Sub:
-// 				// chunks.push(unFilterSub(chunk, bitsPerPixel));
+// 			case FilterTypes.Sub:
+// 				buff[k] = buffer[i];
+
+// 				for (let j = bitsPerPixel; j < bitsPerLine; j += 1) {
+// 					buff[k + j] = buffer[i + j] + buff[k + j - bitsPerPixel];
+// 				}
 // 				break;
-// 			case FilterTypeE.Up:
-// 				// chunks.push(unFilterUp(chunk, chunks[k - 1]));
+// 			case FilterTypes.Up:
+// 				if (k === 0) {
+// 					buff.copy(buffer, k);
+// 				} else {
+// 					for (let j = 0; j < bitsPerLine; j += 1) {
+// 						buff[k + j] = buffer[i + j] + buff[k - bitsPerLine + j];
+// 					}
+// 				}
 // 				break;
-// 			case FilterTypeE.Average:
-// 				// chunks.push(unFilterAverage(chunk, bitsPerPixel, chunks[k - 1]));
+// 			case FilterTypes.Average:
+// 				if (k === 0) {
+
+// 				} else {
+
+// 				}
 // 				break;
-// 			case FilterTypeE.Paeth:
-// 				// chunks.push(unFilterPaeth(chunk, bitsPerPixel, chunks[k - 1]));
+// 			case FilterTypes.Paeth:
 // 				break;
 // 			default:
-// 				throw new Error(`Bad filter type ${filterType}`);
+// 				throw new Error(`Bad filter type: ${filterType}`);
 // 		}
 // 	}
-//
+
 // 	return buff;
 // }

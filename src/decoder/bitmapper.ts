@@ -1,70 +1,103 @@
-import { ColorTypes } from '../types';
+import { ColorType, ColorTypes } from '../types';
 
-export default {
-	[ColorTypes.Grayscale]: (chunk: Buffer, transparent: number[]): Buffer => {
-		const buff = Buffer.alloc(chunk.length * 4);
+export default function normalize(
+	chunks: Buffer[],
+	colotType: ColorType,
+	transparent?: number[],
+	palette?: Buffer[],
+): Buffer[] {
+	// TODO: Можно оптимизировать
+	const buffers = new Array<Buffer>(chunks.length);
 
-		for (let i = 0, k = 0; i < chunk.length; i += 1, k += 4) {
-			if (transparent.length && chunk[i] === transparent[0]) {
-				// TODO: Не так работает
-				// Buffer.from([chunk[i], chunk[i], chunk[i], 0x00]).copy(buff, k);
+	switch (colotType) {
+		case ColorTypes.Grayscale:
+			for (let i = 0; i < chunks.length; i += 1) {
+				const chunk = chunks[i];
+				const buffer = Buffer.alloc(chunk.length * 4);
 
-				continue;
+				for (let k = 0, j = 0; k < buffer.length; k += 4, j += 1) {
+					if (transparent && chunk[j] === transparent[0]) {
+						continue;
+					}
+
+					buffer[k + 0] = chunk[j];
+					buffer[k + 1] = chunk[j];
+					buffer[k + 2] = chunk[j];
+					buffer[k + 3] = 0xff;
+				}
+
+				buffers[i] = buffer;
+			}
+			break;
+		case ColorTypes.TrueColor:
+			for (let i = 0; i < chunks.length; i += 1) {
+				const chunk = chunks[i];
+				const buffer = Buffer.alloc((chunk.length / 3) * 4);
+
+				for (let k = 0, j = 0; k < buffer.length; k += 4, j += 3) {
+					if (
+						transparent &&
+						chunk[j] === transparent[0] &&
+						chunk[j + 1] === transparent[1] &&
+						chunk[j + 2] === transparent[2]
+					) {
+						continue;
+					}
+
+					buffer[k + 0] = chunk[j + 0];
+					buffer[k + 1] = chunk[j + 1];
+					buffer[k + 2] = chunk[j + 2];
+					buffer[k + 3] = 0xff;
+				}
+
+				buffers[i] = buffer;
+			}
+			break;
+		case ColorTypes.IndexedColor:
+			if (!palette) {
+				throw new Error('Missing palette');
 			}
 
-			Buffer.from([chunk[i], chunk[i], chunk[i], 0xff]).copy(buff, k);
-		}
+			for (let i = 0; i < chunks.length; i += 1) {
+				const chunk = chunks[i];
+				const buffer = Buffer.alloc(chunk.length * 4);
 
-		return buff;
-	},
+				for (let k = 0, j = 0; k < buffer.length; k += 4, j += 1) {
+					const paletteEntries = palette[chunk[j]];
 
-	[ColorTypes.TrueColor]: (chunk: Buffer, transparent: number[]): Buffer => {
-		const buff = Buffer.alloc((chunk.length / 3) * 4);
+					if (!paletteEntries) {
+						throw new Error('Missing palette entries');
+					}
 
-		for (let i = 0, k = 0; i < chunk.length; i += 3, k += 4) {
-			if (
-				transparent.length &&
-				chunk[i] === transparent[0] &&
-				chunk[i + 1] === transparent[1] &&
-				chunk[i + 2] === transparent[2]
-			) {
-				// TODO: Не так работает
-				// Buffer.from([chunk[i], chunk[i + 1], chunk[i + 2], 0x00]).copy(buff, k);
+					buffer[k + 0] = paletteEntries[0];
+					buffer[k + 1] = paletteEntries[1];
+					buffer[k + 2] = paletteEntries[2];
+					buffer[k + 3] = paletteEntries[3];
+				}
 
-				continue;
+				buffers[i] = buffer;
 			}
+			break;
+		case ColorTypes.GrayscaleAlpha:
+			for (let i = 0; i < chunks.length; i += 1) {
+				const chunk = chunks[i];
+				const buffer = Buffer.alloc(chunk.length * 2);
 
-			Buffer.from([chunk[i], chunk[i + 1], chunk[i + 2], 0xff]).copy(buff, k);
-		}
+				for (let k = 0, j = 0; k < buffer.length; k += 4, j += 2) {
+					buffer[k + 0] = chunk[j + 0];
+					buffer[k + 1] = chunk[j + 0];
+					buffer[k + 2] = chunk[j + 0];
+					buffer[k + 3] = chunk[j + 1];
+				}
 
-		return buff;
-	},
-
-	[ColorTypes.IndexedColor]: (chunk: Buffer, palette: Buffer[]): Buffer => {
-		const buff = Buffer.alloc(chunk.length * 4);
-
-		for (let i = 0, k = 0; i < chunk.length; i += 1, k += 4) {
-			const paletteEntries = palette[chunk[i]];
-
-			if (!paletteEntries) {
-				throw new Error('Missing palette entry');
+				buffers[i] = buffer;
 			}
+			break;
+		case ColorTypes.TrueColorAlpha:
+			return chunks;
+		default:
+			throw new Error(`Bad color type: ${colotType as string}`);
+	}
 
-			paletteEntries.copy(buff, k);
-		}
-
-		return buff;
-	},
-
-	[ColorTypes.GrayscaleAlpha]: (chunk: Buffer): Buffer => {
-		const buff = Buffer.alloc(chunk.length * 2);
-
-		for (let i = 0, k = 0; i < chunk.length; i += 2, k += 4) {
-			Buffer.from([chunk[i], chunk[i], chunk[i], chunk[i + 1]]).copy(buff, k);
-		}
-
-		return buff;
-	},
-
-	[ColorTypes.TrueColorAlpha]: (chunk: Buffer): Buffer => chunk,
-};
+	return buffers;
+}

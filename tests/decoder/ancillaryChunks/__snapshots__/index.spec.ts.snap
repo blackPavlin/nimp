@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Text chunk UTF-8 international text - english 1`] = `
+exports[`Ancillary chunks Text chunk UTF-8 international text - english 1`] = `
 Array [
   Object {
     "keyword": "Title",
@@ -41,7 +41,7 @@ Array [
 ]
 `;
 
-exports[`Text chunk UTF-8 international text - finnish 1`] = `
+exports[`Ancillary chunks Text chunk UTF-8 international text - finnish 1`] = `
 Array [
   Object {
     "keyword": "Title",
@@ -82,7 +82,7 @@ Array [
 ]
 `;
 
-exports[`Text chunk UTF-8 international text - greek 1`] = `
+exports[`Ancillary chunks Text chunk UTF-8 international text - greek 1`] = `
 Array [
   Object {
     "keyword": "Title",
@@ -123,7 +123,7 @@ Array [
 ]
 `;
 
-exports[`Text chunk UTF-8 international text - hindi 1`] = `
+exports[`Ancillary chunks Text chunk UTF-8 international text - hindi 1`] = `
 Array [
   Object {
     "keyword": "Title",
@@ -164,7 +164,7 @@ Array [
 ]
 `;
 
-exports[`Text chunk UTF-8 international text - japanese 1`] = `
+exports[`Ancillary chunks Text chunk UTF-8 international text - japanese 1`] = `
 Array [
   Object {
     "keyword": "Title",
@@ -205,7 +205,7 @@ Array [
 ]
 `;
 
-exports[`Text chunk With compressed textual data 1`] = `
+exports[`Ancillary chunks Text chunk With compressed textual data 1`] = `
 Array [
   Object {
     "keyword": "Title",
@@ -239,7 +239,7 @@ to the spec are present.",
 ]
 `;
 
-exports[`Text chunk With textual data 1`] = `
+exports[`Ancillary chunks Text chunk With textual data 1`] = `
 Array [
   Object {
     "keyword": "Title",
