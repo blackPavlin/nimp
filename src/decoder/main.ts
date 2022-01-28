@@ -1,45 +1,27 @@
 import zlib from 'zlib';
-import { unfilter } from './unfilter';
-
 import crc from '../crc';
+
 import {
 	BitDepth,
 	Channels,
-	ChunkTypeE,
+	ChunkTypes,
 	ColorType,
-	ColorTypeE,
+	ColorTypes,
 	CompressionMethod,
 	FilterMethod,
 	InterlaceMethod,
-	PngHeader,
 } from '../types';
+
+import PNG from '../png';
+
+import unFilter from './unfilter';
+import converter from './converter';
+import bitmapper from './bitmapper';
 
 type DecoderOptions = {
 	checkCrc?: boolean; // Default true
 	skipAncillary?: boolean; // Default true
 };
-
-class PNG {
-	public width!: number;
-
-	public height!: number;
-
-	public bitDepth!: BitDepth;
-
-	public colorType!: ColorType;
-
-	protected channels!: Channels;
-
-	public compressionMethod!: CompressionMethod;
-
-	public filterMethod!: FilterMethod;
-
-	public interlaceMethod!: InterlaceMethod;
-
-	public palette: Buffer[] = [];
-
-	public bitmap!: Buffer;
-}
 
 export default class Decoder extends PNG {
 	constructor(buffer: Buffer, options: DecoderOptions = {}) {
@@ -74,152 +56,122 @@ export default class Decoder extends PNG {
 		this.decodeImageData();
 	}
 
-	static isPNG(buffer: Buffer): boolean {
-		return buffer.length > 8 && PngHeader.compare(buffer, 0, 8) === 0;
-	}
-
 	static verifyCheckSum(buffer: Buffer, checkSum: number): boolean {
 		return crc.crc32(buffer) === checkSum;
 	}
 
 	private decodeChunk(type: number, chunk: Buffer, skipAncillary = true): void {
 		switch (type) {
-			case ChunkTypeE.IHDR:
+			case ChunkTypes.IHDR:
 				this.parseIHDR(chunk);
 				break;
-			case ChunkTypeE.PLTE:
+			case ChunkTypes.PLTE:
 				this.parsePLTE(chunk);
 				break;
-			case ChunkTypeE.IDAT:
+			case ChunkTypes.IDAT:
 				this.parseIDAT(chunk);
 				break;
-			case ChunkTypeE.IEND:
+			case ChunkTypes.IEND:
 				this.parseIEND(chunk);
 				break;
 		}
 
 		if (!skipAncillary) {
-			// switch (type) {
-			// 	case ChunkTypeE.gAMA:
-			// 		this.parseGAMA(chunk);
-			// 		break;
-			// 	case ChunkTypeE.tRNS:
-			// 		this.parseTRNS(chunk);
-			// 		break;
-			// 	case ChunkTypeE.tEXt:
-			// 		this.parseTEXT(chunk);
-			// 		break;
-			// 	case ChunkTypeE.zTXt:
-			// 		this.parseZTXT(chunk);
-			// 		break;
-			// 	case ChunkTypeE.iTXt:
-			// 		this.parseITXT(chunk);
-			// 		break;
-			// 	case ChunkTypeE.tIME:
-			// 		this.parseTIME(chunk);
-			// 		break;
-			// }
+			switch (type) {
+				// case ChunkTypeE.gAMA:
+				// 	this.parseGAMA(chunk);
+				// 	break;
+				case ChunkTypes.tRNS:
+					this.parseTRNS(chunk);
+					break;
+				// case ChunkTypeE.tEXt:
+				// 	this.parseTEXT(chunk);
+				// 	break;
+				// case ChunkTypeE.zTXt:
+				// 	this.parseZTXT(chunk);
+				// 	break;
+				// case ChunkTypeE.iTXt:
+				// 	this.parseITXT(chunk);
+				// 	break;
+				// case ChunkTypeE.tIME:
+				// 	this.parseTIME(chunk);
+				// 	break;
+			}
 		}
 	}
 
-	private parseIHDR(chunk: Buffer) {
+	private parseIHDR(chunk: Buffer): void {
 		if (chunk.length !== 13) {
 			throw new Error(`Bad IHDR length ${chunk.length}`);
 		}
 
 		this.width = chunk.readInt32BE();
 		this.height = chunk.readInt32BE(4);
-
-		if (this.width <= 0 || this.height <= 0) {
-			throw new Error('Non-positive dimension');
-		}
-
-		const bitDepth = chunk.readUInt8(8);
-		switch (bitDepth) {
-			case 1:
-			case 2:
-			case 4:
-			case 8:
-			case 16:
-				this.bitDepth = bitDepth;
-				break;
-			default:
-				throw new Error(`Bad bit depth ${bitDepth}`);
-		}
-
-		const colorType = chunk.readUInt8(9);
-		switch (colorType) {
-			case ColorTypeE.Grayscale:
-				this.channels = 1;
-				break;
-			case ColorTypeE.TrueColor:
-				this.channels = 3;
-				break;
-			case ColorTypeE.IndexedColor:
-				this.channels = 1;
-				break;
-			case ColorTypeE.GrayscaleAlpha:
-				this.channels = 2;
-				break;
-			case ColorTypeE.TrueColorAlpha:
-				this.channels = 4;
-				break;
-			default:
-				throw new Error(`Bad color type ${colorType}`);
-		}
-
-		this.colorType = colorType;
-
-		if ([2, 4, 6].includes(this.colorType) && ![8, 16].includes(this.bitDepth)) {
-			throw new Error(`Unsupported bit depth ${this.bitDepth}, color type ${this.colorType}`);
-		}
-
-		if (this.colorType === 3 && this.bitDepth === 16) {
-			throw new Error(`Unsupported bit depth ${this.bitDepth}, color type ${this.colorType}`);
-		}
-
+		this.bitDepth = chunk.readUInt8(8) as BitDepth;
+		this.colorType = chunk.readUInt8(9) as ColorType;
 		this.compressionMethod = chunk.readUInt8(10) as CompressionMethod;
-
-		if (this.compressionMethod !== 0) {
-			throw new Error('Unsupported compression method');
-		}
-
 		this.filterMethod = chunk.readUInt8(11) as FilterMethod;
-
-		if (this.filterMethod !== 0) {
-			throw new Error('Unsupported filter method');
-		}
-
 		this.interlaceMethod = chunk.readUInt8(12) as InterlaceMethod;
-
-		if (this.interlaceMethod !== 0 && this.interlaceMethod !== 1) {
-			throw new Error('Bad interlace method');
-		}
 	}
 
-	private parsePLTE(chunk: Buffer) {
-		if (this.colorType === ColorTypeE.Grayscale || this.colorType === ColorTypeE.GrayscaleAlpha) {
-			throw new Error('PLTE, color type mismatch');
-		}
+	private parsePLTE(chunk: Buffer): void {
+		const paletteEntries = chunk.length / 3;
 
-		const paletteEntris = chunk.length / 3;
-
-		if (chunk.length % 3 !== 0 || paletteEntris > 256 || paletteEntris > 2 ** this.bitDepth) {
+		if (chunk.length % 3 !== 0 || paletteEntries > 256 || paletteEntries > 2 ** this.bitDepth) {
 			throw new Error('Bad PLTE length');
 		}
 
 		for (let i = 0; i < chunk.length; i += 3) {
-			this.palette.push(Buffer.from([chunk[i], chunk[i + 1], chunk[i + 2], 0xff]));
+			// this.palette.push(Buffer.from([chunk[i], chunk[i + 1], chunk[i + 2], 0xff]));
+		}
+	}
+
+	private parseTRNS(chunk: Buffer): void {
+		if (
+			this.colorType === ColorTypes.GrayscaleAlpha ||
+			this.colorType === ColorTypes.TrueColorAlpha
+		) {
+			throw new Error('tRNS, color type mismatch');
+		}
+
+		if (this.colorType === ColorTypes.Grayscale) {
+			if (chunk.length !== 2) {
+				throw new Error('Bad tRNS length');
+			}
+
+			this.transparent = [chunk.readUInt16BE(0)];
+		}
+
+		if (this.colorType === ColorTypes.TrueColor) {
+			if (chunk.length !== 6) {
+				throw new Error('Bad tRNS length');
+			}
+
+			this.transparent = [chunk.readUInt16BE(0), chunk.readUInt16BE(2), chunk.readUInt16BE(4)];
+		}
+
+		if (this.colorType === ColorTypes.IndexedColor) {
+			if (this.palette?.length === 0) {
+				throw new Error('Palette not found');
+			}
+
+			// if (chunk.length > this.palette.length) {
+			// 	throw new Error('Bad tRNS length');
+			// }
+
+			// for (let i = 0; i < chunk.length; i += 1) {
+			// 	this.palette[i][3] = chunk[i];
+			// }
 		}
 	}
 
 	private deflatedIDAT: Buffer[] = [];
 
-	private parseIDAT(chunk: Buffer) {
+	private parseIDAT(chunk: Buffer): void {
 		this.deflatedIDAT.push(chunk);
 	}
 
-	private parseIEND(chunk: Buffer) {
+	private parseIEND(chunk: Buffer): void {
 		if (chunk.length !== 0) {
 			throw new Error('Bad IEND length');
 		}
@@ -237,29 +189,13 @@ export default class Decoder extends PNG {
 		const data = zlib.inflateSync(Buffer.concat(this.deflatedIDAT));
 		this.deflatedIDAT = [];
 
-		const bitsPerPixel = Math.ceil((this.channels * this.bitDepth) / 8);
-		const bitsPerLine = Math.ceil(((this.channels * this.bitDepth) / 8) * this.width);
+		// const bitsPerPixel = Math.ceil((this.channels * this.bitDepth) / 8);
+		// const bitsPerLine = Math.ceil(((this.channels * this.bitDepth) / 8) * this.width);
 
-		const unfilteredChunks = unfilter(data, bitsPerPixel, bitsPerLine);
-
-		switch (this.colorType) {
-			case ColorTypeE.Grayscale:
-				// bitmapper[ColorTypeE.Grayscale](normilized, this.transparent).copy(this.bitmap, k);
-				break;
-			case ColorTypeE.TrueColor:
-				// bitmapper[ColorTypeE.TrueColor](normilized, this.transparent).copy(this.bitmap, k);
-				break;
-			case ColorTypeE.IndexedColor:
-				// bitmapper[ColorTypeE.IndexedColor](normilized, this.palette).copy(this.bitmap, k);
-				break;
-			case ColorTypeE.GrayscaleAlpha:
-				// bitmapper[ColorTypeE.GrayscaleAlpha](normilized).copy(this.bitmap, k);
-				break;
-			case ColorTypeE.TrueColorAlpha:
-				// bitmapper[ColorTypeE.TrueColorAlpha](normilized).copy(this.bitmap, k);
-				break;
-			default:
-				throw new Error('Bad color type');
-		}
+		// const unfilteredChunks = unFilter(data, bitsPerPixel, bitsPerLine);
+		// const normalized = converter[this.bitDepth](
+		// 	Buffer.concat(unfilteredChunks),
+		// 	this.width * this.channels,
+		// );
 	}
 }

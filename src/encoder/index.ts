@@ -1,7 +1,7 @@
 import zlib, { ZlibOptions } from 'zlib';
+import { PngSignature } from '../constants';
 import crc from '../crc';
 import {
-	PngHeader,
 	EncodePNGOptions,
 	BitDepth,
 	ColorType,
@@ -91,7 +91,7 @@ class E {
 	private readonly _chunks: Buffer[] = [];
 
 	private _encodeHeader(): void {
-		this._chunks.push(PngHeader);
+		this._chunks.push(PngSignature);
 	}
 
 	private _encodeIHDR(): void {

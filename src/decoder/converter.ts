@@ -1,107 +1,104 @@
+import { BitDepth } from '../types';
+
 /**
  * Converter 1, 2, 4, 16 bit to 8 bit
+ * @param chunks
+ * @param bitDepth
+ * @param bitsPerLine
+ * @returns
  */
-export default {
-	/**
-	 *
-	 * @param {Buffer} chunk
-	 * @param {number} bpl
-	 * @returns {Buffer}
-	 */
-	1: (chunk: Buffer, bpl: number): Buffer => {
-		const buff = Buffer.alloc(bpl);
+export default function bitConverter(
+	chunks: Buffer[],
+	bitDepth: BitDepth,
+	bitsPerLine: number,
+): Buffer[] {
+	const buffers = new Array<Buffer>(chunks.length);
 
-		for (let i = 0; i < chunk.length; i += 1) {
-			const byte = chunk[i];
+	switch (bitDepth) {
+		case 1:
+			for (let i = 0; i < chunks.length; i += 1) {
+				const chunk = chunks[i];
+				const buffer = Buffer.alloc(bitsPerLine);
 
-			const bytes = Buffer.from([
-				(byte >> 7) & 1,
-				(byte >> 6) & 1,
-				(byte >> 5) & 1,
-				(byte >> 4) & 1,
-				(byte >> 3) & 1,
-				(byte >> 2) & 1,
-				(byte >> 1) & 1,
-				(byte >> 0) & 1,
-			]);
+				for (let k = 0; k < chunk.length; k += 1) {
+					const byte = chunk[k];
 
-			bytes.copy(buff, i * 8);
-		}
+					const bytes = Buffer.from([
+						(byte >> 7) & 1,
+						(byte >> 6) & 1,
+						(byte >> 5) & 1,
+						(byte >> 4) & 1,
+						(byte >> 3) & 1,
+						(byte >> 2) & 1,
+						(byte >> 1) & 1,
+						(byte >> 0) & 1,
+					]);
 
-		return buff;
-	},
+					bytes.copy(buffer, k * 8);
+				}
 
-	/**
-	 *
-	 * @param {Buffer} chunk
-	 * @param {number} bpl
-	 * @returns {Buffer}
-	 */
-	2: (chunk: Buffer, bpl: number): Buffer => {
-		const buff = Buffer.alloc(bpl);
+				buffers[i] = buffer;
+			}
+			break;
+		case 2:
+			for (let i = 0; i < chunks.length; i += 1) {
+				const chunk = chunks[i];
+				const buffer = Buffer.alloc(bitsPerLine);
 
-		for (let i = 0; i < chunk.length; i += 1) {
-			const byte = chunk[i];
+				for (let k = 0; k < chunk.length; k += 1) {
+					const byte = chunk[k];
 
-			const bytes = Buffer.from([
-				(byte >> 6) & 3,
-				(byte >> 4) & 3,
-				(byte >> 2) & 3,
-				(byte >> 0) & 3,
-			]);
+					const bytes = Buffer.from([
+						(byte >> 6) & 3,
+						(byte >> 4) & 3,
+						(byte >> 2) & 3,
+						(byte >> 0) & 3,
+					]);
 
-			bytes.copy(buff, i * 4);
-		}
+					bytes.copy(buffer, k * 4);
+				}
 
-		return buff;
-	},
+				buffers[i] = buffer;
+			}
+			break;
+		case 4:
+			for (let i = 0; i < chunks.length; i += 1) {
+				const chunk = chunks[i];
+				const buffer = Buffer.alloc(bitsPerLine);
 
-	/**
-	 *
-	 * @param {Buffer} chunk
-	 * @param {number} bpl
-	 * @returns {Buffer}
-	 */
-	4: (chunk: Buffer, bpl: number): Buffer => {
-		const buff = Buffer.alloc(bpl);
+				for (let k = 0; k < chunk.length; k += 1) {
+					const byte = chunk[k];
 
-		for (let i = 0; i < chunk.length; i += 1) {
-			const byte = chunk[i];
+					const bytes = Buffer.from([(byte >> 4) & 0x0f, byte & 0x0f]);
 
-			const bytes = Buffer.from([(byte >> 4) & 0x0f, byte & 0x0f]);
+					bytes.copy(buffer, k * 2);
+				}
 
-			bytes.copy(buff, i * 2);
-		}
+				buffers[i] = buffer;
+			}
+			break;
+		case 8:
+			return chunks;
+		case 16:
+			for (let i = 0; i < chunks.length; i += 1) {
+				const chunk = chunks[i];
+				const buffer = Buffer.alloc(bitsPerLine);
 
-		return buff;
-	},
+				for (let k = 0; k < chunk.length; k += 2) {
+					const byte = chunk[k];
+					const byte2 = chunk[k + 1];
 
-	/**
-	 *
-	 * @param {Buffer} chunk
-	 * @param {number} bpl
-	 * @returns {Buffer}
-	 */
-	8: (chunk: Buffer, bpl: number): Buffer => chunk,
+					const bytes = Buffer.from([(byte << 8) | byte2]);
 
-	/**
-	 *
-	 * @param {Buffer} chunk
-	 * @param {number} bpl
-	 * @returns {Buffer}
-	 */
-	16: (chunk: Buffer, bpl: number): Buffer => {
-		const buff = Buffer.alloc(bpl);
+					bytes.copy(buffer, k * 0.5);
+				}
 
-		for (let i = 0; i < chunk.length; i += 2) {
-			const byte = chunk[i];
-			const byte2 = chunk[i + 1];
+				buffers[i] = buffer;
+			}
+			break;
+		default:
+			throw new Error(`Bad bit depth: ${bitDepth as number}`);
+	}
 
-			const bytes = Buffer.from([(byte << 8) | byte2]);
-
-			bytes.copy(buff, i * 0.5);
-		}
-
-		return buff;
-	},
-};
+	return buffers;
+}

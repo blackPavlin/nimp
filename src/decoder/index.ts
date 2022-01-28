@@ -1,7 +1,7 @@
 import zlib from 'zlib';
+import { PngSignature, GammaFactor, ChromaticitiesFactor } from '../constants';
 import crc from '../crc';
 import {
-	PngHeader,
 	ChunkTypes,
 	BitDepth,
 	ColorType,
@@ -122,13 +122,9 @@ export default class Decoder {
 		const bytesPerLine = Math.ceil((bitsPerPixel / 8) * this.width);
 
 		const unfilteredChunks = unFilter(iflatedData, bytesPerPixel, bytesPerLine);
-
-		const convertedData = new Array<Buffer>(unfilteredChunks.length);
-		for (let i = 0; i < unfilteredChunks.length; i += 1) {
-			convertedData[i] = converter[this.bitDepth](unfilteredChunks[i], this.width * this._channels);
-		}
-
+		const convertedData = converter(unfilteredChunks, this.bitDepth, this.width * this._channels);
 		const normalizedData = normalize(convertedData, this.colorType, this.transparent, this.palette);
+
 		this.bitmap = Buffer.concat(normalizedData);
 	}
 
@@ -137,7 +133,7 @@ export default class Decoder {
 	 * @param {Buffer} buffer
 	 */
 	static isPNG(buffer: Buffer): boolean {
-		return buffer.length > 8 && PngHeader.compare(buffer, 0, 8) === 0;
+		return PngSignature.compare(buffer, 0, 8) === 0;
 	}
 
 	/**
@@ -279,23 +275,22 @@ export default class Decoder {
 			throw new Error('Bad cHRM length');
 		}
 
-		// TODO: Вынести 10000 в константы
 		this.chromaticities = {
 			white: {
-				x: chunk.readUInt32BE(0) / 100000,
-				y: chunk.readUInt32BE(4) / 100000,
+				x: chunk.readUInt32BE(0) / ChromaticitiesFactor,
+				y: chunk.readUInt32BE(4) / ChromaticitiesFactor,
 			},
 			red: {
-				x: chunk.readUInt32BE(8) / 100000,
-				y: chunk.readUInt32BE(12) / 100000,
+				x: chunk.readUInt32BE(8) / ChromaticitiesFactor,
+				y: chunk.readUInt32BE(12) / ChromaticitiesFactor,
 			},
 			green: {
-				x: chunk.readUInt32BE(16) / 100000,
-				y: chunk.readUInt32BE(20) / 100000,
+				x: chunk.readUInt32BE(16) / ChromaticitiesFactor,
+				y: chunk.readUInt32BE(20) / ChromaticitiesFactor,
 			},
 			blue: {
-				x: chunk.readUInt32BE(24) / 100000,
-				y: chunk.readUInt32BE(28) / 100000,
+				x: chunk.readUInt32BE(24) / ChromaticitiesFactor,
+				y: chunk.readUInt32BE(28) / ChromaticitiesFactor,
 			},
 		};
 	}
@@ -307,8 +302,7 @@ export default class Decoder {
 	 * @param {Buffer} chunk
 	 */
 	private _parseGAMA(chunk: Buffer): void {
-		// TODO: Вынести 100000 в константы
-		this.gamma = chunk.readUInt32BE() / 100000;
+		this.gamma = chunk.readUInt32BE() / GammaFactor;
 	}
 
 	public iccProfile?: IccProfile;
