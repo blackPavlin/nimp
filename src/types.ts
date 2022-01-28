@@ -2,7 +2,7 @@ type ValueOf<T> = T[keyof T];
 
 /**
  * Chunk types
- * https://www.w3.org/TR/PNG/#4Concepts.FormatTypes
+ * @see https://www.w3.org/TR/PNG/#4Concepts.FormatTypes
  */
 export const ChunkTypes = {
 	IHDR: 0x49484452,
@@ -28,7 +28,7 @@ export const ChunkTypes = {
 
 /**
  * Colour types
- * https://www.w3.org/TR/PNG/#6Colour-values
+ * @see https://www.w3.org/TR/PNG/#6Colour-values
  */
 export const ColorTypes = {
 	Grayscale: 0,
@@ -39,8 +39,8 @@ export const ColorTypes = {
 } as const;
 
 /**
- * Filter types
- * https://www.w3.org/TR/PNG/#9Filter-types
+ * @see Filter types
+ * @see https://www.w3.org/TR/PNG/#9Filter-types
  */
 export const FilterTypes = {
 	None: 0,

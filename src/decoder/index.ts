@@ -49,7 +49,6 @@ export default class Decoder {
 		[ChunkTypes.zTXt]: this._parseZTXT.bind(this),
 		[ChunkTypes.iTXt]: this._parseITXT.bind(this),
 		[ChunkTypes.tIME]: this._parseTIME.bind(this),
-		[ChunkTypes.eXIf]: this._parseEXIF.bind(this),
 	};
 
 	constructor(file: Buffer, options: DecoderOptions = {}) {
@@ -129,7 +128,7 @@ export default class Decoder {
 	}
 
 	/**
-	 * https://www.w3.org/TR/2003/REC-PNG-20031110/#5PNG-file-signature
+	 * @see https://www.w3.org/TR/2003/REC-PNG-20031110/#5PNG-file-signature
 	 * @param {Buffer} buffer
 	 */
 	static isPNG(buffer: Buffer): boolean {
@@ -164,7 +163,7 @@ export default class Decoder {
 	public bitmap!: Buffer;
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11IHDR
+	 * @see https://www.w3.org/TR/PNG/#11IHDR
 	 * @param {Buffer} chunk
 	 */
 	private _parseIHDR(chunk: Buffer): void {
@@ -245,7 +244,7 @@ export default class Decoder {
 	public palette: Buffer[] = [];
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11PLTE
+	 * @see https://www.w3.org/TR/PNG/#11PLTE
 	 * @param {Buffer} chunk
 	 */
 	private _parsePLTE(chunk: Buffer): void {
@@ -267,7 +266,7 @@ export default class Decoder {
 	public chromaticities?: Chromaticities;
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11cHRM
+	 * @see https://www.w3.org/TR/PNG/#11cHRM
 	 * @param chunk
 	 */
 	private _parseCHRM(chunk: Buffer): void {
@@ -298,7 +297,7 @@ export default class Decoder {
 	public gamma?: number;
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11gAMA
+	 * @see https://www.w3.org/TR/PNG/#11gAMA
 	 * @param {Buffer} chunk
 	 */
 	private _parseGAMA(chunk: Buffer): void {
@@ -308,7 +307,7 @@ export default class Decoder {
 	public iccProfile?: IccProfile;
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11iCCP
+	 * @see https://www.w3.org/TR/PNG/#11iCCP
 	 * @param chunk
 	 */
 	private _parseICCP(chunk: Buffer): void {
@@ -333,7 +332,7 @@ export default class Decoder {
 	public physicalDimensions?: PhisicalDimensions;
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11pHYs
+	 * @see https://www.w3.org/TR/PNG/#11pHYs
 	 * @param chunk
 	 */
 	private _parsePHYS(chunk: Buffer): void {
@@ -359,7 +358,7 @@ export default class Decoder {
 	public suggestedPalette: SuggestedPalette = {};
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11sPLT
+	 * @see https://www.w3.org/TR/PNG/#11sPLT
 	 * @param chunk
 	 */
 	private _parseSPLT(chunk: Buffer) {
@@ -401,7 +400,7 @@ export default class Decoder {
 	public significantBits?: [number, number, number, number];
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11sBIT
+	 * @see https://www.w3.org/TR/PNG/#11sBIT
 	 * @param chunk
 	 */
 	private _parseSBIT(chunk: Buffer): void {
@@ -437,7 +436,7 @@ export default class Decoder {
 	public sRGB?: number;
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11sRGB
+	 * @see https://www.w3.org/TR/PNG/#11sRGB
 	 * @param chunk
 	 */
 	private _parseSRGB(chunk: Buffer): void {
@@ -451,7 +450,7 @@ export default class Decoder {
 	public background?: [number, number, number, number];
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11bKGD
+	 * @see https://www.w3.org/TR/PNG/#11bKGD
 	 * @param chunk
 	 */
 	private _parseBKGD(chunk: Buffer): void {
@@ -471,7 +470,7 @@ export default class Decoder {
 	public histogram: number[] = [];
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11hIST
+	 * @see https://www.w3.org/TR/PNG/#11hIST
 	 * @param chunk
 	 */
 	private _parseHIST(chunk: Buffer): void {
@@ -491,7 +490,7 @@ export default class Decoder {
 	public transparent: number[] = [];
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11tRNS
+	 * @see https://www.w3.org/TR/PNG/#11tRNS
 	 * @param {Buffer} chunk
 	 */
 	private _parseTRNS(chunk: Buffer): void {
@@ -536,7 +535,7 @@ export default class Decoder {
 	public time?: number;
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11tIME
+	 * @see https://www.w3.org/TR/PNG/#11tIME
 	 * @param {Buffer} chunk
 	 */
 	private _parseTIME(chunk: Buffer): void {
@@ -557,7 +556,7 @@ export default class Decoder {
 	public text: TextData[] = [];
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11iTXt
+	 * @see https://www.w3.org/TR/PNG/#11iTXt
 	 * @param {Buffer} chunk
 	 */
 	private _parseITXT(chunk: Buffer): void {
@@ -577,7 +576,7 @@ export default class Decoder {
 	}
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11tEXt
+	 * @see https://www.w3.org/TR/PNG/#11tEXt
 	 * @param {Buffer} chunk
 	 */
 	private _parseTEXT(chunk: Buffer): void {
@@ -590,7 +589,7 @@ export default class Decoder {
 	}
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11zTXt
+	 * @see https://www.w3.org/TR/PNG/#11zTXt
 	 * @param {Buffer} chunk
 	 */
 	private _parseZTXT(chunk: Buffer): void {
@@ -602,14 +601,10 @@ export default class Decoder {
 		});
 	}
 
-	private _parseEXIF(chunk: Buffer): void {
-		console.log('eXIf');
-	}
-
 	private _deflatedIDAT: Buffer[] = [];
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11IDAT
+	 * @see https://www.w3.org/TR/PNG/#11IDAT
 	 * @param {Buffer} chunk
 	 */
 	private _parseIDAT(chunk: Buffer): void {
@@ -617,7 +612,7 @@ export default class Decoder {
 	}
 
 	/**
-	 * https://www.w3.org/TR/PNG/#11IEND
+	 * @see https://www.w3.org/TR/PNG/#11IEND
 	 * @param {Buffer} chunk
 	 */
 	private _parseIEND(chunk: Buffer): void {

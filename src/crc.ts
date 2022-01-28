@@ -1,6 +1,6 @@
 /**
  * Cyclic Redundancy Check
- * https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix
+ * @see https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix
  */
 class CyclicRedundancyCheck {
 	/** Table of CRCs of all 8-bit messages */
