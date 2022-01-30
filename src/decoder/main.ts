@@ -68,35 +68,15 @@ export default class Decoder extends PNG {
 			case ChunkTypes.PLTE:
 				this.parsePLTE(chunk);
 				break;
+			case ChunkTypes.tRNS:
+				this.parseTRNS(chunk);
+				break;
 			case ChunkTypes.IDAT:
 				this.parseIDAT(chunk);
 				break;
 			case ChunkTypes.IEND:
 				this.parseIEND(chunk);
 				break;
-		}
-
-		if (!skipAncillary) {
-			switch (type) {
-				// case ChunkTypeE.gAMA:
-				// 	this.parseGAMA(chunk);
-				// 	break;
-				case ChunkTypes.tRNS:
-					this.parseTRNS(chunk);
-					break;
-				// case ChunkTypeE.tEXt:
-				// 	this.parseTEXT(chunk);
-				// 	break;
-				// case ChunkTypeE.zTXt:
-				// 	this.parseZTXT(chunk);
-				// 	break;
-				// case ChunkTypeE.iTXt:
-				// 	this.parseITXT(chunk);
-				// 	break;
-				// case ChunkTypeE.tIME:
-				// 	this.parseTIME(chunk);
-				// 	break;
-			}
 		}
 	}
 
@@ -178,24 +158,8 @@ export default class Decoder extends PNG {
 	}
 
 	private decodeImageData(): void {
-		if (this.deflatedIDAT.length === 0) {
-			throw new Error('Missing IDAT chunk');
-		}
-
-		if (this.interlaceMethod === 1) {
-			throw new Error('Unsupported interlace method');
-		}
-
 		const data = zlib.inflateSync(Buffer.concat(this.deflatedIDAT));
-		this.deflatedIDAT = [];
 
-		// const bitsPerPixel = Math.ceil((this.channels * this.bitDepth) / 8);
-		// const bitsPerLine = Math.ceil(((this.channels * this.bitDepth) / 8) * this.width);
-
-		// const unfilteredChunks = unFilter(data, bitsPerPixel, bitsPerLine);
-		// const normalized = converter[this.bitDepth](
-		// 	Buffer.concat(unfilteredChunks),
-		// 	this.width * this.channels,
-		// );
+		const bitsPerPixel = 0;
 	}
 }

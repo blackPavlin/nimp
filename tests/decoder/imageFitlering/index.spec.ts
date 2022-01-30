@@ -124,7 +124,7 @@ describe('Image filtering', () => {
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it.skip('Bit-depth 4, filter changing per scanline', () => {
+	it('Bit-depth 4, filter changing per scanline', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/f99n0g04.png'));
 		const png = new Decoder(image);
 
@@ -133,5 +133,6 @@ describe('Image filtering', () => {
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 });

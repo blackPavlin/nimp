@@ -3,7 +3,7 @@ import path from 'path';
 import Decoder from '../../../src/decoder';
 import { ColorTypes } from '../../../src/types';
 
-describe('Interlacing', () => {
+describe.skip('Interlacing', () => {
 	it.skip('black & white', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/basi0g01.png'));
 		const png = new Decoder(image);

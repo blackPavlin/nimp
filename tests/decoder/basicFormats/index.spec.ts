@@ -4,7 +4,7 @@ import Decoder from '../../../src/decoder';
 import { ColorTypes } from '../../../src/types';
 
 describe('Basic formats', () => {
-	it.skip('black & white', () => {
+	it('black & white', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/basn0g01.png'));
 		const png = new Decoder(image);
 
@@ -13,9 +13,10 @@ describe('Basic formats', () => {
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it.skip('2 bit (4 level) grayscale', () => {
+	it('2 bit (4 level) grayscale', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/basn0g02.png'));
 		const png = new Decoder(image);
 
@@ -24,9 +25,10 @@ describe('Basic formats', () => {
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it.skip('4 bit (16 level) grayscale', () => {
+	it('4 bit (16 level) grayscale', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/basn0g04.png'));
 		const png = new Decoder(image);
 
@@ -35,6 +37,7 @@ describe('Basic formats', () => {
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('8 bit (256 level) grayscale', () => {
