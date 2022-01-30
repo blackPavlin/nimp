@@ -52,7 +52,7 @@ describe('Basic formats', () => {
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it.skip('16 bit (64k level) grayscale', () => {
+	it('16 bit (64k level) grayscale', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/basn0g16.png'));
 		const png = new Decoder(image);
 
@@ -61,6 +61,7 @@ describe('Basic formats', () => {
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('3x8 bits rgb color', () => {
@@ -75,7 +76,7 @@ describe('Basic formats', () => {
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it.skip('3x16 bits rgb color', () => {
+	it('3x16 bits rgb color', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/basn2c16.png'));
 		const png = new Decoder(image);
 
@@ -84,6 +85,7 @@ describe('Basic formats', () => {
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('1 bit (2 color) paletted', () => {
@@ -146,7 +148,7 @@ describe('Basic formats', () => {
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it.skip('16 bit grayscale + 16 bit alpha-channel', () => {
+	it('16 bit grayscale + 16 bit alpha-channel', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/basn4a16.png'));
 		const png = new Decoder(image);
 
@@ -155,6 +157,7 @@ describe('Basic formats', () => {
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypes.GrayscaleAlpha);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('3x8 bits rgb color + 8 bit alpha-channel', () => {
@@ -169,7 +172,7 @@ describe('Basic formats', () => {
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it.skip('3x16 bits rgb color + 16 bit alpha-channel', () => {
+	it('3x16 bits rgb color + 16 bit alpha-channel', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/basn6a16.png'));
 		const png = new Decoder(image);
 
@@ -178,5 +181,6 @@ describe('Basic formats', () => {
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypes.TrueColorAlpha);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 });

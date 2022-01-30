@@ -4,7 +4,7 @@ import Decoder from '../../../src/decoder';
 import { ColorTypes } from '../../../src/types';
 
 describe('Additional palettes', () => {
-	it.skip('Six-cube palette-chunk in true-color image', () => {
+	it('Six-cube palette-chunk in true-color image', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/pp0n2c16.png'));
 		const png = new Decoder(image);
 
@@ -13,6 +13,7 @@ describe('Additional palettes', () => {
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Six-cube palette-chunk in true-color+alpha image', () => {
@@ -42,7 +43,7 @@ describe('Additional palettes', () => {
 		expect(png.suggestedPalette['six-cube']).toHaveLength(216);
 	});
 
-	it.skip('Six-cube suggested palette (1 byte) in true-color image, 16 bit depth', () => {
+	it('Six-cube suggested palette (1 byte) in true-color image, 16 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ps1n2c16.png'));
 		const png = new Decoder(image);
 
@@ -51,6 +52,7 @@ describe('Additional palettes', () => {
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Six-cube suggested palette (2 bytes) in grayscale image, 8 bit depth', () => {
@@ -68,7 +70,7 @@ describe('Additional palettes', () => {
 		expect(png.suggestedPalette['six-cube']).toHaveLength(216);
 	});
 
-	it.skip('Six-cube suggested palette (2 bytes) in true-color image', () => {
+	it('Six-cube suggested palette (2 bytes) in true-color image', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ps2n2c16.png'));
 		const png = new Decoder(image);
 
@@ -77,5 +79,6 @@ describe('Additional palettes', () => {
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 });
