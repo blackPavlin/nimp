@@ -30,6 +30,7 @@ export default class Decoder {
 	private readonly mainChunkMapping: Record<number, ((chunk: Buffer) => void) | undefined> = {
 		[ChunkTypes.IHDR]: this._parseIHDR.bind(this),
 		[ChunkTypes.PLTE]: this._parsePLTE.bind(this),
+		[ChunkTypes.tRNS]: this._parseTRNS.bind(this),
 		[ChunkTypes.IDAT]: this._parseIDAT.bind(this),
 		[ChunkTypes.IEND]: this._parseIEND.bind(this),
 	};
@@ -42,7 +43,6 @@ export default class Decoder {
 		[ChunkTypes.sRGB]: this._parseSRGB.bind(this),
 		[ChunkTypes.bKGD]: this._parseBKGD.bind(this),
 		[ChunkTypes.hIST]: this._parseHIST.bind(this),
-		[ChunkTypes.tRNS]: this._parseTRNS.bind(this),
 		[ChunkTypes.pHYs]: this._parsePHYS.bind(this),
 		[ChunkTypes.sPLT]: this._parseSPLT.bind(this),
 		[ChunkTypes.tEXt]: this._parseTEXT.bind(this),
@@ -116,12 +116,16 @@ export default class Decoder {
 		this._deflatedIDAT = [];
 
 		const bitsPerPixel = this._channels * this.bitDepth;
-		const bytesPerPixel = bitsPerPixel >> 3 || 1;
-		// TODO: Переписать
-		const bytesPerLine = Math.ceil((bitsPerPixel / 8) * this.width);
+		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
+		const bytesPerLine = (bitsPerPixel * this.width + 7) >> 3;
 
 		const unfilteredChunks = unFilter(iflatedData, bytesPerPixel, bytesPerLine);
-		const convertedData = converter(unfilteredChunks, this.bitDepth, this.width * this._channels);
+		const convertedData = converter(
+			unfilteredChunks,
+			this.bitDepth,
+			this.width * this._channels,
+			this.colorType !== ColorTypes.IndexedColor,
+		);
 		const normalizedData = normalize(convertedData, this.colorType, this.transparent, this.palette);
 
 		this.bitmap = Buffer.concat(normalizedData);
@@ -259,7 +263,7 @@ export default class Decoder {
 		}
 
 		for (let i = 0; i < chunk.length; i += 3) {
-			this.palette.push(Buffer.from([chunk[i], chunk[i + 1], chunk[i + 2], 0xff]));
+			this.palette.push(Buffer.of(chunk[i], chunk[i + 1], chunk[i + 2], 0xff));
 		}
 	}
 
@@ -267,7 +271,7 @@ export default class Decoder {
 
 	/**
 	 * @see https://www.w3.org/TR/PNG/#11cHRM
-	 * @param chunk
+	 * @param {Buffer} chunk
 	 */
 	private _parseCHRM(chunk: Buffer): void {
 		if (chunk.length !== 32) {
@@ -308,7 +312,7 @@ export default class Decoder {
 
 	/**
 	 * @see https://www.w3.org/TR/PNG/#11iCCP
-	 * @param chunk
+	 * @param {Buffer} chunk
 	 */
 	private _parseICCP(chunk: Buffer): void {
 		if (this.sRGB) {
@@ -333,7 +337,7 @@ export default class Decoder {
 
 	/**
 	 * @see https://www.w3.org/TR/PNG/#11pHYs
-	 * @param chunk
+	 * @param {Buffer} chunk
 	 */
 	private _parsePHYS(chunk: Buffer): void {
 		if (chunk.length !== 9) {
@@ -359,7 +363,7 @@ export default class Decoder {
 
 	/**
 	 * @see https://www.w3.org/TR/PNG/#11sPLT
-	 * @param chunk
+	 * @param {Buffer} chunk
 	 */
 	private _parseSPLT(chunk: Buffer) {
 		const separator = chunk.indexOf(0x00);
@@ -401,7 +405,7 @@ export default class Decoder {
 
 	/**
 	 * @see https://www.w3.org/TR/PNG/#11sBIT
-	 * @param chunk
+	 * @param {Buffer} chunk
 	 */
 	private _parseSBIT(chunk: Buffer): void {
 		if (this.colorType === ColorTypes.Grayscale) {
@@ -437,7 +441,7 @@ export default class Decoder {
 
 	/**
 	 * @see https://www.w3.org/TR/PNG/#11sRGB
-	 * @param chunk
+	 * @param {Buffer} chunk
 	 */
 	private _parseSRGB(chunk: Buffer): void {
 		if (this.iccProfile) {
@@ -451,7 +455,7 @@ export default class Decoder {
 
 	/**
 	 * @see https://www.w3.org/TR/PNG/#11bKGD
-	 * @param chunk
+	 * @param {Buffer} chunk
 	 */
 	private _parseBKGD(chunk: Buffer): void {
 		// if (this.colorType === ColorTypes.Grayscale || this.colorType === ColorTypes.GrayscaleAlpha) {
@@ -471,7 +475,7 @@ export default class Decoder {
 
 	/**
 	 * @see https://www.w3.org/TR/PNG/#11hIST
-	 * @param chunk
+	 * @param {Buffer} chunk
 	 */
 	private _parseHIST(chunk: Buffer): void {
 		if (this.palette.length === 0) {
@@ -528,6 +532,18 @@ export default class Decoder {
 
 			for (let i = 0; i < chunk.length; i += 1) {
 				this.palette[i][3] = chunk[i];
+			}
+		}
+
+		if (this.bitDepth !== 8) {
+			const replaceSample = (value: number, depthIn: number, depthOut: number): number => {
+				const maxSampleIn = 2 ** depthIn - 1;
+				const maxSampleOut = 2 ** depthOut - 1;
+				return Math.round((value * maxSampleOut) / maxSampleIn);
+			};
+
+			for (let i = 0; i < this.transparent.length; i += 1) {
+				this.transparent[i] = replaceSample(this.transparent[i], this.bitDepth, 8);
 			}
 		}
 	}

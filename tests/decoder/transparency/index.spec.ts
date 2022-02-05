@@ -4,7 +4,7 @@ import Decoder from '../../../src/decoder';
 import { ColorTypes } from '../../../src/types';
 
 describe('Transparency', () => {
-	it.skip('Transparent, black background chunk, 4 bit depth', () => {
+	it('Transparent, black background chunk, 4 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/tbbn0g04.png'));
 		const png = new Decoder(image);
 
@@ -13,9 +13,10 @@ describe('Transparency', () => {
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it.skip('Transparent, blue background chunk, 16 bit depth', () => {
+	it('Transparent, blue background chunk, 16 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/tbbn2c16.png'));
 		const png = new Decoder(image);
 
@@ -24,6 +25,7 @@ describe('Transparency', () => {
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Transparent, black background chunk, 8 bit depth', () => {
@@ -38,7 +40,7 @@ describe('Transparency', () => {
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it.skip('Transparent, green background chunk', () => {
+	it('Transparent, green background chunk', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/tbgn2c16.png'));
 		const png = new Decoder(image);
 
@@ -47,6 +49,7 @@ describe('Transparency', () => {
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypes.TrueColor);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Transparent, light-gray background chunk', () => {
@@ -73,7 +76,7 @@ describe('Transparency', () => {
 		expect(png.bitmap).toMatchSnapshot();
 	});
 
-	it.skip('Transparent, white background chunk, bitdepth 16', () => {
+	it('Transparent, white background chunk, bitdepth 16', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/tbwn0g16.png'));
 		const png = new Decoder(image);
 
@@ -82,6 +85,7 @@ describe('Transparency', () => {
 		expect(png.bitDepth).toBe(16);
 		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('Transparent, white background chunk, bitdepth 8', () => {

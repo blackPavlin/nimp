@@ -11,6 +11,7 @@ export default function bitConverter(
 	chunks: Buffer[],
 	bitDepth: BitDepth,
 	bitsPerLine: number,
+	scale: boolean,
 ): Buffer[] {
 	const buffers = new Array<Buffer>(chunks.length);
 
@@ -23,16 +24,27 @@ export default function bitConverter(
 				for (let k = 0; k < chunk.length; k += 1) {
 					const byte = chunk[k];
 
-					const bytes = Buffer.from([
-						(byte >> 7) & 1,
-						(byte >> 6) & 1,
-						(byte >> 5) & 1,
-						(byte >> 4) & 1,
-						(byte >> 3) & 1,
-						(byte >> 2) & 1,
-						(byte >> 1) & 1,
-						(byte >> 0) & 1,
-					]);
+					const bytes = scale
+						? Buffer.of(
+								scale1BitTo8Bit((byte >> 7) & 1),
+								scale1BitTo8Bit((byte >> 6) & 1),
+								scale1BitTo8Bit((byte >> 5) & 1),
+								scale1BitTo8Bit((byte >> 4) & 1),
+								scale1BitTo8Bit((byte >> 3) & 1),
+								scale1BitTo8Bit((byte >> 2) & 1),
+								scale1BitTo8Bit((byte >> 1) & 1),
+								scale1BitTo8Bit((byte >> 0) & 1),
+						  )
+						: Buffer.of(
+								(byte >> 7) & 1,
+								(byte >> 6) & 1,
+								(byte >> 5) & 1,
+								(byte >> 4) & 1,
+								(byte >> 3) & 1,
+								(byte >> 2) & 1,
+								(byte >> 1) & 1,
+								(byte >> 0) & 1,
+						  );
 
 					bytes.copy(buffer, k * 8);
 				}
@@ -48,12 +60,14 @@ export default function bitConverter(
 				for (let k = 0; k < chunk.length; k += 1) {
 					const byte = chunk[k];
 
-					const bytes = Buffer.from([
-						(byte >> 6) & 3,
-						(byte >> 4) & 3,
-						(byte >> 2) & 3,
-						(byte >> 0) & 3,
-					]);
+					const bytes = scale
+						? Buffer.of(
+								scale2BitTo8Bit((byte >> 6) & 3),
+								scale2BitTo8Bit((byte >> 4) & 3),
+								scale2BitTo8Bit((byte >> 2) & 3),
+								scale2BitTo8Bit((byte >> 0) & 3),
+						  )
+						: Buffer.of((byte >> 6) & 3, (byte >> 4) & 3, (byte >> 2) & 3, (byte >> 0) & 3);
 
 					bytes.copy(buffer, k * 4);
 				}
@@ -69,7 +83,9 @@ export default function bitConverter(
 				for (let k = 0; k < chunk.length; k += 1) {
 					const byte = chunk[k];
 
-					const bytes = Buffer.from([(byte >> 4) & 0x0f, byte & 0x0f]);
+					const bytes = scale
+						? Buffer.of(scale4BitTo8Bit((byte >> 4) & 0x0f), scale4BitTo8Bit(byte & 0x0f))
+						: Buffer.of((byte >> 4) & 0x0f, byte & 0x0f);
 
 					bytes.copy(buffer, k * 2);
 				}
@@ -88,9 +104,7 @@ export default function bitConverter(
 					const byte = chunk[k];
 					const byte2 = chunk[k + 1];
 
-					const bytes = Buffer.from([(byte << 8) | byte2]);
-
-					bytes.copy(buffer, k * 0.5);
+					buffer[k * 0.5] = scale16BitTo8Bit((byte << 8) | byte2);
 				}
 
 				buffers[i] = buffer;
@@ -101,4 +115,20 @@ export default function bitConverter(
 	}
 
 	return buffers;
+}
+
+function scale16BitTo8Bit(value: number): number {
+	return Math.round((value * 255) / 65535);
+}
+
+function scale4BitTo8Bit(value: number): number {
+	return Math.round((value * 255) / 15);
+}
+
+function scale2BitTo8Bit(value: number): number {
+	return Math.round((value * 255) / 3);
+}
+
+function scale1BitTo8Bit(value: number): number {
+	return Math.round((value * 255) / 1);
 }
