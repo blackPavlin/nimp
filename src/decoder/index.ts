@@ -26,6 +26,12 @@ type DecoderOptions = {
 	skipAncillary?: boolean; // Default false
 };
 
+const replaceSample = (value: number, depthIn: number, depthOut: number): number => {
+	const maxSampleIn = 2 ** depthIn - 1;
+	const maxSampleOut = 2 ** depthOut - 1;
+	return Math.round((value * maxSampleOut) / maxSampleIn);
+};
+
 export default class Decoder {
 	private readonly mainChunkMapping: Record<number, ((chunk: Buffer) => void) | undefined> = {
 		[ChunkTypes.IHDR]: this._parseIHDR.bind(this),
@@ -458,16 +464,32 @@ export default class Decoder {
 	 * @param {Buffer} chunk
 	 */
 	private _parseBKGD(chunk: Buffer): void {
-		// if (this.colorType === ColorTypes.Grayscale || this.colorType === ColorTypes.GrayscaleAlpha) {
-		// }
+		if (this.colorType === ColorTypes.Grayscale || this.colorType === ColorTypes.GrayscaleAlpha) {
+			const color = replaceSample(chunk.readUInt16BE(), this.bitDepth, 8);
 
-		// if (this.colorType === ColorTypes.TrueColor || this.colorType === ColorTypes.TrueColorAlpha) {
-		// }
+			this.background = [color, color, color, 0xff];
+		}
+
+		if (this.colorType === ColorTypes.TrueColor || this.colorType === ColorTypes.TrueColorAlpha) {
+			this.background = [
+				replaceSample(chunk.readUInt16BE(0), this.bitDepth, 8),
+				replaceSample(chunk.readUInt16BE(2), this.bitDepth, 8),
+				replaceSample(chunk.readUInt16BE(4), this.bitDepth, 8),
+				0xff,
+			];
+		}
 
 		if (this.colorType === ColorTypes.IndexedColor) {
 			if (!this.palette.length) {
 				throw new Error('Missing palette');
 			}
+
+			this.background = [
+				this.palette[chunk.readUInt8()][0],
+				this.palette[chunk.readUInt8()][1],
+				this.palette[chunk.readUInt8()][2],
+				this.palette[chunk.readUInt8()][3],
+			];
 		}
 	}
 
@@ -536,12 +558,6 @@ export default class Decoder {
 		}
 
 		if (this.bitDepth !== 8) {
-			const replaceSample = (value: number, depthIn: number, depthOut: number): number => {
-				const maxSampleIn = 2 ** depthIn - 1;
-				const maxSampleOut = 2 ** depthOut - 1;
-				return Math.round((value * maxSampleOut) / maxSampleIn);
-			};
-
 			for (let i = 0; i < this.transparent.length; i += 1) {
 				this.transparent[i] = replaceSample(this.transparent[i], this.bitDepth, 8);
 			}
