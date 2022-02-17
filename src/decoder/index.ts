@@ -23,14 +23,7 @@ import converter from './converter';
 import normalize from './bitmapper';
 
 type DecoderOptions = {
-	checkCrc?: boolean; // Default true
 	skipAncillary?: boolean; // Default false
-};
-
-const replaceSample = (value: number, depthIn: number, depthOut: number): number => {
-	const maxSampleIn = (1 << depthIn) - 1;
-	const maxSampleOut = (1 << depthOut) - 1;
-	return ((value * maxSampleOut) / maxSampleIn + 0.5) | 0;
 };
 
 export default class Decoder {
@@ -67,7 +60,6 @@ export default class Decoder {
 			throw new Error('Not a PNG file');
 		}
 
-		const checkCrc = options.checkCrc ?? true;
 		const skipAncillary = options.skipAncillary ?? false;
 
 		const chunkMapping = {
@@ -83,10 +75,9 @@ export default class Decoder {
 			}
 
 			if (
-				checkCrc &&
 				!Decoder.verifyCheckSum(
-					file.subarray(i + 4, i + 4 + 4 + length),
-					file.readInt32BE(i + 4 + 4 + length),
+					file.subarray(i + 4, i + 8 + length),
+					file.readInt32BE(i + 8 + length),
 				)
 			) {
 				throw new Error('Invalid checksum');
@@ -124,7 +115,7 @@ export default class Decoder {
 
 		const bitsPerPixel = this.channels * this.bitDepth;
 		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
-		const bytesPerLine = (bitsPerPixel * this.width + 7) >> 3;
+		const bytesPerLine = 1 + ((bitsPerPixel * this.width + 7) >> 3);
 
 		const unfilteredChunks = unFilter(inflatedData, bytesPerPixel, bytesPerLine);
 		const convertedData = converter(
@@ -265,25 +256,38 @@ export default class Decoder {
 		}
 	}
 
-	public palette: Buffer[] = [];
+	public palette?: Buffer[];
 
 	/**
 	 * @see https://www.w3.org/TR/PNG/#11PLTE
 	 * @param {Buffer} chunk
 	 */
 	private _parsePLTE(chunk: Buffer): void {
-		if (this.colorType === ColorTypes.Grayscale || this.colorType === ColorTypes.GrayscaleAlpha) {
-			throw new Error('PLTE, color type mismatch');
-		}
-
 		const paletteEntries = chunk.length / 3;
 
-		if (chunk.length % 3 !== 0 || paletteEntries > 256 || paletteEntries > 2 ** this.bitDepth) {
+		if (
+			chunk.length % 3 !== 0 ||
+			paletteEntries <= 0 ||
+			paletteEntries > 256 ||
+			paletteEntries > 1 << this.bitDepth
+		) {
 			throw new Error('Bad PLTE length');
 		}
 
-		for (let i = 0; i < chunk.length; i += 3) {
-			this.palette.push(Buffer.of(chunk[i], chunk[i + 1], chunk[i + 2], 0xff));
+		switch (this.colorType) {
+			case ColorTypes.IndexedColor:
+				this.palette = [];
+
+				for (let i = 0; i < chunk.length; i += 3) {
+					this.palette.push(Buffer.of(chunk[i], chunk[i + 1], chunk[i + 2], 0xff));
+				}
+				break;
+			case ColorTypes.TrueColor:
+			case ColorTypes.TrueColorAlpha:
+				// Ignore PLTE for color types TrueColor and TrueColorAlpha
+				break;
+			default:
+				throw new Error('PLTE, color type mismatch');
 		}
 	}
 
@@ -478,32 +482,68 @@ export default class Decoder {
 	 * @param {Buffer} chunk
 	 */
 	private _parseBKGD(chunk: Buffer): void {
-		if (this.colorType === ColorTypes.Grayscale || this.colorType === ColorTypes.GrayscaleAlpha) {
-			const color = replaceSample(chunk.readUInt16BE(), this.bitDepth, 8);
+		switch (this.colorType) {
+			case ColorTypes.Grayscale:
+			case ColorTypes.GrayscaleAlpha:
+				this.background = [chunk.readUInt16BE(), chunk.readUInt16BE(), chunk.readUInt16BE(), 0xff];
 
-			this.background = [color, color, color, 0xff];
-		}
+				switch (this.bitDepth) {
+					case 1:
+						this.background[0] *= 0xff;
+						this.background[1] *= 0xff;
+						this.background[2] *= 0xff;
+						break;
+					case 2:
+						this.background[0] *= 0x55;
+						this.background[1] *= 0x55;
+						this.background[2] *= 0x55;
+						break;
+					case 4:
+						this.background[0] *= 0x11;
+						this.background[1] *= 0x11;
+						this.background[2] *= 0x11;
+						break;
+					case 8:
+						// No-op.
+						break;
+					case 16:
+						this.background[0] = (this.background[0] / 0x101 + 0.5) | 0;
+						this.background[1] = (this.background[1] / 0x101 + 0.5) | 0;
+						this.background[2] = (this.background[2] / 0x101 + 0.5) | 0;
+						break;
+					default:
+						throw new Error();
+				}
+				break;
+			case ColorTypes.TrueColor:
+			case ColorTypes.TrueColorAlpha:
+				this.background = [
+					chunk.readUInt16BE(0),
+					chunk.readUInt16BE(2),
+					chunk.readUInt16BE(4),
+					0xff,
+				];
 
-		if (this.colorType === ColorTypes.TrueColor || this.colorType === ColorTypes.TrueColorAlpha) {
-			this.background = [
-				replaceSample(chunk.readUInt16BE(0), this.bitDepth, 8),
-				replaceSample(chunk.readUInt16BE(2), this.bitDepth, 8),
-				replaceSample(chunk.readUInt16BE(4), this.bitDepth, 8),
-				0xff,
-			];
-		}
+				if (this.bitDepth === 16) {
+					this.background[0] = (this.background[0] / 0x101 + 0.5) | 0;
+					this.background[1] = (this.background[1] / 0x101 + 0.5) | 0;
+					this.background[2] = (this.background[2] / 0x101 + 0.5) | 0;
+				}
+				break;
+			case ColorTypes.IndexedColor:
+				if (!this.palette) {
+					throw new Error('Missing palette');
+				}
 
-		if (this.colorType === ColorTypes.IndexedColor) {
-			if (!this.palette.length) {
-				throw new Error('Missing palette');
-			}
-
-			this.background = [
-				this.palette[chunk.readUInt8()][0],
-				this.palette[chunk.readUInt8()][1],
-				this.palette[chunk.readUInt8()][2],
-				this.palette[chunk.readUInt8()][3],
-			];
+				this.background = [
+					this.palette[chunk.readUInt8()][0],
+					this.palette[chunk.readUInt8()][1],
+					this.palette[chunk.readUInt8()][2],
+					this.palette[chunk.readUInt8()][3],
+				];
+				break;
+			default:
+				throw new Error();
 		}
 	}
 
@@ -514,7 +554,7 @@ export default class Decoder {
 	 * @param {Buffer} chunk
 	 */
 	private _parseHIST(chunk: Buffer): void {
-		if (this.palette.length === 0) {
+		if (!this.palette) {
 			throw new Error('Missing palette');
 		}
 
@@ -527,7 +567,7 @@ export default class Decoder {
 		}
 	}
 
-	public transparent: number[] = [];
+	public transparent?: number[];
 
 	/**
 	 * @see https://www.w3.org/TR/PNG/#11tRNS
@@ -553,7 +593,7 @@ export default class Decoder {
 						this.transparent[0] *= 0x11;
 						break;
 					case 16:
-						this.transparent[0] /= 0x101 | 0;
+						this.transparent[0] = (this.transparent[0] / 0x101 + 0.5) | 0;
 						break;
 				}
 				break;
@@ -565,9 +605,9 @@ export default class Decoder {
 				this.transparent = [chunk.readUInt16BE(0), chunk.readUInt16BE(2), chunk.readUInt16BE(4)];
 
 				if (this.bitDepth === 16) {
-					this.transparent[0] /= 0x101 | 0;
-					this.transparent[1] /= 0x101 | 0;
-					this.transparent[2] /= 0x101 | 0;
+					this.transparent[0] = (this.transparent[0] / 0x101 + 0.5) | 0;
+					this.transparent[1] = (this.transparent[1] / 0x101 + 0.5) | 0;
+					this.transparent[2] = (this.transparent[2] / 0x101 + 0.5) | 0;
 				}
 				break;
 			case ColorTypes.IndexedColor:

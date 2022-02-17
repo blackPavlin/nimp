@@ -16,10 +16,9 @@ export default function unFilter(
 	const chunks: Buffer[] = [];
 
 	for (let i = 0, k = 0; i < buffer.length; i += bytesPerLine, k += 1) {
-		const filterType = buffer.readUInt8(i);
-		const chunk = buffer.subarray((i += 1), i + bytesPerLine);
+		const chunk = buffer.subarray(i + 1, i + bytesPerLine);
 
-		switch (filterType) {
+		switch (buffer.readUInt8(i)) {
 			case FilterTypes.None:
 				chunks.push(unFilterNone(chunk));
 				break;
@@ -36,7 +35,7 @@ export default function unFilter(
 				chunks.push(unFilterPaeth(chunk, bytesPerPixel, chunks[k - 1]));
 				break;
 			default:
-				throw new Error(`Bad filter type: ${filterType}`);
+				throw new Error(`Bad filter type: `);
 		}
 	}
 
