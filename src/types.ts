@@ -50,13 +50,18 @@ export const FilterTypes = {
 	Paeth: 4,
 } as const;
 
+export const InterlaceMethods = {
+	None: 0,
+	Adam7: 1,
+} as const;
+
 export type ChunkType = ValueOf<typeof ChunkTypes>;
 export type BitDepth = 1 | 2 | 4 | 8 | 16;
 export type ColorType = ValueOf<typeof ColorTypes>;
 export type CompressionMethod = 0;
 export type FilterMethod = 0;
 export type FilterType = ValueOf<typeof FilterTypes>;
-export type InterlaceMethod = 0 | 1;
+export type InterlaceMethod = ValueOf<typeof InterlaceMethods>;
 export type Channels = 1 | 2 | 3 | 4;
 
 export type TextData = {

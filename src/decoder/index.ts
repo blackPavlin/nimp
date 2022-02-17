@@ -15,6 +15,7 @@ import {
 	PhisicalDimensions,
 	SuggestedPalette,
 	IccProfile,
+	InterlaceMethods,
 } from '../types';
 
 import unFilter from './unfilter';
@@ -27,9 +28,9 @@ type DecoderOptions = {
 };
 
 const replaceSample = (value: number, depthIn: number, depthOut: number): number => {
-	const maxSampleIn = 2 ** depthIn - 1;
-	const maxSampleOut = 2 ** depthOut - 1;
-	return Math.round((value * maxSampleOut) / maxSampleIn);
+	const maxSampleIn = (1 << depthIn) - 1;
+	const maxSampleOut = (1 << depthOut) - 1;
+	return ((value * maxSampleOut) / maxSampleIn + 0.5) | 0;
 };
 
 export default class Decoder {
@@ -118,18 +119,18 @@ export default class Decoder {
 			throw new Error('Unsupported interlace method');
 		}
 
-		const iflatedData = zlib.inflateSync(Buffer.concat(this._deflatedIDAT));
+		const inflatedData = zlib.inflateSync(Buffer.concat(this._deflatedIDAT));
 		this._deflatedIDAT = [];
 
-		const bitsPerPixel = this._channels * this.bitDepth;
+		const bitsPerPixel = this.channels * this.bitDepth;
 		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
 		const bytesPerLine = (bitsPerPixel * this.width + 7) >> 3;
 
-		const unfilteredChunks = unFilter(iflatedData, bytesPerPixel, bytesPerLine);
+		const unfilteredChunks = unFilter(inflatedData, bytesPerPixel, bytesPerLine);
 		const convertedData = converter(
 			unfilteredChunks,
 			this.bitDepth,
-			this.width * this._channels,
+			this.width * this.channels,
 			this.colorType !== ColorTypes.IndexedColor,
 		);
 		const normalizedData = normalize(convertedData, this.colorType, this.transparent, this.palette);
@@ -162,7 +163,7 @@ export default class Decoder {
 
 	public colorType!: ColorType;
 
-	private _channels!: Channels;
+	private channels!: Channels;
 
 	public compressionMethod!: CompressionMethod;
 
@@ -181,73 +182,86 @@ export default class Decoder {
 			throw new Error('Bad IHDR length');
 		}
 
-		this.width = chunk.readInt32BE();
-		this.height = chunk.readInt32BE(4);
+		this.width = chunk.readUInt32BE();
+		this.height = chunk.readUInt32BE(4);
 
 		if (this.width <= 0 || this.height <= 0) {
 			throw new Error('Non-positive dimension');
 		}
 
-		const bitDepth = chunk.readUInt8(8);
-		switch (bitDepth) {
-			case 1:
-			case 2:
-			case 4:
-			case 8:
-			case 16:
-				this.bitDepth = bitDepth;
-				break;
-			default:
-				throw new Error(`Bad bit depth ${bitDepth}`);
+		this.bitDepth = chunk.readUInt8(8) as BitDepth;
+
+		if (
+			this.bitDepth !== 1 &&
+			this.bitDepth !== 2 &&
+			this.bitDepth !== 4 &&
+			this.bitDepth !== 8 &&
+			this.bitDepth !== 16
+		) {
+			throw new Error(`Bad bit depth: ${this.bitDepth as number}`);
 		}
 
-		const colorType = chunk.readUInt8(9);
-		switch (colorType) {
+		this.colorType = chunk.readUInt8(9) as ColorType;
+
+		switch (this.colorType) {
 			case ColorTypes.Grayscale:
-				this._channels = 1;
+				this.channels = 1;
 				break;
 			case ColorTypes.TrueColor:
-				this._channels = 3;
+				if (this.bitDepth !== 8 && this.bitDepth !== 16) {
+					throw new Error(
+						`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth}`,
+					);
+				}
+				this.channels = 3;
 				break;
 			case ColorTypes.IndexedColor:
-				this._channels = 1;
+				if (this.bitDepth === 16) {
+					throw new Error(
+						`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth}`,
+					);
+				}
+				this.channels = 1;
 				break;
 			case ColorTypes.GrayscaleAlpha:
-				this._channels = 2;
+				if (this.bitDepth !== 8 && this.bitDepth !== 16) {
+					throw new Error(
+						`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth}`,
+					);
+				}
+				this.channels = 2;
 				break;
 			case ColorTypes.TrueColorAlpha:
-				this._channels = 4;
+				if (this.bitDepth !== 8 && this.bitDepth !== 16) {
+					throw new Error(
+						`Unsupported color type: ${this.colorType} and bit depth ${this.bitDepth}`,
+					);
+				}
+				this.channels = 4;
 				break;
 			default:
-				throw new Error(`Bad color type ${colorType}`);
-		}
-
-		this.colorType = colorType;
-
-		if ([2, 4, 6].includes(this.colorType) && ![8, 16].includes(this.bitDepth)) {
-			throw new Error(`Unsupported bit depth ${this.bitDepth}, color type ${this.colorType}`);
-		}
-
-		if (this.colorType === 3 && this.bitDepth === 16) {
-			throw new Error(`Unsupported bit depth ${this.bitDepth}, color type ${this.colorType}`);
+				throw new Error(`Bad color type: ${this.colorType as number}`);
 		}
 
 		this.compressionMethod = chunk.readUInt8(10) as CompressionMethod;
 
 		if (this.compressionMethod !== 0) {
-			throw new Error('Unsupported compression method');
+			throw new Error(`Unsupported compression method: ${this.compressionMethod as number}`);
 		}
 
 		this.filterMethod = chunk.readUInt8(11) as FilterMethod;
 
 		if (this.filterMethod !== 0) {
-			throw new Error('Unsupported filter method');
+			throw new Error(`Unsupported filter method: ${this.filterMethod as number}`);
 		}
 
 		this.interlaceMethod = chunk.readUInt8(12) as InterlaceMethod;
 
-		if (this.interlaceMethod !== 0 && this.interlaceMethod !== 1) {
-			throw new Error('Bad interlace method');
+		if (
+			this.interlaceMethod !== InterlaceMethods.None &&
+			this.interlaceMethod !== InterlaceMethods.Adam7
+		) {
+			throw new Error(`Unsupported interlace method: ${this.interlaceMethod as number}`);
 		}
 	}
 
@@ -520,47 +534,57 @@ export default class Decoder {
 	 * @param {Buffer} chunk
 	 */
 	private _parseTRNS(chunk: Buffer): void {
-		if (
-			this.colorType === ColorTypes.GrayscaleAlpha ||
-			this.colorType === ColorTypes.TrueColorAlpha
-		) {
-			throw new Error('tRNS, color type mismatch');
-		}
+		switch (this.colorType) {
+			case ColorTypes.Grayscale:
+				if (chunk.length !== 2) {
+					throw new Error('Bad tRNS length');
+				}
 
-		if (this.colorType === ColorTypes.Grayscale) {
-			if (chunk.length !== 2) {
-				throw new Error('Bad tRNS length');
-			}
+				this.transparent = [chunk.readUInt16BE()];
 
-			this.transparent = [chunk.readUInt16BE(0)];
-		}
+				switch (this.bitDepth) {
+					case 1:
+						this.transparent[0] *= 0xff;
+						break;
+					case 2:
+						this.transparent[0] *= 0x55;
+						break;
+					case 4:
+						this.transparent[0] *= 0x11;
+						break;
+					case 16:
+						this.transparent[0] /= 0x101 | 0;
+						break;
+				}
+				break;
+			case ColorTypes.TrueColor:
+				if (chunk.length !== 6) {
+					throw new Error('Bad tRNS length');
+				}
 
-		if (this.colorType === ColorTypes.TrueColor) {
-			if (chunk.length !== 6) {
-				throw new Error('Bad tRNS length');
-			}
+				this.transparent = [chunk.readUInt16BE(0), chunk.readUInt16BE(2), chunk.readUInt16BE(4)];
 
-			this.transparent = [chunk.readUInt16BE(0), chunk.readUInt16BE(2), chunk.readUInt16BE(4)];
-		}
+				if (this.bitDepth === 16) {
+					this.transparent[0] /= 0x101 | 0;
+					this.transparent[1] /= 0x101 | 0;
+					this.transparent[2] /= 0x101 | 0;
+				}
+				break;
+			case ColorTypes.IndexedColor:
+				if (!this.palette) {
+					throw new Error('Missing palette');
+				}
 
-		if (this.colorType === ColorTypes.IndexedColor) {
-			if (this.palette.length === 0) {
-				throw new Error('Palette not found');
-			}
+				if (chunk.length > this.palette.length) {
+					throw new Error('Bad tRNS length');
+				}
 
-			if (chunk.length > this.palette.length) {
-				throw new Error('Bad tRNS length');
-			}
-
-			for (let i = 0; i < chunk.length; i += 1) {
-				this.palette[i][3] = chunk[i];
-			}
-		}
-
-		if (this.bitDepth !== 8) {
-			for (let i = 0; i < this.transparent.length; i += 1) {
-				this.transparent[i] = replaceSample(this.transparent[i], this.bitDepth, 8);
-			}
+				for (let i = 0; i < chunk.length; i += 1) {
+					this.palette[i][3] = chunk[i];
+				}
+				break;
+			default:
+				throw new Error('tRNS, color type mismatch');
 		}
 	}
 
