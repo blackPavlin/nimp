@@ -1,5 +1,5 @@
 import { FilterTypes } from '../types';
-import paethPredictor from './paeth';
+import paethPredictor from '../paeth';
 
 /**
  * @see https://www.w3.org/TR/PNG/#9Filters
@@ -35,7 +35,7 @@ export default function unFilter(
 				chunks.push(unFilterPaeth(chunk, bytesPerPixel, chunks[k - 1]));
 				break;
 			default:
-				throw new Error(`Bad filter type: `);
+				throw new Error('Bad filter type');
 		}
 	}
 

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import Decoder from '../../../src/decoder';
-import { ColorTypes } from '../../../src/types';
+import Decoder from '../../../src/png/decoder';
+import { ColorTypes } from '../../../src/png/types';
 
 describe('Odd sizes no interlacing', () => {
 	it('1x1 paletted file', () => {

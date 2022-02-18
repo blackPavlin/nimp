@@ -1,14 +1,22 @@
 import { ColorType, ColorTypes } from '../types';
 
+/**
+ *
+ * @param chunks {Buffer[]}
+ * @param colorType {number}
+ * @param transparent {number|undefuned}
+ * @param palette {number[]|undefuned}
+ * @returns {Buffer[]}
+ */
 export default function normalize(
 	chunks: Buffer[],
-	colotType: ColorType,
+	colorType: ColorType,
 	transparent?: number[],
 	palette?: Buffer[],
 ): Buffer[] {
 	const buffers = new Array<Buffer>(chunks.length);
 
-	switch (colotType) {
+	switch (colorType) {
 		case ColorTypes.Grayscale:
 			for (let i = 0; i < chunks.length; i += 1) {
 				const chunk = chunks[i];
@@ -95,7 +103,7 @@ export default function normalize(
 		case ColorTypes.TrueColorAlpha:
 			return chunks;
 		default:
-			throw new Error(`Bad color type: ${colotType as string}`);
+			throw new Error(`Bad color type: ${colorType as string}`);
 	}
 
 	return buffers;

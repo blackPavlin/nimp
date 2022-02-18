@@ -263,6 +263,7 @@ export default class Decoder {
 			case ColorTypes.IndexedColor:
 				this.palette = [];
 
+				// TODO: Use chunk.subarray(i, i + 3);
 				for (let i = 0; i < chunk.length; i += 3) {
 					this.palette.push(Buffer.of(chunk[i], chunk[i + 1], chunk[i + 2], 0xff));
 				}

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import Decoder from '../../../src/decoder';
+import Decoder from '../../../src/png/decoder';
 
 describe('Gamma values', () => {
 	it('Grayscale, file-gamma = 0.35', () => {

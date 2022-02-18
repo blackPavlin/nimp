@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import Decoder from '../../../src/decoder';
+import Decoder from '../../../src/png/decoder';
 
 describe('Ancillary chunks', () => {
 	describe('Chroma chunk', () => {

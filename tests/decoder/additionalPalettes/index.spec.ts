@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import Decoder from '../../../src/decoder';
-import { ColorTypes } from '../../../src/types';
+import Decoder from '../../../src/png/decoder';
+import { ColorTypes } from '../../../src/png/types';
 
 describe('Additional palettes', () => {
 	it('Six-cube palette-chunk in true-color image', () => {
