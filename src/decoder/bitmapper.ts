@@ -6,7 +6,6 @@ export default function normalize(
 	transparent?: number[],
 	palette?: Buffer[],
 ): Buffer[] {
-	// TODO: Можно оптимизировать
 	const buffers = new Array<Buffer>(chunks.length);
 
 	switch (colotType) {

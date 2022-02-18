@@ -22,20 +22,15 @@ import unFilter from './unfilter';
 import converter from './converter';
 import normalize from './bitmapper';
 
-type DecoderOptions = {
-	skipAncillary?: boolean; // Default false
-};
-
 export default class Decoder {
-	private readonly mainChunkMapping: Record<number, ((chunk: Buffer) => void) | undefined> = {
+	private readonly chunkMapping: Record<number, ((chunk: Buffer) => void) | undefined> = {
+		// Critical chunks
 		[ChunkTypes.IHDR]: this._parseIHDR.bind(this),
 		[ChunkTypes.PLTE]: this._parsePLTE.bind(this),
 		[ChunkTypes.tRNS]: this._parseTRNS.bind(this),
 		[ChunkTypes.IDAT]: this._parseIDAT.bind(this),
 		[ChunkTypes.IEND]: this._parseIEND.bind(this),
-	};
-
-	private readonly acillaryChunkMapping: Record<number, ((chunk: Buffer) => void) | undefined> = {
+		// Ancillary chunks
 		[ChunkTypes.cHRM]: this._parseCHRM.bind(this),
 		[ChunkTypes.gAMA]: this._parseGAMA.bind(this),
 		[ChunkTypes.iCCP]: this._parseICCP.bind(this),
@@ -51,21 +46,10 @@ export default class Decoder {
 		[ChunkTypes.tIME]: this._parseTIME.bind(this),
 	};
 
-	constructor(file: Buffer, options: DecoderOptions = {}) {
-		if (!Buffer.isBuffer(file)) {
-			throw new TypeError('Not a buffer');
-		}
-
+	constructor(file: Buffer) {
 		if (!Decoder.isPNG(file)) {
 			throw new Error('Not a PNG file');
 		}
-
-		const skipAncillary = options.skipAncillary ?? false;
-
-		const chunkMapping = {
-			...this.mainChunkMapping,
-			...(skipAncillary ? {} : this.acillaryChunkMapping),
-		};
 
 		for (let i = 8; i < file.length; i += 4) {
 			const length = file.readUInt32BE(i);
@@ -85,7 +69,7 @@ export default class Decoder {
 
 			const type = file.readUInt32BE((i += 4));
 
-			const handler = chunkMapping[type];
+			const handler = this.chunkMapping[type];
 			if (!handler) {
 				i += 4 + length;
 				continue;
@@ -115,6 +99,7 @@ export default class Decoder {
 
 		const bitsPerPixel = this.channels * this.bitDepth;
 		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
+		// + 1
 		const bytesPerLine = 1 + ((bitsPerPixel * this.width + 7) >> 3);
 
 		const unfilteredChunks = unFilter(inflatedData, bytesPerPixel, bytesPerLine);
@@ -133,7 +118,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/2003/REC-PNG-20031110/#5PNG-file-signature
 	 * @param {Buffer} buffer
 	 */
-	static isPNG(buffer: Buffer): boolean {
+	public static isPNG(buffer: Buffer): boolean {
 		return PngSignature.compare(buffer, 0, 8) === 0;
 	}
 
@@ -142,7 +127,7 @@ export default class Decoder {
 	 * @param {Buffer} chunk
 	 * @param {number} checkSum
 	 */
-	static verifyCheckSum(buffer: Buffer, checkSum: number): boolean {
+	private static verifyCheckSum(buffer: Buffer, checkSum: number): boolean {
 		return crc.crc32(buffer) === checkSum;
 	}
 
