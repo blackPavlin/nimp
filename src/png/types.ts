@@ -39,7 +39,7 @@ export const ColorTypes = {
 } as const;
 
 /**
- * @see Filter types
+ * Filter types
  * @see https://www.w3.org/TR/PNG/#9Filter-types
  */
 export const FilterTypes = {
@@ -50,6 +50,10 @@ export const FilterTypes = {
 	Paeth: 4,
 } as const;
 
+/**
+ * Interlace methods
+ * @see https://www.w3.org/TR/PNG/#8InterlaceMethods
+ */
 export const InterlaceMethods = {
 	None: 0,
 	Adam7: 1,
@@ -63,6 +67,13 @@ export type FilterMethod = 0;
 export type FilterType = ValueOf<typeof FilterTypes>;
 export type InterlaceMethod = ValueOf<typeof InterlaceMethods>;
 export type Channels = 1 | 2 | 3 | 4;
+
+export type InterlaceScan = {
+	xFactor: number;
+	yFactor: number;
+	xOffset: number;
+	yOffset: number;
+};
 
 export type TextData = {
 	keyword: string;

@@ -13,26 +13,26 @@ export default function unFilter(
 	bytesPerPixel: number,
 	bytesPerLine: number,
 ): Buffer[] {
-	const chunks: Buffer[] = [];
+	const chunks = new Array<Buffer>(buffer.length / bytesPerLine);
 
-	for (let i = 0, k = 0; i < buffer.length; i += bytesPerLine, k += 1) {
+	for (let i = 0, j = 0; i < buffer.length; i += bytesPerLine, j += 1) {
 		const chunk = buffer.subarray(i + 1, i + bytesPerLine);
 
 		switch (buffer.readUInt8(i)) {
 			case FilterTypes.None:
-				chunks.push(unFilterNone(chunk));
+				chunks[j] = unFilterNone(chunk);
 				break;
 			case FilterTypes.Sub:
-				chunks.push(unFilterSub(chunk, bytesPerPixel));
+				chunks[j] = unFilterSub(chunk, bytesPerPixel);
 				break;
 			case FilterTypes.Up:
-				chunks.push(unFilterUp(chunk, chunks[k - 1]));
+				chunks[j] = unFilterUp(chunk, chunks[j - 1]);
 				break;
 			case FilterTypes.Average:
-				chunks.push(unFilterAverage(chunk, bytesPerPixel, chunks[k - 1]));
+				chunks[j] = unFilterAverage(chunk, bytesPerPixel, chunks[j - 1]);
 				break;
 			case FilterTypes.Paeth:
-				chunks.push(unFilterPaeth(chunk, bytesPerPixel, chunks[k - 1]));
+				chunks[j] = unFilterPaeth(chunk, bytesPerPixel, chunks[j - 1]);
 				break;
 			default:
 				throw new Error('Bad filter type');

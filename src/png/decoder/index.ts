@@ -690,7 +690,9 @@ export default class Decoder {
 	 * @param {Buffer} chunk
 	 */
 	private _parseIDAT(chunk: Buffer): void {
-		this._deflatedIDAT.push(chunk);
+		if (chunk.length !== 0) {
+			this._deflatedIDAT.push(chunk);
+		}
 	}
 
 	/**

@@ -1,7 +1,7 @@
 import zlib from 'zlib';
 import crc from '../crc';
 import paethPredictor from '../paeth';
-import { PngSignature } from '../constants';
+import { PngSignature, Interlacing } from '../constants';
 
 import {
 	BitDepth,
@@ -15,23 +15,6 @@ import {
 	InterlaceMethod,
 	InterlaceMethods,
 } from '../types';
-
-type interlaceScan = {
-	xFactor: number;
-	yFactor: number;
-	xOffset: number;
-	yOffset: number;
-};
-
-const interlacing: interlaceScan[] = [
-	{ xFactor: 8, yFactor: 8, xOffset: 0, yOffset: 0 },
-	{ xFactor: 8, yFactor: 8, xOffset: 4, yOffset: 0 },
-	{ xFactor: 4, yFactor: 8, xOffset: 0, yOffset: 4 },
-	{ xFactor: 4, yFactor: 4, xOffset: 2, yOffset: 0 },
-	{ xFactor: 2, yFactor: 4, xOffset: 0, yOffset: 2 },
-	{ xFactor: 2, yFactor: 2, xOffset: 1, yOffset: 0 },
-	{ xFactor: 1, yFactor: 2, xOffset: 0, yOffset: 1 },
-];
 
 export default class Decoder {
 	constructor(buffer: Buffer) {
@@ -86,17 +69,35 @@ export default class Decoder {
 		const inflatedIDAT = zlib.inflateSync(Buffer.concat(this.deflatedIDAT));
 
 		if (this.interlaceMethod === InterlaceMethods.None) {
-			const image = this.decodeImagePass(inflatedIDAT, 0);
-			if (!image) {
-				throw new Error();
-			}
-
-			this.bitmap = image;
+			this.bitmap = this.decodeImagePass(inflatedIDAT, this.width, this.height);
 		} else if (this.interlaceMethod === InterlaceMethods.Adam7) {
-			this.bitmap = Buffer.alloc(this.width * this.height * 4);
+			const bitsPerPixel = this.channels * this.bitDepth;
+			const bytesPerPixel = (bitsPerPixel + 7) >> 3;
 
-			for (let i = 0; i < 7; i += 1) {}
+			this.bitmap = Buffer.alloc(this.width * this.height * bytesPerPixel);
+
+			let offset = 0;
+
+			for (let i = 0; i < 7; i += 1) {
+				const pass = Interlacing[i];
+
+				const width = ((this.width - pass.xOffset + pass.xFactor - 1) / pass.xFactor) | 0;
+				const height = ((this.height - pass.yOffset + pass.yFactor - 1) / pass.yFactor) | 0;
+
+				if (width === 0 || height === 0) {
+					continue;
+				}
+
+				const bytesPerLine = 1 + ((bitsPerPixel * width + 7) >> 3);
+
+				const chunk = inflatedIDAT.subarray(offset, (offset += bytesPerLine * height));
+
+				const image = this.decodeImagePass(chunk, width, height);
+				this.mergeImagePass(image, width, height, i);
+			}
 		}
+
+		console.log(this.bitmap);
 	}
 
 	public static isPNG(buffer: Buffer): boolean {
@@ -266,7 +267,7 @@ export default class Decoder {
 						this.transparent[0] *= 0x11;
 						break;
 					case 16:
-						this.transparent[0] /= 0x101 | 0;
+						this.transparent[0] = (this.transparent[0] / 0x101 + 0.5) | 0;
 						break;
 				}
 				break;
@@ -278,9 +279,9 @@ export default class Decoder {
 				this.transparent = [chunk.readUInt16BE(0), chunk.readUInt16BE(2), chunk.readUInt16BE(4)];
 
 				if (this.bitDepth === 16) {
-					this.transparent[0] /= 0x101 | 0;
-					this.transparent[1] /= 0x101 | 0;
-					this.transparent[2] /= 0x101 | 0;
+					this.transparent[0] = (this.transparent[0] / 0x101 + 0.5) | 0;
+					this.transparent[1] = (this.transparent[1] / 0x101 + 0.5) | 0;
+					this.transparent[2] = (this.transparent[2] / 0x101 + 0.5) | 0;
 				}
 				break;
 			case ColorTypes.IndexedColor:
@@ -315,22 +316,9 @@ export default class Decoder {
 		}
 	}
 
-	private decodeImagePass(buffer: Buffer, pass: number): Buffer | undefined {
-		let width = this.width;
-		let height = this.height;
-
-		if (this.interlaceMethod === InterlaceMethods.Adam7) {
-			const p = interlacing[pass];
-
-			width = ((this.width - p.xOffset + p.xFactor - 1) / p.xFactor) | 0;
-			height = ((this.height - p.yOffset + p.yFactor - 1) / p.yFactor) | 0;
-
-			if (width === 0 || height === 0) {
-				return;
-			}
-		}
-
-		const image = Buffer.alloc(width * height * 4);
+	private decodeImagePass(buffer: Buffer, width: number, height: number): Buffer {
+		const image = Buffer.alloc(width * height);
+		// const image = Buffer.alloc(width * height * 4);
 
 		const bitsPerPixel = this.channels * this.bitDepth;
 		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
@@ -380,101 +368,120 @@ export default class Decoder {
 					throw new Error('Bad filter type');
 			}
 
+			Buffer.from(cdat).copy(image, l * width);
 			currentLine.copy(previousLine);
 
-			switch (this.colorType) {
-				case ColorTypes.Grayscale:
-					switch (this.bitDepth) {
-						case 1:
-							break;
-						case 2:
-							break;
-						case 4:
-							break;
-						case 8:
-							for (let j = 0, k = 0; j < cdat.length; j += 1, k += 4) {
-								Buffer.of(cdat[j], cdat[j], cdat[j], 0xff).copy(image, l * width * 4 + k);
-							}
-							break;
-						case 16:
-							break;
-						default:
-							throw new Error(
-								`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
-							);
-					}
-					break;
-				case ColorTypes.TrueColor:
-					switch (this.bitDepth) {
-						case 8:
-							for (let j = 0, k = 0; j < cdat.length; j += 3, k += 4) {
-								Buffer.of(cdat[j + 0], cdat[j + 1], cdat[j + 2], 0xff).copy(
-									image,
-									l * width * 4 + k,
-								);
-							}
-							break;
-						case 16:
-							break;
-						default:
-							throw new Error(
-								`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
-							);
-					}
-					break;
-				case ColorTypes.IndexedColor:
-					switch (this.bitDepth) {
-						case 1:
-							break;
-						case 2:
-							break;
-						case 4:
-							break;
-						case 8:
-							break;
-						default:
-							throw new Error(
-								`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
-							);
-					}
-					break;
-				case ColorTypes.GrayscaleAlpha:
-					switch (this.bitDepth) {
-						case 8:
-							break;
-						case 16:
-							break;
-						default:
-							throw new Error(
-								`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
-							);
-					}
-					break;
-				case ColorTypes.TrueColorAlpha:
-					switch (this.bitDepth) {
-						case 8:
-							for (let i = 0, k = 0; i < cdat.length; i += 4, k += 4) {
-								image[k + 0] = cdat[i + 0];
-								image[k + 1] = cdat[i + 1];
-								image[k + 2] = cdat[i + 2];
-								image[k + 3] = cdat[i + 3];
-							}
-							break;
-						case 16:
-							break;
-						default:
-							throw new Error(
-								`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
-							);
-					}
-					break;
-				default:
-					throw new Error(`Bad color type ${this.colorType as number}`);
-			}
+			// switch (this.colorType) {
+			// 	case ColorTypes.Grayscale:
+			// 		switch (this.bitDepth) {
+			// 			case 1:
+			// 				break;
+			// 			case 2:
+			// 				break;
+			// 			case 4:
+			// 				break;
+			// 			case 8:
+			// 				for (let j = 0, k = 0; j < cdat.length; j += 1, k += 4) {
+			// 					Buffer.of(cdat[j], cdat[j], cdat[j], 0xff).copy(image, l * width * 4 + k);
+			// 				}
+			// 				break;
+			// 			case 16:
+			// 				break;
+			// 			default:
+			// 				throw new Error(
+			// 					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
+			// 				);
+			// 		}
+			// 		break;
+			// 	case ColorTypes.TrueColor:
+			// 		switch (this.bitDepth) {
+			// 			case 8:
+			// 				for (let j = 0, k = 0; j < cdat.length; j += 3, k += 4) {
+			// 					Buffer.of(cdat[j + 0], cdat[j + 1], cdat[j + 2], 0xff).copy(
+			// 						image,
+			// 						l * width * 4 + k,
+			// 					);
+			// 				}
+			// 				break;
+			// 			case 16:
+			// 				break;
+			// 			default:
+			// 				throw new Error(
+			// 					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
+			// 				);
+			// 		}
+			// 		break;
+			// 	case ColorTypes.IndexedColor:
+			// 		switch (this.bitDepth) {
+			// 			case 1:
+			// 				break;
+			// 			case 2:
+			// 				break;
+			// 			case 4:
+			// 				break;
+			// 			case 8:
+			// 				break;
+			// 			default:
+			// 				throw new Error(
+			// 					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
+			// 				);
+			// 		}
+			// 		break;
+			// 	case ColorTypes.GrayscaleAlpha:
+			// 		switch (this.bitDepth) {
+			// 			case 8:
+			// 				break;
+			// 			case 16:
+			// 				break;
+			// 			default:
+			// 				throw new Error(
+			// 					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
+			// 				);
+			// 		}
+			// 		break;
+			// 	case ColorTypes.TrueColorAlpha:
+			// 		switch (this.bitDepth) {
+			// 			case 8:
+			// 				for (let i = 0, k = 0; i < cdat.length; i += 4, k += 4) {
+			// 					image[k + 0] = cdat[i + 0];
+			// 					image[k + 1] = cdat[i + 1];
+			// 					image[k + 2] = cdat[i + 2];
+			// 					image[k + 3] = cdat[i + 3];
+			// 				}
+			// 				break;
+			// 			case 16:
+			// 				break;
+			// 			default:
+			// 				throw new Error(
+			// 					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
+			// 				);
+			// 		}
+			// 		break;
+			// 	default:
+			// 		throw new Error(`Bad color type ${this.colorType as number}`);
+			// }
 		}
 
 		return image;
 	}
 
-	// private mergeImagePass(): void {}
+	private mergeImagePass(image: Buffer, width: number, height: number, pass: number): void {
+		const p = Interlacing[pass];
+
+		let s = 0;
+
+		for (let y = 0; y < height; y += 1) {
+			const dBase = (y * p.yFactor + p.yOffset - 0) * this.width + (p.xOffset - 0) * 1;
+
+			for (let x = 0; x < width; x += 1) {
+				const d = dBase + x * p.xFactor * 1;
+
+				const arr = image.subarray(s, s + 1);
+
+				arr.copy(this.bitmap, d);
+				// s += bitsPerPixel
+				s += 1;
+			}
+		}
+	}
 }

@@ -8,12 +8,12 @@ Portable Network Graphics, is a ubiquitous, lossless image file format, based on
 ### Features:
 - Support 1, 2, 4, 8, 16 bit depth images;
 - Support greyscale, truecolour, indexed-colour, greyscale with alpha and truecolour with alpha images;
+- Support interlace method;
 - Support all ancillary chunks;
 - Full unit test coverage;
 - Typescript;
 
 ### Plans:
-- Add support interlace method;
 - Add support streams;
 - Add support eXIf chunks;
 
