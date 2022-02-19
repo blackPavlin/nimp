@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import Decoder from '../../../src/png/decoder';
-import { ColorTypes } from '../../../src/png/types';
+import Decoder from '../../../decoder';
+import { ColorTypes } from '../../../types';
 
 describe('Chunk ordering', () => {
 	it('Grayscale mother image with 1 idat-chunk', () => {

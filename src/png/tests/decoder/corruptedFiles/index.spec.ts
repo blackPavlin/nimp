@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import Decoder from '../../../src/png/decoder';
+import Decoder from '../../../decoder';
 
 describe('Corrupted files', () => {
 	it('Signature byte 1 MSBit reset to zero', () => {

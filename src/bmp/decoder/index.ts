@@ -1,8 +1,5 @@
 import { BmpSignature } from '../constants';
 
-import path from 'path';
-import fs from 'fs';
-
 export default class Decoder {
 	constructor(buffer: Buffer) {
 		if (!Decoder.isBMP(buffer)) {
@@ -11,21 +8,21 @@ export default class Decoder {
 
 		// BitMapFileHeader
 		const fileSize = buffer.readUInt32LE(2);
-
-		const a = buffer.readUInt16LE(6);
-		const b = buffer.readUInt16LE(8);
-
 		const offset = buffer.readUInt32LE(10);
 
 		console.log('fileSize', fileSize);
-		console.log('a', a);
-		console.log('b', b);
 		console.log('offset', offset);
 
 		// BitMapInfoHeader
 		const headerSize = buffer.readUInt32LE(14);
+
 		const width = buffer.readUInt32LE(18);
 		const height = buffer.readUInt32LE(22);
+
+		if (width <= 0 || height <= 0) {
+			throw new Error();
+		}
+
 		const colorPlanes = buffer.readUInt16LE(26);
 		const bitsPerPixel = buffer.readUInt16LE(28);
 		const compressionMethod = buffer.readUInt32LE(30);
@@ -70,6 +67,3 @@ export default class Decoder {
 
 	public height!: number;
 }
-
-const image = fs.readFileSync(path.join(__dirname, './basn0g08.bmp'));
-const bmp = new Decoder(image);
