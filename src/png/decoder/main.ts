@@ -276,7 +276,11 @@ export default class Decoder {
 					throw new Error('Bad tRNS length');
 				}
 
-				this.transparent = [chunk.readUInt16BE(0), chunk.readUInt16BE(2), chunk.readUInt16BE(4)];
+				this.transparent = [
+					chunk.readUInt16BE(0),
+					chunk.readUInt16BE(2),
+					chunk.readUInt16BE(4),
+				];
 
 				if (this.bitDepth === 16) {
 					this.transparent[0] = (this.transparent[0] / 0x101 + 0.5) | 0;
@@ -361,7 +365,11 @@ export default class Decoder {
 						cdat[i] += pdat[i];
 					}
 					for (let i = bytesPerPixel; i < cdat.length; i += 1) {
-						cdat[i] += paethPredictor(cdat[i - bytesPerPixel], pdat[i], pdat[i - bytesPerPixel]);
+						cdat[i] += paethPredictor(
+							cdat[i - bytesPerPixel],
+							pdat[i],
+							pdat[i - bytesPerPixel],
+						);
 					}
 					break;
 				default:
@@ -468,6 +476,9 @@ export default class Decoder {
 	private mergeImagePass(image: Buffer, width: number, height: number, pass: number): void {
 		const p = Interlacing[pass];
 
+		const bitsPerPixel = this.channels * this.bitDepth;
+		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
+
 		let s = 0;
 
 		for (let y = 0; y < height; y += 1) {
@@ -476,11 +487,10 @@ export default class Decoder {
 			for (let x = 0; x < width; x += 1) {
 				const d = dBase + x * p.xFactor * 1;
 
-				const arr = image.subarray(s, s + 1);
+				const arr = image.subarray(s, s + bytesPerPixel);
 
 				arr.copy(this.bitmap, d);
-				// s += bitsPerPixel
-				s += 1;
+				s += bytesPerPixel;
 			}
 		}
 	}
