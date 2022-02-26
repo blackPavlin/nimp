@@ -67,7 +67,12 @@ export default function bitConverter(
 								((byte >> 2) & 3) * 0x55,
 								((byte >> 0) & 3) * 0x55,
 						  )
-						: Buffer.of((byte >> 6) & 3, (byte >> 4) & 3, (byte >> 2) & 3, (byte >> 0) & 3);
+						: Buffer.of(
+								(byte >> 6) & 3,
+								(byte >> 4) & 3,
+								(byte >> 2) & 3,
+								(byte >> 0) & 3,
+						  );
 
 					bytes.copy(buffer, k * 4);
 				}

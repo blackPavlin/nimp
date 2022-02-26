@@ -1,5 +1,5 @@
 import zlib from 'zlib';
-import { PngSignature, GammaFactor, ChromaticitiesFactor } from '../constants';
+import { PngSignature, GammaFactor, ChromaticitiesFactor, Interlacing } from '../constants';
 import crc from '../crc';
 import {
 	ChunkTypes,
@@ -79,39 +79,79 @@ export default class Decoder {
 			handler(chunk);
 		}
 
-		// TODO: Добавить проверку последовательности чанков
-		// TODO: Добавить проверки
+		// TODO: Add check chunk ordering
 
-		this.decodeImageData();
+		if (this.deflatedIDAT.length === 0) {
+			throw new Error('Missing IDAT chunks');
+		}
+
+		const inflatedIDAT = zlib.inflateSync(Buffer.concat(this.deflatedIDAT));
+		this.deflatedIDAT.length = 0; // Clear unused data
+
+		if (this.interlaceMethod === InterlaceMethods.None) {
+			this.bitmap = this.decodeImagePass(inflatedIDAT, this.width);
+		} else if (this.interlaceMethod === InterlaceMethods.Adam7) {
+			const bitsPerPixel = this.channels * this.bitDepth;
+
+			this.bitmap = Buffer.alloc(this.width * this.height * 4);
+
+			for (let i = 0, offset = 0; i < 7; i += 1) {
+				const pass = Interlacing[i];
+
+				const width = ((this.width - pass.xOffset + pass.xFactor - 1) / pass.xFactor) | 0;
+				const height = ((this.height - pass.yOffset + pass.yFactor - 1) / pass.yFactor) | 0;
+
+				if (width === 0 || height === 0) {
+					continue;
+				}
+
+				const bytesPerLine = 1 + ((bitsPerPixel * width + 7) >> 3);
+
+				const chunk = inflatedIDAT.subarray(offset, (offset += bytesPerLine * height));
+
+				const image = this.decodeImagePass(chunk, width);
+				this.mergeImagePass(image, width, height, i);
+			}
+		}
 	}
 
-	private decodeImageData(): void {
-		if (this._deflatedIDAT.length === 0) {
-			throw new Error('Missing IDAT chunk');
-		}
-
-		if (this.interlaceMethod === 1) {
-			throw new Error('Unsupported interlace method');
-		}
-
-		const inflatedData = zlib.inflateSync(Buffer.concat(this._deflatedIDAT));
-		this._deflatedIDAT = [];
-
+	private decodeImagePass(inflatedData: Buffer, width: number): Buffer {
 		const bitsPerPixel = this.channels * this.bitDepth;
 		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
 		// + 1
-		const bytesPerLine = 1 + ((bitsPerPixel * this.width + 7) >> 3);
+		const bytesPerLine = 1 + ((bitsPerPixel * width + 7) >> 3);
 
 		const unfilteredChunks = unFilter(inflatedData, bytesPerPixel, bytesPerLine);
+
 		const convertedData = converter(
 			unfilteredChunks,
 			this.bitDepth,
-			this.width * this.channels,
+			width * this.channels,
 			this.colorType !== ColorTypes.IndexedColor,
 		);
-		const normalizedData = normalize(convertedData, this.colorType, this.transparent, this.palette);
 
-		this.bitmap = Buffer.concat(normalizedData);
+		const normalizedData = normalize(
+			convertedData,
+			this.colorType,
+			this.transparent,
+			this.palette,
+		);
+
+		return Buffer.concat(normalizedData);
+	}
+
+	private mergeImagePass(image: Buffer, width: number, height: number, pass: number): void {
+		const p = Interlacing[pass];
+
+		for (let y = 0, s = 0; y < height; y += 1) {
+			const dBase = (y * p.yFactor + p.yOffset) * this.width * 4 + p.xOffset * 4;
+
+			for (let x = 0; x < image.length / height; x += 1) {
+				const d = dBase + x * p.xFactor * 4;
+
+				image.subarray(s, (s += 4)).copy(this.bitmap, d);
+			}
+		}
 	}
 
 	/**
@@ -471,7 +511,12 @@ export default class Decoder {
 		switch (this.colorType) {
 			case ColorTypes.Grayscale:
 			case ColorTypes.GrayscaleAlpha:
-				this.background = [chunk.readUInt16BE(), chunk.readUInt16BE(), chunk.readUInt16BE(), 0xff];
+				this.background = [
+					chunk.readUInt16BE(),
+					chunk.readUInt16BE(),
+					chunk.readUInt16BE(),
+					0xff,
+				];
 
 				switch (this.bitDepth) {
 					case 1:
@@ -588,7 +633,11 @@ export default class Decoder {
 					throw new Error('Bad tRNS length');
 				}
 
-				this.transparent = [chunk.readUInt16BE(0), chunk.readUInt16BE(2), chunk.readUInt16BE(4)];
+				this.transparent = [
+					chunk.readUInt16BE(0),
+					chunk.readUInt16BE(2),
+					chunk.readUInt16BE(4),
+				];
 
 				if (this.bitDepth === 16) {
 					this.transparent[0] = (this.transparent[0] / 0x101 + 0.5) | 0;
@@ -683,7 +732,7 @@ export default class Decoder {
 		});
 	}
 
-	private _deflatedIDAT: Buffer[] = [];
+	private deflatedIDAT: Buffer[] = [];
 
 	/**
 	 * @see https://www.w3.org/TR/PNG/#11IDAT
@@ -691,7 +740,7 @@ export default class Decoder {
 	 */
 	private _parseIDAT(chunk: Buffer): void {
 		if (chunk.length !== 0) {
-			this._deflatedIDAT.push(chunk);
+			this.deflatedIDAT.push(chunk);
 		}
 	}
 

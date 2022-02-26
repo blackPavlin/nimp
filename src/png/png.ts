@@ -8,6 +8,7 @@ import {
 	FilterMethod,
 	IccProfile,
 	InterlaceMethod,
+	InterlaceMethods,
 	PhisicalDimensions,
 	SuggestedPalette,
 	TextData,
@@ -73,7 +74,13 @@ export default class PNG {
 	}
 
 	protected set bitDepth(bitDepth: BitDepth) {
-		if (bitDepth !== 1 && bitDepth !== 2 && bitDepth !== 4 && bitDepth !== 8 && bitDepth !== 16) {
+		if (
+			bitDepth !== 1 &&
+			bitDepth !== 2 &&
+			bitDepth !== 4 &&
+			bitDepth !== 8 &&
+			bitDepth !== 16
+		) {
 			throw new Error(`Bad bit depth: ${bitDepth as number}`);
 		}
 
@@ -83,12 +90,16 @@ export default class PNG {
 				case ColorTypes.GrayscaleAlpha:
 				case ColorTypes.TrueColorAlpha:
 					if (bitDepth !== 8 && bitDepth !== 16) {
-						throw new Error(`Unsupported color type ${this.#colorType} and bit depth ${bitDepth}`);
+						throw new Error(
+							`Unsupported color type ${this.#colorType} and bit depth ${bitDepth}`,
+						);
 					}
 					break;
 				case ColorTypes.IndexedColor:
 					if (bitDepth === 16) {
-						throw new Error(`Unsupported color type ${this.#colorType} and bit depth ${bitDepth}`);
+						throw new Error(
+							`Unsupported color type ${this.#colorType} and bit depth ${bitDepth}`,
+						);
 					}
 					break;
 			}
@@ -120,12 +131,16 @@ export default class PNG {
 				case ColorTypes.GrayscaleAlpha:
 				case ColorTypes.TrueColorAlpha:
 					if (this.bitDepth !== 8 && this.#bitDepth !== 16) {
-						throw new Error(`Unsupported color type ${colorType} and bit depth ${this.#bitDepth}`);
+						throw new Error(
+							`Unsupported color type ${colorType} and bit depth ${this.#bitDepth}`,
+						);
 					}
 					break;
 				case ColorTypes.IndexedColor:
 					if (this.#bitDepth === 16) {
-						throw new Error(`Unsupported color type ${colorType} and bit depth ${this.#bitDepth}`);
+						throw new Error(
+							`Unsupported color type ${colorType} and bit depth ${this.#bitDepth}`,
+						);
 					}
 					break;
 			}
@@ -167,7 +182,10 @@ export default class PNG {
 	}
 
 	protected set interlaceMethod(interlaceMethod: InterlaceMethod) {
-		if (interlaceMethod !== 0 && interlaceMethod !== 1) {
+		if (
+			interlaceMethod !== InterlaceMethods.None &&
+			interlaceMethod !== InterlaceMethods.Adam7
+		) {
 			throw new Error(`Bad interlace method: ${interlaceMethod as number}`);
 		}
 
@@ -191,7 +209,10 @@ export default class PNG {
 	}
 
 	protected set palette(palette: Buffer[] | undefined) {
-		if (this.colorType === ColorTypes.Grayscale || this.colorType === ColorTypes.GrayscaleAlpha) {
+		if (
+			this.colorType === ColorTypes.Grayscale ||
+			this.colorType === ColorTypes.GrayscaleAlpha
+		) {
 			throw new Error('PLTE, color type mismatch');
 		}
 

@@ -34,3 +34,4 @@ BitMap Picture, is a raster graphics image file format used to store bitmap digi
 - Typescript;
 
 ## References:
+- [The Bitmap Test Suite](https://bmptestsuite.sourceforge.io/)

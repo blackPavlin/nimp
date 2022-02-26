@@ -1,6 +1,14 @@
 import { FilterTypes } from '../types';
 import paethPredictor from '../paeth';
 
+/*
+	Recon(x) = Filt(x)
+	Recon(x) = Filt(x) + Recon(a)
+	Recon(x) = Filt(x) + Recon(b)
+	Recon(x) = Filt(x) + floor((Recon(a) + Recon(b)) / 2)
+	Recon(x) = Filt(x) + PaethPredictor(Recon(a), Recon(b), Recon(c))
+*/
+
 /**
  * @see https://www.w3.org/TR/PNG/#9Filters
  * @param buffer {Buffer}
@@ -13,126 +21,55 @@ export default function unFilter(
 	bytesPerPixel: number,
 	bytesPerLine: number,
 ): Buffer[] {
-	const chunks = new Array<Buffer>(buffer.length / bytesPerLine);
+	const lines = new Array<Buffer>(buffer.length / bytesPerLine);
+	let previousLine = Buffer.alloc(bytesPerLine - 1);
 
-	for (let i = 0, j = 0; i < buffer.length; i += bytesPerLine, j += 1) {
-		const chunk = buffer.subarray(i + 1, i + bytesPerLine);
+	for (let y = 0, offset = 0; offset < buffer.length; y += 1, offset += bytesPerLine) {
+		const line = buffer.subarray(offset + 1, offset + bytesPerLine);
 
-		switch (buffer.readUInt8(i)) {
+		switch (buffer.readUInt8(offset)) {
 			case FilterTypes.None:
-				chunks[j] = unFilterNone(chunk);
+				// No-op
 				break;
 			case FilterTypes.Sub:
-				chunks[j] = unFilterSub(chunk, bytesPerPixel);
+				for (let i = bytesPerPixel; i < line.length; i += 1) {
+					line[i] += line[i - bytesPerPixel];
+				}
 				break;
 			case FilterTypes.Up:
-				chunks[j] = unFilterUp(chunk, chunks[j - 1]);
+				for (let i = 0; i < line.length; i += 1) {
+					line[i] += previousLine[i];
+				}
 				break;
 			case FilterTypes.Average:
-				chunks[j] = unFilterAverage(chunk, bytesPerPixel, chunks[j - 1]);
+				for (let i = 0; i < bytesPerPixel; i += 1) {
+					line[i] += previousLine[i] >> 1;
+				}
+
+				for (let i = bytesPerPixel; i < line.length; i += 1) {
+					line[i] += (line[i - bytesPerPixel] + previousLine[i]) >> 1;
+				}
 				break;
 			case FilterTypes.Paeth:
-				chunks[j] = unFilterPaeth(chunk, bytesPerPixel, chunks[j - 1]);
+				for (let i = 0; i < bytesPerPixel; i += 1) {
+					line[i] += previousLine[i];
+				}
+
+				for (let i = bytesPerPixel; i < line.length; i += 1) {
+					line[i] += paethPredictor(
+						line[i - bytesPerPixel],
+						previousLine[i],
+						previousLine[i - bytesPerPixel],
+					);
+				}
 				break;
 			default:
 				throw new Error('Bad filter type');
 		}
+
+		lines[y] = line;
+		previousLine = line;
 	}
 
-	return chunks;
-}
-
-/**
- * Recon(x) = Filt(x)
- * @param {Buffer} chunk
- * @returns {Buffer}
- */
-function unFilterNone(chunk: Buffer): Buffer {
-	return chunk;
-}
-
-/**
- * Recon(x) = Filt(x) + Recon(a)
- * @param {Buffer} chunk
- * @param {number} bpp
- * @returns {Buffer}
- */
-function unFilterSub(chunk: Buffer, bpp: number): Buffer {
-	for (let i = bpp; i < chunk.length; i += 1) {
-		chunk[i] += chunk[i - bpp];
-	}
-
-	return chunk;
-}
-
-/**
- * Recon(x) = Filt(x) + Recon(b)
- * @param {Buffer} chunk
- * @param {Buffer} tmp
- * @returns {Buffer}
- */
-function unFilterUp(chunk: Buffer, tmp?: Buffer): Buffer {
-	if (!tmp) {
-		return chunk;
-	}
-
-	for (let i = 0; i < chunk.length; i += 1) {
-		chunk[i] += tmp[i];
-	}
-
-	return chunk;
-}
-
-/**
- * Recon(x) = Filt(x) + floor((Recon(a) + Recon(b)) / 2)
- * @param {Buffer} chunk
- * @param {number} bpp
- * @param {Buffer} tmp
- * @returns {Buffer}
- */
-function unFilterAverage(chunk: Buffer, bpp: number, tmp?: Buffer): Buffer {
-	if (!tmp) {
-		for (let i = bpp; i < chunk.length; i += 1) {
-			chunk[i] += chunk[i - bpp] >> 1;
-		}
-
-		return chunk;
-	}
-
-	for (let i = 0; i < bpp; i += 1) {
-		chunk[i] += tmp[i] >> 1;
-	}
-
-	for (let i = bpp; i < chunk.length; i += 1) {
-		chunk[i] += (chunk[i - bpp] + tmp[i]) >> 1;
-	}
-
-	return chunk;
-}
-
-/**
- * Recon(x) = Filt(x) + PaethPredictor(Recon(a), Recon(b), Recon(c))
- * @param {Buffer} chunk
- * @param {number} bpp
- * @param {Buffer} tmp
- * @returns {Buffer}
- */
-function unFilterPaeth(chunk: Buffer, bpp: number, tmp?: Buffer): Buffer {
-	if (!tmp) {
-		for (let i = bpp; i < chunk.length; i += 1) {
-			chunk[i] += chunk[i - bpp];
-		}
-
-		return chunk;
-	}
-
-	for (let i = 0; i < bpp; i += 1) {
-		chunk[i] += tmp[i];
-	}
-
-	for (let i = bpp; i < chunk.length; i += 1) {
-		chunk[i] += paethPredictor(chunk[i - bpp], tmp[i], tmp[i - bpp]);
-	}
-
-	return chunk;
+	return lines;
 }

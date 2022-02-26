@@ -1,7 +1,9 @@
 import zlib from 'zlib';
 import crc from '../crc';
-import paethPredictor from '../paeth';
 import { PngSignature, Interlacing } from '../constants';
+
+import converter from './converter';
+import normalize from './bitmapper';
 
 import {
 	BitDepth,
@@ -11,10 +13,10 @@ import {
 	ColorTypes,
 	CompressionMethod,
 	FilterMethod,
-	FilterTypes,
 	InterlaceMethod,
 	InterlaceMethods,
 } from '../types';
+import unFilter from './unfilter';
 
 export default class Decoder {
 	constructor(buffer: Buffer) {
@@ -69,16 +71,14 @@ export default class Decoder {
 		const inflatedIDAT = zlib.inflateSync(Buffer.concat(this.deflatedIDAT));
 
 		if (this.interlaceMethod === InterlaceMethods.None) {
-			this.bitmap = this.decodeImagePass(inflatedIDAT, this.width, this.height);
+			this.bitmap = this.decodeImagePass(inflatedIDAT, this.width);
 		} else if (this.interlaceMethod === InterlaceMethods.Adam7) {
 			const bitsPerPixel = this.channels * this.bitDepth;
 			const bytesPerPixel = (bitsPerPixel + 7) >> 3;
 
 			this.bitmap = Buffer.alloc(this.width * this.height * bytesPerPixel);
 
-			let offset = 0;
-
-			for (let i = 0; i < 7; i += 1) {
+			for (let i = 0, offset = 0; i < 7; i += 1) {
 				const pass = Interlacing[i];
 
 				const width = ((this.width - pass.xOffset + pass.xFactor - 1) / pass.xFactor) | 0;
@@ -92,12 +92,30 @@ export default class Decoder {
 
 				const chunk = inflatedIDAT.subarray(offset, (offset += bytesPerLine * height));
 
-				const image = this.decodeImagePass(chunk, width, height);
+				const image = this.decodeImagePass(chunk, width);
 				this.mergeImagePass(image, width, height, i);
 			}
 		}
 
-		console.log(this.bitmap);
+		const chunks = new Array<Buffer>();
+		for (let i = 0; i < this.bitmap.length; i += this.bitmap.length / this.height) {
+			chunks.push(this.bitmap.subarray(i, i + this.bitmap.length / this.height));
+		}
+
+		const convertedData = converter(
+			chunks,
+			this.bitDepth,
+			this.width * this.channels,
+			this.colorType !== ColorTypes.IndexedColor,
+		);
+		const normalizedData = normalize(
+			convertedData,
+			this.colorType,
+			this.transparent,
+			this.palette,
+		);
+
+		this.bitmap = Buffer.concat(normalizedData);
 	}
 
 	public static isPNG(buffer: Buffer): boolean {
@@ -320,155 +338,14 @@ export default class Decoder {
 		}
 	}
 
-	private decodeImagePass(buffer: Buffer, width: number, height: number): Buffer {
-		const image = Buffer.alloc(width * height);
-		// const image = Buffer.alloc(width * height * 4);
-
+	private decodeImagePass(buffer: Buffer, width: number): Buffer {
 		const bitsPerPixel = this.channels * this.bitDepth;
 		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
 		// +1
 		const bytesPerLine = 1 + ((bitsPerPixel * width + 7) >> 3);
 
-		const currentLine = Buffer.alloc(bytesPerLine).fill(0x00);
-		const previousLine = Buffer.alloc(bytesPerLine).fill(0x00);
-
-		for (let i = 0, l = 0; i < buffer.length; i += bytesPerLine, l += 1) {
-			buffer.copy(currentLine, 0, i);
-
-			const cdat = currentLine.subarray(1);
-			const pdat = previousLine.subarray(1);
-
-			switch (currentLine.readUInt8()) {
-				case FilterTypes.None:
-					// No-op.
-					break;
-				case FilterTypes.Sub:
-					for (let i = bytesPerPixel; i < cdat.length; i += 1) {
-						cdat[i] += cdat[i - bytesPerPixel];
-					}
-					break;
-				case FilterTypes.Up:
-					for (let i = 0; i < cdat.length; i += 1) {
-						cdat[i] += pdat[i];
-					}
-					break;
-				case FilterTypes.Average:
-					for (let i = 0; i < bytesPerPixel; i += 1) {
-						cdat[i] += pdat[i] >> 1;
-					}
-					for (let i = bytesPerPixel; i < cdat.length; i += 1) {
-						cdat[i] += (cdat[i - bytesPerPixel] + pdat[i]) >> 1;
-					}
-					break;
-				case FilterTypes.Paeth:
-					for (let i = 0; i < bytesPerPixel; i += 1) {
-						cdat[i] += pdat[i];
-					}
-					for (let i = bytesPerPixel; i < cdat.length; i += 1) {
-						cdat[i] += paethPredictor(
-							cdat[i - bytesPerPixel],
-							pdat[i],
-							pdat[i - bytesPerPixel],
-						);
-					}
-					break;
-				default:
-					throw new Error('Bad filter type');
-			}
-
-			Buffer.from(cdat).copy(image, l * width);
-			currentLine.copy(previousLine);
-
-			// switch (this.colorType) {
-			// 	case ColorTypes.Grayscale:
-			// 		switch (this.bitDepth) {
-			// 			case 1:
-			// 				break;
-			// 			case 2:
-			// 				break;
-			// 			case 4:
-			// 				break;
-			// 			case 8:
-			// 				for (let j = 0, k = 0; j < cdat.length; j += 1, k += 4) {
-			// 					Buffer.of(cdat[j], cdat[j], cdat[j], 0xff).copy(image, l * width * 4 + k);
-			// 				}
-			// 				break;
-			// 			case 16:
-			// 				break;
-			// 			default:
-			// 				throw new Error(
-			// 					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
-			// 				);
-			// 		}
-			// 		break;
-			// 	case ColorTypes.TrueColor:
-			// 		switch (this.bitDepth) {
-			// 			case 8:
-			// 				for (let j = 0, k = 0; j < cdat.length; j += 3, k += 4) {
-			// 					Buffer.of(cdat[j + 0], cdat[j + 1], cdat[j + 2], 0xff).copy(
-			// 						image,
-			// 						l * width * 4 + k,
-			// 					);
-			// 				}
-			// 				break;
-			// 			case 16:
-			// 				break;
-			// 			default:
-			// 				throw new Error(
-			// 					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
-			// 				);
-			// 		}
-			// 		break;
-			// 	case ColorTypes.IndexedColor:
-			// 		switch (this.bitDepth) {
-			// 			case 1:
-			// 				break;
-			// 			case 2:
-			// 				break;
-			// 			case 4:
-			// 				break;
-			// 			case 8:
-			// 				break;
-			// 			default:
-			// 				throw new Error(
-			// 					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
-			// 				);
-			// 		}
-			// 		break;
-			// 	case ColorTypes.GrayscaleAlpha:
-			// 		switch (this.bitDepth) {
-			// 			case 8:
-			// 				break;
-			// 			case 16:
-			// 				break;
-			// 			default:
-			// 				throw new Error(
-			// 					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
-			// 				);
-			// 		}
-			// 		break;
-			// 	case ColorTypes.TrueColorAlpha:
-			// 		switch (this.bitDepth) {
-			// 			case 8:
-			// 				for (let i = 0, k = 0; i < cdat.length; i += 4, k += 4) {
-			// 					image[k + 0] = cdat[i + 0];
-			// 					image[k + 1] = cdat[i + 1];
-			// 					image[k + 2] = cdat[i + 2];
-			// 					image[k + 3] = cdat[i + 3];
-			// 				}
-			// 				break;
-			// 			case 16:
-			// 				break;
-			// 			default:
-			// 				throw new Error(
-			// 					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth as number}`,
-			// 				);
-			// 		}
-			// 		break;
-			// 	default:
-			// 		throw new Error(`Bad color type ${this.colorType as number}`);
-			// }
-		}
+		const unfiltered = unFilter(buffer, bytesPerPixel, bytesPerLine);
+		const image = Buffer.concat(unfiltered);
 
 		return image;
 	}
@@ -479,18 +356,13 @@ export default class Decoder {
 		const bitsPerPixel = this.channels * this.bitDepth;
 		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
 
-		let s = 0;
-
-		for (let y = 0; y < height; y += 1) {
-			const dBase = (y * p.yFactor + p.yOffset - 0) * this.width + (p.xOffset - 0) * 1;
+		for (let y = 0, s = 0; y < height; y += 1) {
+			const dBase = (y * p.yFactor + p.yOffset) * this.width + p.xOffset * bytesPerPixel;
 
 			for (let x = 0; x < width; x += 1) {
-				const d = dBase + x * p.xFactor * 1;
+				const d = dBase + x * p.xFactor * bytesPerPixel;
 
-				const arr = image.subarray(s, s + bytesPerPixel);
-
-				arr.copy(this.bitmap, d);
-				s += bytesPerPixel;
+				image.subarray(s, (s += bytesPerPixel)).copy(this.bitmap, d);
 			}
 		}
 	}
