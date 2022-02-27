@@ -4,14 +4,22 @@ import Decoder from '../../../decoder';
 import { ColorTypes } from '../../../types';
 
 describe('Background colors', () => {
-	it.skip('8 bit grayscale, alpha, no background chunk, interlaced', () => {
+	it('8 bit grayscale, alpha, no background chunk, interlaced', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/bgai4a08.png'));
 		const png = new Decoder(image);
+		expect(png.bitDepth).toBe(8);
+		expect(png.colorType).toBe(ColorTypes.GrayscaleAlpha);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.background).toBeUndefined();
 	});
 
-	it.skip('16 bit grayscale, alpha, no background chunk, interlaced', () => {
+	it('16 bit grayscale, alpha, no background chunk, interlaced', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/bgai4a16.png'));
 		const png = new Decoder(image);
+		expect(png.bitDepth).toBe(16);
+		expect(png.colorType).toBe(ColorTypes.GrayscaleAlpha);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.background).toBeUndefined();
 	});
 
 	it('3x8 bits rgb color, alpha, no background chunk', () => {

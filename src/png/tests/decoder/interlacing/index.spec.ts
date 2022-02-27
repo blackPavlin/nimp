@@ -3,7 +3,7 @@ import path from 'path';
 import Decoder from '../../../decoder';
 import { ColorTypes } from '../../../types';
 
-describe.skip('Interlacing', () => {
+describe('Interlacing', () => {
 	it('black & white', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/basi0g01.png'));
 		const png = new Decoder(image);
@@ -13,6 +13,7 @@ describe.skip('Interlacing', () => {
 		expect(png.bitDepth).toBe(1);
 		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('2 bit (4 level) grayscale', () => {
@@ -24,6 +25,7 @@ describe.skip('Interlacing', () => {
 		expect(png.bitDepth).toBe(2);
 		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('4 bit (16 level) grayscale', () => {
@@ -35,6 +37,7 @@ describe.skip('Interlacing', () => {
 		expect(png.bitDepth).toBe(4);
 		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('8 bit (256 level) grayscale', () => {
@@ -46,6 +49,7 @@ describe.skip('Interlacing', () => {
 		expect(png.bitDepth).toBe(8);
 		expect(png.colorType).toBe(ColorTypes.Grayscale);
 		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('16 bit (64k level) grayscale', () => {
@@ -55,6 +59,9 @@ describe.skip('Interlacing', () => {
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
 		expect(png.bitDepth).toBe(16);
+		expect(png.colorType).toBe(ColorTypes.Grayscale);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('3x8 bits rgb color', () => {
@@ -63,6 +70,10 @@ describe.skip('Interlacing', () => {
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
+		expect(png.bitDepth).toBe(8);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('3x16 bits rgb color', () => {
@@ -71,6 +82,10 @@ describe.skip('Interlacing', () => {
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
+		expect(png.bitDepth).toBe(16);
+		expect(png.colorType).toBe(ColorTypes.TrueColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('1 bit (2 color) paletted', () => {
@@ -79,6 +94,10 @@ describe.skip('Interlacing', () => {
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
+		expect(png.bitDepth).toBe(1);
+		expect(png.colorType).toBe(ColorTypes.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('2 bit (4 color) paletted', () => {
@@ -87,6 +106,10 @@ describe.skip('Interlacing', () => {
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
+		expect(png.bitDepth).toBe(2);
+		expect(png.colorType).toBe(ColorTypes.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('4 bit (16 color) paletted', () => {
@@ -95,6 +118,10 @@ describe.skip('Interlacing', () => {
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
+		expect(png.bitDepth).toBe(4);
+		expect(png.colorType).toBe(ColorTypes.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('8 bit (256 color) paletted', () => {
@@ -103,6 +130,10 @@ describe.skip('Interlacing', () => {
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
+		expect(png.bitDepth).toBe(8);
+		expect(png.colorType).toBe(ColorTypes.IndexedColor);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('8 bit grayscale + 8 bit alpha-channel', () => {
@@ -111,6 +142,10 @@ describe.skip('Interlacing', () => {
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
+		expect(png.bitDepth).toBe(8);
+		expect(png.colorType).toBe(ColorTypes.GrayscaleAlpha);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('16 bit grayscale + 16 bit alpha-channel', () => {
@@ -119,6 +154,10 @@ describe.skip('Interlacing', () => {
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
+		expect(png.bitDepth).toBe(16);
+		expect(png.colorType).toBe(ColorTypes.GrayscaleAlpha);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('3x8 bits rgb color + 8 bit alpha-channel', () => {
@@ -127,6 +166,10 @@ describe.skip('Interlacing', () => {
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
+		expect(png.bitDepth).toBe(8);
+		expect(png.colorType).toBe(ColorTypes.TrueColorAlpha);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 
 	it('3x16 bits rgb color + 16 bit alpha-channel', () => {
@@ -135,5 +178,9 @@ describe.skip('Interlacing', () => {
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
+		expect(png.bitDepth).toBe(16);
+		expect(png.colorType).toBe(ColorTypes.TrueColorAlpha);
+		expect(png.bitmap).toHaveLength(png.width * png.height * 4);
+		expect(png.bitmap).toMatchSnapshot();
 	});
 });
