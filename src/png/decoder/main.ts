@@ -69,14 +69,12 @@ export default class Decoder {
 		}
 
 		const inflatedIDAT = zlib.inflateSync(Buffer.concat(this.deflatedIDAT));
+		this.deflatedIDAT.length = 0;
 
 		if (this.interlaceMethod === InterlaceMethods.None) {
 			this.bitmap = this.decodeImagePass(inflatedIDAT, this.width);
 		} else if (this.interlaceMethod === InterlaceMethods.Adam7) {
-			const bitsPerPixel = this.channels * this.bitDepth;
-			const bytesPerPixel = (bitsPerPixel + 7) >> 3;
-
-			this.bitmap = Buffer.alloc(this.width * this.height * bytesPerPixel);
+			this.bitmap = Buffer.alloc(this.height * this.height * this.channels);
 
 			for (let i = 0, offset = 0; i < 7; i += 1) {
 				const pass = Interlacing[i];
@@ -88,32 +86,35 @@ export default class Decoder {
 					continue;
 				}
 
+				const bitsPerPixel = this.channels * this.bitDepth;
 				const bytesPerLine = 1 + ((bitsPerPixel * width + 7) >> 3);
 
 				const chunk = inflatedIDAT.subarray(offset, (offset += bytesPerLine * height));
 
 				const image = this.decodeImagePass(chunk, width);
-				this.mergeImagePass(image, width, height, i);
+
+				const chunks = new Array<Buffer>();
+				for (let i = 0; i < (bytesPerLine - 1) * height; i += bytesPerLine - 1) {
+					chunks.push(image.subarray(i, i + (bytesPerLine - 1)));
+				}
+
+				const convertedData = converter(
+					chunks,
+					this.bitDepth,
+					width * this.channels,
+					this.colorType !== ColorTypes.IndexedColor,
+				);
+
+				this.mergeImagePass(Buffer.concat(convertedData), width, height, i);
 			}
 		}
 
 		const chunks = new Array<Buffer>();
-		for (let i = 0; i < this.bitmap.length; i += this.bitmap.length / this.height) {
-			chunks.push(this.bitmap.subarray(i, i + this.bitmap.length / this.height));
+		for (let i = 0; i < this.bitmap.length; i += this.width * this.channels) {
+			chunks.push(this.bitmap.subarray(i, i + this.width * this.channels));
 		}
 
-		const convertedData = converter(
-			chunks,
-			this.bitDepth,
-			this.width * this.channels,
-			this.colorType !== ColorTypes.IndexedColor,
-		);
-		const normalizedData = normalize(
-			convertedData,
-			this.colorType,
-			this.transparent,
-			this.palette,
-		);
+		const normalizedData = normalize(chunks, this.colorType, this.transparent, this.palette);
 
 		this.bitmap = Buffer.concat(normalizedData);
 	}
@@ -341,7 +342,7 @@ export default class Decoder {
 	private decodeImagePass(buffer: Buffer, width: number): Buffer {
 		const bitsPerPixel = this.channels * this.bitDepth;
 		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
-		// +1
+		// +1 byte filter type
 		const bytesPerLine = 1 + ((bitsPerPixel * width + 7) >> 3);
 
 		const unfiltered = unFilter(buffer, bytesPerPixel, bytesPerLine);
@@ -354,10 +355,16 @@ export default class Decoder {
 		const p = Interlacing[pass];
 
 		const bitsPerPixel = this.channels * this.bitDepth;
-		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
+		let bytesPerPixel = (bitsPerPixel + 7) >> 3;
+
+		if (this.bitDepth > 8) {
+			bytesPerPixel /= 2;
+		}
 
 		for (let y = 0, s = 0; y < height; y += 1) {
-			const dBase = (y * p.yFactor + p.yOffset) * this.width + p.xOffset * bytesPerPixel;
+			const dBase =
+				(y * p.yFactor + p.yOffset) * (this.width * bytesPerPixel) +
+				p.xOffset * bytesPerPixel;
 
 			for (let x = 0; x < width; x += 1) {
 				const d = dBase + x * p.xFactor * bytesPerPixel;

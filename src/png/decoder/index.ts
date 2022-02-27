@@ -25,25 +25,25 @@ import normalize from './bitmapper';
 export default class Decoder {
 	private readonly chunkMapping: Record<number, ((chunk: Buffer) => void) | undefined> = {
 		// Critical chunks
-		[ChunkTypes.IHDR]: this._parseIHDR.bind(this),
-		[ChunkTypes.PLTE]: this._parsePLTE.bind(this),
-		[ChunkTypes.tRNS]: this._parseTRNS.bind(this),
-		[ChunkTypes.IDAT]: this._parseIDAT.bind(this),
-		[ChunkTypes.IEND]: this._parseIEND.bind(this),
+		[ChunkTypes.IHDR]: this.parseIHDR.bind(this),
+		[ChunkTypes.PLTE]: this.parsePLTE.bind(this),
+		[ChunkTypes.tRNS]: this.parsetRNS.bind(this),
+		[ChunkTypes.IDAT]: this.parseIDAT.bind(this),
+		[ChunkTypes.IEND]: this.parseIEND.bind(this),
 		// Ancillary chunks
-		[ChunkTypes.cHRM]: this._parseCHRM.bind(this),
-		[ChunkTypes.gAMA]: this._parseGAMA.bind(this),
-		[ChunkTypes.iCCP]: this._parseICCP.bind(this),
-		[ChunkTypes.sBIT]: this._parseSBIT.bind(this),
-		[ChunkTypes.sRGB]: this._parseSRGB.bind(this),
-		[ChunkTypes.bKGD]: this._parseBKGD.bind(this),
-		[ChunkTypes.hIST]: this._parseHIST.bind(this),
-		[ChunkTypes.pHYs]: this._parsePHYS.bind(this),
-		[ChunkTypes.sPLT]: this._parseSPLT.bind(this),
-		[ChunkTypes.tEXt]: this._parseTEXT.bind(this),
-		[ChunkTypes.zTXt]: this._parseZTXT.bind(this),
-		[ChunkTypes.iTXt]: this._parseITXT.bind(this),
-		[ChunkTypes.tIME]: this._parseTIME.bind(this),
+		[ChunkTypes.cHRM]: this.parsecHRM.bind(this),
+		[ChunkTypes.gAMA]: this.parsegAMA.bind(this),
+		[ChunkTypes.iCCP]: this.parseiCCP.bind(this),
+		[ChunkTypes.sBIT]: this.parsesBIT.bind(this),
+		[ChunkTypes.sRGB]: this.parsesRGB.bind(this),
+		[ChunkTypes.bKGD]: this.parsebKGD.bind(this),
+		[ChunkTypes.hIST]: this.parsehIST.bind(this),
+		[ChunkTypes.pHYs]: this.parsepHYS.bind(this),
+		[ChunkTypes.sPLT]: this.parsesPLT.bind(this),
+		[ChunkTypes.tEXt]: this.parsetEXT.bind(this),
+		[ChunkTypes.zTXt]: this.parsezTXT.bind(this),
+		[ChunkTypes.iTXt]: this.parseiTXT.bind(this),
+		[ChunkTypes.tIME]: this.parsetIME.bind(this),
 	};
 
 	constructor(file: Buffer) {
@@ -118,7 +118,7 @@ export default class Decoder {
 	private decodeImagePass(inflatedData: Buffer, width: number): Buffer {
 		const bitsPerPixel = this.channels * this.bitDepth;
 		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
-		// + 1
+		// +1 byte filter type
 		const bytesPerLine = 1 + ((bitsPerPixel * width + 7) >> 3);
 
 		const unfilteredChunks = unFilter(inflatedData, bytesPerPixel, bytesPerLine);
@@ -193,7 +193,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11IHDR
 	 * @param {Buffer} chunk
 	 */
-	private _parseIHDR(chunk: Buffer): void {
+	private parseIHDR(chunk: Buffer): void {
 		if (chunk.length !== 13) {
 			throw new Error('Bad IHDR length');
 		}
@@ -287,7 +287,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11PLTE
 	 * @param {Buffer} chunk
 	 */
-	private _parsePLTE(chunk: Buffer): void {
+	private parsePLTE(chunk: Buffer): void {
 		const paletteEntries = chunk.length / 3;
 
 		if (
@@ -323,7 +323,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11cHRM
 	 * @param {Buffer} chunk
 	 */
-	private _parseCHRM(chunk: Buffer): void {
+	private parsecHRM(chunk: Buffer): void {
 		if (chunk.length !== 32) {
 			throw new Error('Bad cHRM length');
 		}
@@ -354,7 +354,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11gAMA
 	 * @param {Buffer} chunk
 	 */
-	private _parseGAMA(chunk: Buffer): void {
+	private parsegAMA(chunk: Buffer): void {
 		this.gamma = chunk.readUInt32BE() / GammaFactor;
 	}
 
@@ -364,7 +364,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11iCCP
 	 * @param {Buffer} chunk
 	 */
-	private _parseICCP(chunk: Buffer): void {
+	private parseiCCP(chunk: Buffer): void {
 		if (this.sRGB) {
 			throw new Error();
 		}
@@ -389,7 +389,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11pHYs
 	 * @param {Buffer} chunk
 	 */
-	private _parsePHYS(chunk: Buffer): void {
+	private parsepHYS(chunk: Buffer): void {
 		if (chunk.length !== 9) {
 			throw new Error('Bad pHYs length');
 		}
@@ -415,7 +415,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11sPLT
 	 * @param {Buffer} chunk
 	 */
-	private _parseSPLT(chunk: Buffer) {
+	private parsesPLT(chunk: Buffer) {
 		const separator = chunk.indexOf(0x00);
 		const name = chunk.toString('latin1', 0, separator);
 		const depth = chunk.readUInt8(separator + 1);
@@ -457,7 +457,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11sBIT
 	 * @param {Buffer} chunk
 	 */
-	private _parseSBIT(chunk: Buffer): void {
+	private parsesBIT(chunk: Buffer): void {
 		if (this.colorType === ColorTypes.Grayscale) {
 			const sBit = chunk.readUInt8();
 			this.significantBits = [sBit, sBit, sBit, this.bitDepth];
@@ -493,7 +493,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11sRGB
 	 * @param {Buffer} chunk
 	 */
-	private _parseSRGB(chunk: Buffer): void {
+	private parsesRGB(chunk: Buffer): void {
 		if (this.iccProfile) {
 			throw new Error();
 		}
@@ -507,7 +507,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11bKGD
 	 * @param {Buffer} chunk
 	 */
-	private _parseBKGD(chunk: Buffer): void {
+	private parsebKGD(chunk: Buffer): void {
 		switch (this.colorType) {
 			case ColorTypes.Grayscale:
 			case ColorTypes.GrayscaleAlpha:
@@ -584,7 +584,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11hIST
 	 * @param {Buffer} chunk
 	 */
-	private _parseHIST(chunk: Buffer): void {
+	private parsehIST(chunk: Buffer): void {
 		if (!this.palette) {
 			throw new Error('Missing palette');
 		}
@@ -604,7 +604,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11tRNS
 	 * @param {Buffer} chunk
 	 */
-	private _parseTRNS(chunk: Buffer): void {
+	private parsetRNS(chunk: Buffer): void {
 		switch (this.colorType) {
 			case ColorTypes.Grayscale:
 				if (chunk.length !== 2) {
@@ -669,7 +669,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11tIME
 	 * @param {Buffer} chunk
 	 */
-	private _parseTIME(chunk: Buffer): void {
+	private parsetIME(chunk: Buffer): void {
 		if (chunk.length !== 7) {
 			throw new Error('Bad tIME length');
 		}
@@ -690,7 +690,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11iTXt
 	 * @param {Buffer} chunk
 	 */
-	private _parseITXT(chunk: Buffer): void {
+	private parseiTXT(chunk: Buffer): void {
 		const separator1 = chunk.indexOf(0x00);
 		const separator2 = chunk.indexOf(0x00, separator1 + 3);
 		const separator3 = chunk.indexOf(0x00, separator2 + 2);
@@ -710,7 +710,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11tEXt
 	 * @param {Buffer} chunk
 	 */
-	private _parseTEXT(chunk: Buffer): void {
+	private parsetEXT(chunk: Buffer): void {
 		const separator = chunk.indexOf(0x00);
 
 		this.text.push({
@@ -723,7 +723,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11zTXt
 	 * @param {Buffer} chunk
 	 */
-	private _parseZTXT(chunk: Buffer): void {
+	private parsezTXT(chunk: Buffer): void {
 		const separator = chunk.indexOf(0x00);
 
 		this.text.push({
@@ -738,7 +738,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11IDAT
 	 * @param {Buffer} chunk
 	 */
-	private _parseIDAT(chunk: Buffer): void {
+	private parseIDAT(chunk: Buffer): void {
 		if (chunk.length !== 0) {
 			this.deflatedIDAT.push(chunk);
 		}
@@ -748,7 +748,7 @@ export default class Decoder {
 	 * @see https://www.w3.org/TR/PNG/#11IEND
 	 * @param {Buffer} chunk
 	 */
-	private _parseIEND(chunk: Buffer): void {
+	private parseIEND(chunk: Buffer): void {
 		if (chunk.length !== 0) {
 			throw new Error('Bad IEND length');
 		}
