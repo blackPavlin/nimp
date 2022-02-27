@@ -74,7 +74,7 @@ export default class Decoder {
 		if (this.interlaceMethod === InterlaceMethods.None) {
 			this.bitmap = this.decodeImagePass(inflatedIDAT, this.width);
 		} else if (this.interlaceMethod === InterlaceMethods.Adam7) {
-			this.bitmap = Buffer.alloc(this.height * this.height * this.channels);
+			this.bitmap = Buffer.alloc(this.height * this.width * 4);
 
 			for (let i = 0, offset = 0; i < 7; i += 1) {
 				const pass = Interlacing[i];
@@ -92,31 +92,9 @@ export default class Decoder {
 				const chunk = inflatedIDAT.subarray(offset, (offset += bytesPerLine * height));
 
 				const image = this.decodeImagePass(chunk, width);
-
-				const chunks = new Array<Buffer>();
-				for (let i = 0; i < (bytesPerLine - 1) * height; i += bytesPerLine - 1) {
-					chunks.push(image.subarray(i, i + (bytesPerLine - 1)));
-				}
-
-				const convertedData = converter(
-					chunks,
-					this.bitDepth,
-					width * this.channels,
-					this.colorType !== ColorTypes.IndexedColor,
-				);
-
-				this.mergeImagePass(Buffer.concat(convertedData), width, height, i);
+				this.mergeImagePass(image, height, i);
 			}
 		}
-
-		const chunks = new Array<Buffer>();
-		for (let i = 0; i < this.bitmap.length; i += this.width * this.channels) {
-			chunks.push(this.bitmap.subarray(i, i + this.width * this.channels));
-		}
-
-		const normalizedData = normalize(chunks, this.colorType, this.transparent, this.palette);
-
-		this.bitmap = Buffer.concat(normalizedData);
 	}
 
 	public static isPNG(buffer: Buffer): boolean {
@@ -346,30 +324,34 @@ export default class Decoder {
 		const bytesPerLine = 1 + ((bitsPerPixel * width + 7) >> 3);
 
 		const unfiltered = unFilter(buffer, bytesPerPixel, bytesPerLine);
-		const image = Buffer.concat(unfiltered);
 
-		return image;
+		const convertedData = converter(
+			unfiltered,
+			this.bitDepth,
+			width * this.channels,
+			this.colorType !== ColorTypes.IndexedColor,
+		);
+
+		const normalizedData = normalize(
+			convertedData,
+			this.colorType,
+			this.transparent,
+			this.palette,
+		);
+
+		return Buffer.concat(normalizedData);
 	}
 
-	private mergeImagePass(image: Buffer, width: number, height: number, pass: number): void {
+	private mergeImagePass(image: Buffer, height: number, pass: number): void {
 		const p = Interlacing[pass];
 
-		const bitsPerPixel = this.channels * this.bitDepth;
-		let bytesPerPixel = (bitsPerPixel + 7) >> 3;
-
-		if (this.bitDepth > 8) {
-			bytesPerPixel /= 2;
-		}
-
 		for (let y = 0, s = 0; y < height; y += 1) {
-			const dBase =
-				(y * p.yFactor + p.yOffset) * (this.width * bytesPerPixel) +
-				p.xOffset * bytesPerPixel;
+			const dBase = (y * p.yFactor + p.yOffset) * (this.width * 4) + p.xOffset * 4;
 
-			for (let x = 0; x < width; x += 1) {
-				const d = dBase + x * p.xFactor * bytesPerPixel;
+			for (let x = 0; x < image.length / height; x += 4) {
+				const d = dBase + x * p.xFactor;
 
-				image.subarray(s, (s += bytesPerPixel)).copy(this.bitmap, d);
+				image.subarray(s, (s += 4)).copy(this.bitmap, d);
 			}
 		}
 	}

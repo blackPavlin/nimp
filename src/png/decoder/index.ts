@@ -110,7 +110,7 @@ export default class Decoder {
 				const chunk = inflatedIDAT.subarray(offset, (offset += bytesPerLine * height));
 
 				const image = this.decodeImagePass(chunk, width);
-				this.mergeImagePass(image, width, height, i);
+				this.mergeImagePass(image, height, i);
 			}
 		}
 	}
@@ -140,14 +140,14 @@ export default class Decoder {
 		return Buffer.concat(normalizedData);
 	}
 
-	private mergeImagePass(image: Buffer, width: number, height: number, pass: number): void {
+	private mergeImagePass(image: Buffer, height: number, pass: number): void {
 		const p = Interlacing[pass];
 
 		for (let y = 0, s = 0; y < height; y += 1) {
-			const dBase = (y * p.yFactor + p.yOffset) * this.width * 4 + p.xOffset * 4;
+			const dBase = (y * p.yFactor + p.yOffset) * (this.width * 4) + p.xOffset * 4;
 
-			for (let x = 0; x < image.length / height; x += 1) {
-				const d = dBase + x * p.xFactor * 4;
+			for (let x = 0; x < image.length / height; x += 4) {
+				const d = dBase + x * p.xFactor;
 
 				image.subarray(s, (s += 4)).copy(this.bitmap, d);
 			}
