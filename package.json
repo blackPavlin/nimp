@@ -10,10 +10,9 @@
     "build": "tsc",
     "test": "tsc --noEmit && jest --colors",
     "test:png": "tsc --noEmit && jest --colors --selectProjects=png",
-    "test:bmp": "tsc --noEmit && jest --colors --selectProjects=bmp",
     "lint": "tsc --noEmit && eslint ./src/**/*.ts",
     "lint:fix": "eslint ./src/**/*.ts --fix",
-    "benchmark": "ts-node ./benchmarks/decoder/index.bench.ts"
+    "benchmark": "ts-node ./benchmarks/png/decoder/index.bench.ts"
   },
   "keywords": [
     "png",
@@ -29,14 +28,12 @@
   },
   "devDependencies": {
     "@types/benchmark": "^2.1.1",
-    "@types/bmp-js": "^0.1.0",
     "@types/jest": "^27.0.1",
     "@types/node": "^16.11.25",
     "@types/pngjs": "^6.0.1",
     "@typescript-eslint/eslint-plugin": "4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
     "benchmark": "^2.1.4",
-    "bmp-js": "^0.1.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-jest": "^24.4.2",

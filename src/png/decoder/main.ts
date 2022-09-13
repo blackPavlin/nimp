@@ -1,5 +1,5 @@
 import zlib from 'zlib';
-import crc from '../crc';
+import crc32 from '../../hash/crc/crc32';
 import { PngSignature, Interlacing } from '../constants';
 
 import converter from './converter';
@@ -9,11 +9,9 @@ import {
 	BitDepth,
 	Channels,
 	ChunkTypes,
-	ColorType,
 	ColorTypes,
 	CompressionMethod,
 	FilterMethod,
-	InterlaceMethod,
 	InterlaceMethods,
 } from '../types';
 import unFilter from './unfilter';
@@ -21,15 +19,11 @@ import unFilter from './unfilter';
 export default class Decoder {
 	constructor(buffer: Buffer) {
 		if (!Decoder.isPNG(buffer)) {
-			throw new Error();
+			throw new Error('Not a PNG file');
 		}
 
 		for (let i = 8; i < buffer.length; i += 4) {
 			const length = buffer.readUInt32BE(i);
-
-			if (length > 0x7fffffff) {
-				throw new Error(`Bad chunk length: ${length}`);
-			}
 
 			if (
 				!Decoder.verifyCheckSum(
@@ -40,9 +34,7 @@ export default class Decoder {
 				throw new Error('Invalid checksum');
 			}
 
-			const type = buffer.readUInt32BE(i);
-
-			switch (type) {
+			switch (buffer.readUInt32BE(i)) {
 				case ChunkTypes.IHDR:
 					this.parseIHDR(buffer.subarray((i += 4), (i += length)));
 					break;
@@ -69,7 +61,6 @@ export default class Decoder {
 		}
 
 		const inflatedIDAT = zlib.inflateSync(Buffer.concat(this.deflatedIDAT));
-		this.deflatedIDAT.length = 0;
 
 		if (this.interlaceMethod === InterlaceMethods.None) {
 			this.bitmap = this.decodeImagePass(inflatedIDAT, this.width);
@@ -102,7 +93,7 @@ export default class Decoder {
 	}
 
 	private static verifyCheckSum(buffer: Buffer, checkSum: number): boolean {
-		return crc.crc32(buffer) === checkSum;
+		return crc32.sum(buffer) === checkSum;
 	}
 
 	public width!: number;
@@ -111,7 +102,7 @@ export default class Decoder {
 
 	public bitDepth!: BitDepth;
 
-	public colorType!: ColorType;
+	public colorType!: ColorTypes;
 
 	private channels!: Channels;
 
@@ -119,7 +110,7 @@ export default class Decoder {
 
 	public filterMethod!: FilterMethod;
 
-	public interlaceMethod!: InterlaceMethod;
+	public interlaceMethod!: InterlaceMethods;
 
 	public bitmap!: Buffer;
 
@@ -147,7 +138,7 @@ export default class Decoder {
 			throw new Error(`Bad bit depth: ${this.bitDepth as number}`);
 		}
 
-		this.colorType = chunk.readUInt8(9) as ColorType;
+		this.colorType = chunk.readUInt8(9) as ColorTypes;
 
 		switch (this.colorType) {
 			case ColorTypes.Grayscale:
@@ -201,7 +192,7 @@ export default class Decoder {
 			throw new Error(`Unsupported filter method: ${this.filterMethod as number}`);
 		}
 
-		this.interlaceMethod = chunk.readUInt8(12) as InterlaceMethod;
+		this.interlaceMethod = chunk.readUInt8(12) as InterlaceMethods;
 
 		if (
 			this.interlaceMethod !== InterlaceMethods.None &&

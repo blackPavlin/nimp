@@ -11,13 +11,6 @@ const config: InitialOptionsTsJest = {
 				'^.+\\.tsx?$': 'ts-jest',
 			},
 		},
-		{
-			displayName: 'bmp',
-			testMatch: ['<rootDir>/src/bmp/tests/**/*.spec.ts'],
-			transform: {
-				'^.+\\.tsx?$': 'ts-jest',
-			},
-		},
 	],
 };
 

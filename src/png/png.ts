@@ -2,40 +2,18 @@ import { PngSignature } from './constants';
 import {
 	BitDepth,
 	Chromaticities,
-	ColorType,
 	ColorTypes,
 	CompressionMethod,
 	FilterMethod,
 	IccProfile,
-	InterlaceMethod,
 	InterlaceMethods,
 	PhisicalDimensions,
 	SuggestedPalette,
 	TextData,
 } from './types';
 
-// type IDAT = {
-// 	width: number;
-// 	height: number;
-// 	bitDepth: BitDepth;
-// 	colorType: ColorType;
-// 	compressionMethod: CompressionMethod;
-// 	filterMethod: FilterMethod;
-// 	interlaceMethod: InterlaceMethod;
-// };
-
 export default class PNG {
-	// constructor(data: IDAT) {
-	// 	this.width = data.width;
-	// 	this.height = data.height;
-	// 	this.bitDepth = data.bitDepth;
-	// 	this.colorType = data.colorType;
-	// 	this.compressionMethod = data.compressionMethod;
-	// 	this.filterMethod = data.filterMethod;
-	// 	this.interlaceMethod = data.interlaceMethod;
-	// }
-
-	static isPNG(buffer: Buffer): boolean {
+	public static isPNG(buffer: Buffer): boolean {
 		return PngSignature.compare(buffer, 0, 8) === 0;
 	}
 
@@ -73,7 +51,7 @@ export default class PNG {
 		return this.#bitDepth;
 	}
 
-	protected set bitDepth(bitDepth: BitDepth) {
+	public set bitDepth(bitDepth: number) {
 		if (
 			bitDepth !== 1 &&
 			bitDepth !== 2 &&
@@ -81,40 +59,19 @@ export default class PNG {
 			bitDepth !== 8 &&
 			bitDepth !== 16
 		) {
-			throw new Error(`Bad bit depth: ${bitDepth as number}`);
-		}
-
-		if (this.#colorType) {
-			switch (this.#colorType) {
-				case ColorTypes.TrueColor:
-				case ColorTypes.GrayscaleAlpha:
-				case ColorTypes.TrueColorAlpha:
-					if (bitDepth !== 8 && bitDepth !== 16) {
-						throw new Error(
-							`Unsupported color type ${this.#colorType} and bit depth ${bitDepth}`,
-						);
-					}
-					break;
-				case ColorTypes.IndexedColor:
-					if (bitDepth === 16) {
-						throw new Error(
-							`Unsupported color type ${this.#colorType} and bit depth ${bitDepth}`,
-						);
-					}
-					break;
-			}
+			throw new Error(`Bad bit depth: ${bitDepth}`);
 		}
 
 		this.#bitDepth = bitDepth;
 	}
 
-	#colorType!: ColorType;
+	#colorType!: ColorTypes;
 
-	public get colorType(): ColorType {
+	public get colorType(): ColorTypes {
 		return this.#colorType;
 	}
 
-	protected set colorType(colorType: ColorType) {
+	public set colorType(colorType: number) {
 		if (
 			colorType !== ColorTypes.Grayscale &&
 			colorType !== ColorTypes.TrueColor &&
@@ -122,28 +79,7 @@ export default class PNG {
 			colorType !== ColorTypes.GrayscaleAlpha &&
 			colorType !== ColorTypes.TrueColorAlpha
 		) {
-			throw new Error(`Bad color type: ${colorType as number}`);
-		}
-
-		if (this.#bitDepth) {
-			switch (colorType) {
-				case ColorTypes.TrueColor:
-				case ColorTypes.GrayscaleAlpha:
-				case ColorTypes.TrueColorAlpha:
-					if (this.bitDepth !== 8 && this.#bitDepth !== 16) {
-						throw new Error(
-							`Unsupported color type ${colorType} and bit depth ${this.#bitDepth}`,
-						);
-					}
-					break;
-				case ColorTypes.IndexedColor:
-					if (this.#bitDepth === 16) {
-						throw new Error(
-							`Unsupported color type ${colorType} and bit depth ${this.#bitDepth}`,
-						);
-					}
-					break;
-			}
+			throw new Error(`Bad color type: ${colorType}`);
 		}
 
 		this.#colorType = colorType;
@@ -155,9 +91,9 @@ export default class PNG {
 		return this.#compressionMethod;
 	}
 
-	protected set compressionMethod(compressionMethod: CompressionMethod) {
+	public set compressionMethod(compressionMethod: number) {
 		if (compressionMethod !== 0) {
-			throw new Error(`Bad compression method: ${compressionMethod as number}`);
+			throw new Error(`Bad compression method: ${compressionMethod}`);
 		}
 	}
 
@@ -167,39 +103,29 @@ export default class PNG {
 		return this.#filterMethod;
 	}
 
-	protected set filterMethod(filterMethod: FilterMethod) {
+	public set filterMethod(filterMethod: number) {
 		if (filterMethod !== 0) {
-			throw new Error(`Bad filter method: ${filterMethod as number}`);
+			throw new Error(`Bad filter method: ${filterMethod}`);
 		}
 
 		this.#filterMethod = filterMethod;
 	}
 
-	#interlaceMethod!: InterlaceMethod;
+	#interlaceMethod!: InterlaceMethods;
 
-	public get interlaceMethod(): InterlaceMethod {
+	public get interlaceMethod(): InterlaceMethods {
 		return this.#interlaceMethod;
 	}
 
-	protected set interlaceMethod(interlaceMethod: InterlaceMethod) {
+	public set interlaceMethod(interlaceMethod: number) {
 		if (
 			interlaceMethod !== InterlaceMethods.None &&
 			interlaceMethod !== InterlaceMethods.Adam7
 		) {
-			throw new Error(`Bad interlace method: ${interlaceMethod as number}`);
+			throw new Error(`Bad interlace method: ${interlaceMethod}`);
 		}
 
 		this.#interlaceMethod = interlaceMethod;
-	}
-
-	#bitmap!: Buffer;
-
-	public get bitmap(): Buffer {
-		return this.#bitmap;
-	}
-
-	protected set bitmap(bitmap: Buffer) {
-		this.#bitmap = bitmap;
 	}
 
 	#palette?: Buffer[];
@@ -208,9 +134,9 @@ export default class PNG {
 		return this.#palette;
 	}
 
-	protected set palette(palette: Buffer[] | undefined) {
+	public set palette(palette: Buffer[] | undefined) {
 		if (
-			this.colorType === ColorTypes.Grayscale ||
+			(palette && this.colorType === ColorTypes.Grayscale) ||
 			this.colorType === ColorTypes.GrayscaleAlpha
 		) {
 			throw new Error('PLTE, color type mismatch');
@@ -225,7 +151,7 @@ export default class PNG {
 		return this.#transparent;
 	}
 
-	protected set transparent(transparent: number[] | undefined) {
+	public set transparent(transparent: number[] | undefined) {
 		if (
 			this.colorType === ColorTypes.GrayscaleAlpha ||
 			this.colorType === ColorTypes.TrueColorAlpha

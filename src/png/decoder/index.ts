@@ -1,13 +1,11 @@
 import zlib from 'zlib';
 import { PngSignature, GammaFactor, ChromaticitiesFactor, Interlacing } from '../constants';
-import crc from '../crc';
+import crc32 from '../../hash/crc/crc32';
 import {
 	ChunkTypes,
 	BitDepth,
-	ColorType,
 	CompressionMethod,
 	FilterMethod,
-	InterlaceMethod,
 	Channels,
 	ColorTypes,
 	TextData,
@@ -23,60 +21,84 @@ import converter from './converter';
 import normalize from './bitmapper';
 
 export default class Decoder {
-	private readonly chunkMapping: Record<number, ((chunk: Buffer) => void) | undefined> = {
-		// Critical chunks
-		[ChunkTypes.IHDR]: this.parseIHDR.bind(this),
-		[ChunkTypes.PLTE]: this.parsePLTE.bind(this),
-		[ChunkTypes.tRNS]: this.parsetRNS.bind(this),
-		[ChunkTypes.IDAT]: this.parseIDAT.bind(this),
-		[ChunkTypes.IEND]: this.parseIEND.bind(this),
-		// Ancillary chunks
-		[ChunkTypes.cHRM]: this.parsecHRM.bind(this),
-		[ChunkTypes.gAMA]: this.parsegAMA.bind(this),
-		[ChunkTypes.iCCP]: this.parseiCCP.bind(this),
-		[ChunkTypes.sBIT]: this.parsesBIT.bind(this),
-		[ChunkTypes.sRGB]: this.parsesRGB.bind(this),
-		[ChunkTypes.bKGD]: this.parsebKGD.bind(this),
-		[ChunkTypes.hIST]: this.parsehIST.bind(this),
-		[ChunkTypes.pHYs]: this.parsepHYS.bind(this),
-		[ChunkTypes.sPLT]: this.parsesPLT.bind(this),
-		[ChunkTypes.tEXt]: this.parsetEXT.bind(this),
-		[ChunkTypes.zTXt]: this.parsezTXT.bind(this),
-		[ChunkTypes.iTXt]: this.parseiTXT.bind(this),
-		[ChunkTypes.tIME]: this.parsetIME.bind(this),
-	};
-
-	constructor(file: Buffer) {
-		if (!Decoder.isPNG(file)) {
+	constructor(buffer: Buffer) {
+		if (!Decoder.isPNG(buffer)) {
 			throw new Error('Not a PNG file');
 		}
 
-		for (let i = 8; i < file.length; i += 4) {
-			const length = file.readUInt32BE(i);
-
-			if (length > 0x7fffffff) {
-				throw new Error('Bad chunk length');
-			}
+		for (let i = 8; i < buffer.length; i += 4) {
+			const length = buffer.readUInt32BE(i);
 
 			if (
 				!Decoder.verifyCheckSum(
-					file.subarray(i + 4, i + 8 + length),
-					file.readInt32BE(i + 8 + length),
+					buffer.subarray(i + 4, i + 8 + length),
+					buffer.readInt32BE(i + 8 + length),
 				)
 			) {
 				throw new Error('Invalid checksum');
 			}
 
-			const type = file.readUInt32BE((i += 4));
-
-			const handler = this.chunkMapping[type];
-			if (!handler) {
-				i += 4 + length;
-				continue;
+			switch (buffer.readUInt32BE(i)) {
+				// Critical chunks
+				case ChunkTypes.IHDR:
+					this.parseIHDR(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.PLTE:
+					this.parsePLTE(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.tRNS:
+					this.parsetRNS(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.IDAT:
+					this.parseIDAT(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.IEND:
+					this.parseIEND(buffer.subarray((i += 4), (i += length)));
+					break;
+				// Ancillary chunks
+				case ChunkTypes.cHRM:
+					this.parsecHRM(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.gAMA:
+					this.parsegAMA(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.iCCP:
+					this.parseiCCP(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.sBIT:
+					this.parsesBIT(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.sRGB:
+					this.parsesRGB(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.bKGD:
+					this.parsebKGD(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.hIST:
+					this.parsehIST(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.pHYs:
+					this.parsepHYS(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.sPLT:
+					this.parsesPLT(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.tEXt:
+					this.parsetEXT(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.zTXt:
+					this.parsezTXT(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.iTXt:
+					this.parseiTXT(buffer.subarray((i += 4), (i += length)));
+					break;
+				case ChunkTypes.tIME:
+					this.parsetIME(buffer.subarray((i += 4), (i += length)));
+					break;
+				default:
+					// Skip uknown chunk
+					i += 4 + length;
 			}
-
-			const chunk = file.subarray((i += 4), (i += length));
-			handler(chunk);
 		}
 
 		// TODO: Add check chunk ordering
@@ -86,7 +108,6 @@ export default class Decoder {
 		}
 
 		const inflatedIDAT = zlib.inflateSync(Buffer.concat(this.deflatedIDAT));
-		this.deflatedIDAT.length = 0; // Clear unused data
 
 		if (this.interlaceMethod === InterlaceMethods.None) {
 			this.bitmap = this.decodeImagePass(inflatedIDAT, this.width);
@@ -168,7 +189,7 @@ export default class Decoder {
 	 * @param {number} checkSum
 	 */
 	private static verifyCheckSum(buffer: Buffer, checkSum: number): boolean {
-		return crc.crc32(buffer) === checkSum;
+		return crc32.sum(buffer) === checkSum;
 	}
 
 	public width!: number;
@@ -177,7 +198,7 @@ export default class Decoder {
 
 	public bitDepth!: BitDepth;
 
-	public colorType!: ColorType;
+	public colorType!: ColorTypes;
 
 	private channels!: Channels;
 
@@ -185,7 +206,7 @@ export default class Decoder {
 
 	public filterMethod!: FilterMethod;
 
-	public interlaceMethod!: InterlaceMethod;
+	public interlaceMethod!: InterlaceMethods;
 
 	public bitmap!: Buffer;
 
@@ -217,7 +238,7 @@ export default class Decoder {
 			throw new Error(`Bad bit depth: ${this.bitDepth as number}`);
 		}
 
-		this.colorType = chunk.readUInt8(9) as ColorType;
+		this.colorType = chunk.readUInt8(9) as ColorTypes;
 
 		switch (this.colorType) {
 			case ColorTypes.Grayscale:
@@ -271,7 +292,7 @@ export default class Decoder {
 			throw new Error(`Unsupported filter method: ${this.filterMethod as number}`);
 		}
 
-		this.interlaceMethod = chunk.readUInt8(12) as InterlaceMethod;
+		this.interlaceMethod = chunk.readUInt8(12) as InterlaceMethods;
 
 		if (
 			this.interlaceMethod !== InterlaceMethods.None &&

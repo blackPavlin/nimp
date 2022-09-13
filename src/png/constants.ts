@@ -10,7 +10,7 @@ export const GammaFactor = 100000;
 
 export const ChromaticitiesFactor = 100000;
 
-export const Interlacing: Readonly<InterlaceScan[]> = [
+export const Interlacing: InterlaceScan[] = [
 	{ xFactor: 8, yFactor: 8, xOffset: 0, yOffset: 0 },
 	{ xFactor: 8, yFactor: 8, xOffset: 4, yOffset: 0 },
 	{ xFactor: 4, yFactor: 8, xOffset: 0, yOffset: 4 },

@@ -1,4 +1,4 @@
-import { ColorType, ColorTypes } from '../types';
+import { ColorTypes } from '../types';
 
 /**
  *
@@ -10,7 +10,7 @@ import { ColorType, ColorTypes } from '../types';
  */
 export default function normalize(
 	chunks: Buffer[],
-	colorType: ColorType,
+	colorType: ColorTypes,
 	transparent?: number[],
 	palette?: Buffer[],
 ): Buffer[] {
