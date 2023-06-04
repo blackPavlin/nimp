@@ -65,8 +65,6 @@ export type InterlaceScan = {
 };
 
 export type BitDepth = 1 | 2 | 4 | 8 | 16;
-export type CompressionMethod = 0;
-export type FilterMethod = 0;
 export type Channels = 1 | 2 | 3 | 4;
 
 export type TextData = {

@@ -3,8 +3,6 @@ import {
 	BitDepth,
 	Chromaticities,
 	ColorTypes,
-	CompressionMethod,
-	FilterMethod,
 	IccProfile,
 	InterlaceMethods,
 	PhisicalDimensions,
@@ -85,30 +83,16 @@ export default class PNG {
 		this.#colorType = colorType;
 	}
 
-	#compressionMethod!: CompressionMethod;
+	#compressionMethod: 0 = 0;
 
-	public get compressionMethod(): CompressionMethod {
+	public get compressionMethod(): 0 {
 		return this.#compressionMethod;
 	}
 
-	public set compressionMethod(compressionMethod: number) {
-		if (compressionMethod !== 0) {
-			throw new Error(`Bad compression method: ${compressionMethod}`);
-		}
-	}
+	#filterMethod: 0 = 0;
 
-	#filterMethod!: FilterMethod;
-
-	public get filterMethod(): FilterMethod {
+	public get filterMethod(): 0 {
 		return this.#filterMethod;
-	}
-
-	public set filterMethod(filterMethod: number) {
-		if (filterMethod !== 0) {
-			throw new Error(`Bad filter method: ${filterMethod}`);
-		}
-
-		this.#filterMethod = filterMethod;
 	}
 
 	#interlaceMethod!: InterlaceMethods;

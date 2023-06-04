@@ -1,11 +1,9 @@
 import zlib from 'zlib';
 import { PngSignature, GammaFactor, ChromaticitiesFactor, Interlacing } from '../constants';
-import crc32 from '../../hash/crc/crc32';
+import crc32 from '../../hash/crc32';
 import {
 	ChunkTypes,
 	BitDepth,
-	CompressionMethod,
-	FilterMethod,
 	Channels,
 	ColorTypes,
 	TextData,
@@ -22,82 +20,77 @@ import normalize from './bitmapper';
 
 export default class Decoder {
 	constructor(buffer: Buffer) {
-		if (!Decoder.isPNG(buffer)) {
+		if (buffer.length < 8 || !Decoder.isPNG(buffer)) {
 			throw new Error('Not a PNG file');
 		}
 
-		for (let i = 8; i < buffer.length; i += 4) {
-			const length = buffer.readUInt32BE(i);
+		for (let offset = 8; offset < buffer.length; offset += 4) {
+			const length = buffer.readUInt32BE(offset);
+			const chunk = buffer.subarray((offset += 4), (offset += 4 + length));
 
-			if (
-				!Decoder.verifyCheckSum(
-					buffer.subarray(i + 4, i + 8 + length),
-					buffer.readInt32BE(i + 8 + length),
-				)
-			) {
-				throw new Error('Invalid checksum');
-			}
-
-			switch (buffer.readUInt32BE(i)) {
+			switch (chunk.readUInt32BE()) {
 				// Critical chunks
 				case ChunkTypes.IHDR:
-					this.parseIHDR(buffer.subarray((i += 4), (i += length)));
+					this.parseIHDR(chunk.subarray(4));
 					break;
 				case ChunkTypes.PLTE:
-					this.parsePLTE(buffer.subarray((i += 4), (i += length)));
+					this.parsePLTE(chunk.subarray(4));
 					break;
 				case ChunkTypes.tRNS:
-					this.parsetRNS(buffer.subarray((i += 4), (i += length)));
+					this.parsetRNS(chunk.subarray(4));
 					break;
 				case ChunkTypes.IDAT:
-					this.parseIDAT(buffer.subarray((i += 4), (i += length)));
+					this.parseIDAT(chunk.subarray(4));
 					break;
 				case ChunkTypes.IEND:
-					this.parseIEND(buffer.subarray((i += 4), (i += length)));
+					this.parseIEND(chunk.subarray(4));
 					break;
 				// Ancillary chunks
 				case ChunkTypes.cHRM:
-					this.parsecHRM(buffer.subarray((i += 4), (i += length)));
+					this.parsecHRM(chunk.subarray(4));
 					break;
 				case ChunkTypes.gAMA:
-					this.parsegAMA(buffer.subarray((i += 4), (i += length)));
+					this.parsegAMA(chunk.subarray(4));
 					break;
 				case ChunkTypes.iCCP:
-					this.parseiCCP(buffer.subarray((i += 4), (i += length)));
+					this.parseiCCP(chunk.subarray(4));
 					break;
 				case ChunkTypes.sBIT:
-					this.parsesBIT(buffer.subarray((i += 4), (i += length)));
+					this.parsesBIT(chunk.subarray(4));
 					break;
 				case ChunkTypes.sRGB:
-					this.parsesRGB(buffer.subarray((i += 4), (i += length)));
+					this.parsesRGB(chunk.subarray(4));
 					break;
 				case ChunkTypes.bKGD:
-					this.parsebKGD(buffer.subarray((i += 4), (i += length)));
+					this.parsebKGD(chunk.subarray(4));
 					break;
 				case ChunkTypes.hIST:
-					this.parsehIST(buffer.subarray((i += 4), (i += length)));
+					this.parsehIST(chunk.subarray(4));
 					break;
 				case ChunkTypes.pHYs:
-					this.parsepHYS(buffer.subarray((i += 4), (i += length)));
+					this.parsepHYS(chunk.subarray(4));
 					break;
 				case ChunkTypes.sPLT:
-					this.parsesPLT(buffer.subarray((i += 4), (i += length)));
+					this.parsesPLT(chunk.subarray(4));
 					break;
 				case ChunkTypes.tEXt:
-					this.parsetEXT(buffer.subarray((i += 4), (i += length)));
+					this.parsetEXT(chunk.subarray(4));
 					break;
 				case ChunkTypes.zTXt:
-					this.parsezTXT(buffer.subarray((i += 4), (i += length)));
+					this.parsezTXT(chunk.subarray(4));
 					break;
 				case ChunkTypes.iTXt:
-					this.parseiTXT(buffer.subarray((i += 4), (i += length)));
+					this.parseiTXT(chunk.subarray(4));
 					break;
 				case ChunkTypes.tIME:
-					this.parsetIME(buffer.subarray((i += 4), (i += length)));
+					this.parsetIME(chunk.subarray(4));
 					break;
 				default:
-					// Skip uknown chunk
-					i += 4 + length;
+					continue;
+			}
+
+			if (!Decoder.verifyChecksum(chunk, buffer.readInt32BE(offset))) {
+				throw new Error('Invalid checksum');
 			}
 		}
 
@@ -186,10 +179,10 @@ export default class Decoder {
 	/**
 	 *
 	 * @param {Buffer} chunk
-	 * @param {number} checkSum
+	 * @param {number} checksum
 	 */
-	private static verifyCheckSum(buffer: Buffer, checkSum: number): boolean {
-		return crc32.sum(buffer) === checkSum;
+	private static verifyChecksum(chunk: Buffer, checksum: number): boolean {
+		return crc32.sum(chunk) === checksum;
 	}
 
 	public width!: number;
@@ -201,10 +194,6 @@ export default class Decoder {
 	public colorType!: ColorTypes;
 
 	private channels!: Channels;
-
-	public compressionMethod!: CompressionMethod;
-
-	public filterMethod!: FilterMethod;
 
 	public interlaceMethod!: InterlaceMethods;
 
@@ -280,16 +269,12 @@ export default class Decoder {
 				throw new Error(`Bad color type: ${this.colorType as number}`);
 		}
 
-		this.compressionMethod = chunk.readUInt8(10) as CompressionMethod;
-
-		if (this.compressionMethod !== 0) {
-			throw new Error(`Unsupported compression method: ${this.compressionMethod as number}`);
+		if (chunk.readUInt8(10) !== 0) {
+			throw new Error(`Unsupported compression method: ${chunk.readUInt8(10)}`);
 		}
 
-		this.filterMethod = chunk.readUInt8(11) as FilterMethod;
-
-		if (this.filterMethod !== 0) {
-			throw new Error(`Unsupported filter method: ${this.filterMethod as number}`);
+		if (chunk.readUInt8(11) !== 0) {
+			throw new Error(`Unsupported filter method: ${chunk.readUInt8(11)}`);
 		}
 
 		this.interlaceMethod = chunk.readUInt8(12) as InterlaceMethods;

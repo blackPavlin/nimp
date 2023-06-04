@@ -13,9 +13,7 @@ export default function paethPredictor(a: number, b: number, c: number): number 
 
 	if (pa <= pb && pa <= pc) {
 		return a;
-	} else if (pb <= pc) {
-		return b;
-	} else {
-		return c;
 	}
+
+	return pb <= pc ? b : c;
 }

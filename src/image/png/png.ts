@@ -1,12 +1,6 @@
 import { Image } from '../image';
 import { PngSignature } from '../../png/constants';
-import {
-	BitDepth,
-	ColorTypes,
-	CompressionMethod,
-	FilterMethod,
-	InterlaceMethods,
-} from '../../png/types';
+import { BitDepth, ColorTypes, InterlaceMethods } from '../../png/types';
 
 export class PNG extends Image {
 	public static isPNG(buffer: Buffer): boolean {
@@ -53,30 +47,16 @@ export class PNG extends Image {
 		this.#colorType = colorType;
 	}
 
-	#compressionMethod!: CompressionMethod;
+	#compressionMethod!: 0;
 
-	public get compressionMethod(): CompressionMethod {
+	public get compressionMethod(): 0 {
 		return this.#compressionMethod;
 	}
 
-	public set compressionMethod(compressionMethod: number) {
-		if (compressionMethod !== 0) {
-			throw new Error(`Bad compression method: ${compressionMethod}`);
-		}
-	}
+	#filterMethod!: 0;
 
-	#filterMethod!: FilterMethod;
-
-	public get filterMethod(): FilterMethod {
+	public get filterMethod(): 0 {
 		return this.#filterMethod;
-	}
-
-	public set filterMethod(filterMethod: number) {
-		if (filterMethod !== 0) {
-			throw new Error(`Bad filter method: ${filterMethod}`);
-		}
-
-		this.#filterMethod = filterMethod;
 	}
 
 	#interlaceMethod!: InterlaceMethods;

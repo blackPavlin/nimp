@@ -1,18 +1,14 @@
 import zlib, { ZlibOptions } from 'zlib';
 import { PngSignature } from '../constants';
-import crc from '../crc';
+import crc32 from '../../hash/crc32';
 import {
 	EncodePNGOptions,
 	BitDepth,
-	ColorType,
 	ColorTypes,
 	Channels,
 	ChunkTypes,
-	FilterType,
-	CompressionMethod,
-	FilterMethod,
-	InterlaceMethod,
-	ChunkType,
+	FilterTypes,
+	InterlaceMethods,
 } from '../types';
 import Filter from './filter';
 
@@ -76,15 +72,15 @@ class E {
 
 	private readonly _bitDepth!: BitDepth;
 
-	private readonly _colorType!: ColorType;
+	private readonly _colorType!: ColorTypes;
 
-	private readonly _fitlerType!: FilterType;
+	private readonly _fitlerType!: FilterTypes;
 
-	private readonly _compressionMethod: CompressionMethod = 0;
+	private readonly _compressionMethod = 0;
 
-	private readonly _filterMethod: FilterMethod = 0;
+	private readonly _filterMethod = 0;
 
-	private readonly _interlaceMethod!: InterlaceMethod;
+	private readonly _interlaceMethod!: InterlaceMethods;
 
 	private readonly _channels!: Channels;
 
@@ -118,13 +114,13 @@ class E {
 		this._encodeChunk(ChunkTypes.IEND, buff);
 	}
 
-	private _encodeChunk(type: ChunkType, chunk: Buffer): void {
+	private _encodeChunk(type: ChunkTypes, chunk: Buffer): void {
 		const buff = Buffer.alloc(chunk.length + 12);
 
 		buff.writeInt32BE(chunk.length, 0); // write length
 		buff.writeInt32BE(type, 4); // write type
 		chunk.copy(buff, 8); // write chunk
-		buff.writeInt32BE(crc.crc32(buff.subarray(4, buff.length - 4)), buff.length - 4); // write crc
+		buff.writeInt32BE(crc32.sum(buff.subarray(4, buff.length - 4)), buff.length - 4); // write crc
 
 		this._chunks.push(buff);
 	}
@@ -176,7 +172,7 @@ export default class Encoder {
 
 	private readonly _bitDepth!: BitDepth;
 
-	private readonly _colorType!: ColorType;
+	private readonly _colorType!: ColorTypes;
 
 	private readonly _compressionMethod = 0;
 
@@ -191,7 +187,7 @@ export default class Encoder {
 
 		buff.writeInt32BE(chunk.length, 0); // write length
 		chunk.copy(buff, 4); // write chunk
-		buff.writeInt32BE(crc.crc32(chunk), buff.length - 4); // write crc
+		buff.writeInt32BE(crc32.sum(chunk), buff.length - 4); // write crc
 
 		return buff;
 	}
