@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Basic formats 1 bit (2 color) paletted 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     238,
     255,
     34,
@@ -4105,8 +4105,8 @@ Object {
 `;
 
 exports[`Basic formats 2 bit (4 color) paletted 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     255,
@@ -8209,8 +8209,8 @@ Object {
 `;
 
 exports[`Basic formats 2 bit (4 level) grayscale 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -12313,8 +12313,8 @@ Object {
 `;
 
 exports[`Basic formats 3x8 bits rgb color + 8 bit alpha-channel 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     0,
     8,
@@ -16417,8 +16417,8 @@ Object {
 `;
 
 exports[`Basic formats 3x8 bits rgb color 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     255,
@@ -20521,8 +20521,8 @@ Object {
 `;
 
 exports[`Basic formats 3x16 bits rgb color + 16 bit alpha-channel 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
@@ -24625,8 +24625,8 @@ Object {
 `;
 
 exports[`Basic formats 3x16 bits rgb color 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
@@ -28729,8 +28729,8 @@ Object {
 `;
 
 exports[`Basic formats 4 bit (16 color) paletted 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     0,
     0,
@@ -32833,8 +32833,8 @@ Object {
 `;
 
 exports[`Basic formats 4 bit (16 level) grayscale 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -36937,8 +36937,8 @@ Object {
 `;
 
 exports[`Basic formats 8 bit (256 color) paletted 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     1,
     0,
     0,
@@ -41041,8 +41041,8 @@ Object {
 `;
 
 exports[`Basic formats 8 bit (256 level) grayscale 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -45145,8 +45145,8 @@ Object {
 `;
 
 exports[`Basic formats 8 bit grayscale + 8 bit alpha-channel 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     255,
@@ -49249,8 +49249,8 @@ Object {
 `;
 
 exports[`Basic formats 16 bit (64k level) grayscale 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -53353,8 +53353,8 @@ Object {
 `;
 
 exports[`Basic formats 16 bit grayscale + 16 bit alpha-channel 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -57457,8 +57457,8 @@ Object {
 `;
 
 exports[`Basic formats black & white 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     255,

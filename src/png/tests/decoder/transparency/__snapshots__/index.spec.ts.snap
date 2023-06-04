@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Transparency Multiple levels of transparency, 3 entries 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     255,
@@ -4105,8 +4105,8 @@ Object {
 `;
 
 exports[`Transparency Not transparent for reference (logo on gray), Grayscale 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     127,
     127,
     127,
@@ -8209,8 +8209,8 @@ Object {
 `;
 
 exports[`Transparency Not transparent for reference (logo on gray), IndexedColor 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     127,
     127,
     127,
@@ -12313,8 +12313,8 @@ Object {
 `;
 
 exports[`Transparency Not transparent for reference (logo on gray), TrueColor 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     127,
     127,
     127,
@@ -16417,8 +16417,8 @@ Object {
 `;
 
 exports[`Transparency Transparent, black background chunk, 4 bit depth 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -20521,8 +20521,8 @@ Object {
 `;
 
 exports[`Transparency Transparent, black background chunk, 8 bit depth 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     255,
@@ -24625,8 +24625,8 @@ Object {
 `;
 
 exports[`Transparency Transparent, blue background chunk, 16 bit depth 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -28729,8 +28729,8 @@ Object {
 `;
 
 exports[`Transparency Transparent, but no background chunk 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     255,
@@ -32833,8 +32833,8 @@ Object {
 `;
 
 exports[`Transparency Transparent, green background chunk 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -36937,8 +36937,8 @@ Object {
 `;
 
 exports[`Transparency Transparent, light-gray background chunk 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     255,
@@ -41041,8 +41041,8 @@ Object {
 `;
 
 exports[`Transparency Transparent, red background chunk 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -45145,8 +45145,8 @@ Object {
 `;
 
 exports[`Transparency Transparent, white background chunk, bitdepth 8 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     255,
@@ -49249,8 +49249,8 @@ Object {
 `;
 
 exports[`Transparency Transparent, white background chunk, bitdepth 16 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -53353,8 +53353,8 @@ Object {
 `;
 
 exports[`Transparency Transparent, yellow background chunk 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     255,

@@ -1,38 +1,38 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Ancillary chunks Text chunk UTF-8 international text - english 1`] = `
-Array [
-  Object {
+[
+  {
     "keyword": "Title",
     "languageTag": "en",
     "text": "PngSuite",
     "translatedKeyword": "Title",
   },
-  Object {
+  {
     "keyword": "Author",
     "languageTag": "en",
     "text": "Willem van Schaik (willem@schaik.com)",
     "translatedKeyword": "Author",
   },
-  Object {
+  {
     "keyword": "Copyright",
     "languageTag": "en",
     "text": "Copyright Willem van Schaik, Canada 2011",
     "translatedKeyword": "Copyright",
   },
-  Object {
+  {
     "keyword": "Description",
     "languageTag": "en",
     "text": "A compilation of a set of images created to test the various color-types of the PNG format. Included are black&white, color, paletted, with alpha channel, with transparency formats. All bit-depths allowed according to the spec are present.",
     "translatedKeyword": "Description",
   },
-  Object {
+  {
     "keyword": "Software",
     "languageTag": "en",
-    "text": "Created on a NeXTstation color using \\"pnmtopng\\".",
+    "text": "Created on a NeXTstation color using "pnmtopng".",
     "translatedKeyword": "Software",
   },
-  Object {
+  {
     "keyword": "Disclaimer",
     "languageTag": "en",
     "text": "Freeware.",
@@ -42,38 +42,38 @@ Array [
 `;
 
 exports[`Ancillary chunks Text chunk UTF-8 international text - finnish 1`] = `
-Array [
-  Object {
+[
+  {
     "keyword": "Title",
     "languageTag": "fi",
     "text": "PngSuite",
     "translatedKeyword": "Otsikko",
   },
-  Object {
+  {
     "keyword": "Author",
     "languageTag": "fi",
     "text": "Willem van Schaik (willem@schaik.com)",
     "translatedKeyword": "Tekijä",
   },
-  Object {
+  {
     "keyword": "Copyright",
     "languageTag": "fi",
     "text": "Copyright Willem van Schaik, Kanada 2011",
     "translatedKeyword": "Tekijänoikeudet",
   },
-  Object {
+  {
     "keyword": "Description",
     "languageTag": "fi",
     "text": "kokoelma joukon kuvia luotu testata eri väri-tyyppisiä PNG-muodossa. Mukana on mustavalkoinen, väri, paletted, alpha-kanava, avoimuuden muodossa. Kaikki bit-syvyydessä mukaan sallittua spec on ​​läsnä.",
     "translatedKeyword": "Kuvaus",
   },
-  Object {
+  {
     "keyword": "Software",
     "languageTag": "fi",
-    "text": "Luotu NeXTstation väriä \\"pnmtopng\\".",
+    "text": "Luotu NeXTstation väriä "pnmtopng".",
     "translatedKeyword": "Ohjelmistot",
   },
-  Object {
+  {
     "keyword": "Disclaimer",
     "languageTag": "fi",
     "text": "Freeware.",
@@ -83,38 +83,38 @@ Array [
 `;
 
 exports[`Ancillary chunks Text chunk UTF-8 international text - greek 1`] = `
-Array [
-  Object {
+[
+  {
     "keyword": "Title",
     "languageTag": "el",
     "text": "PngSuite",
     "translatedKeyword": "Τίτλος",
   },
-  Object {
+  {
     "keyword": "Author",
     "languageTag": "el",
     "text": "Willem van Schaik (willem@schaik.com)",
     "translatedKeyword": "Συγγραφέας",
   },
-  Object {
+  {
     "keyword": "Copyright",
     "languageTag": "el",
     "text": "Πνευματικά δικαιώματα Schaik van Willem, Καναδάς 2011",
     "translatedKeyword": "Πνευματικά δικαιώματα",
   },
-  Object {
+  {
     "keyword": "Description",
     "languageTag": "el",
     "text": "Μια συλλογή από ένα σύνολο εικόνων που δημιουργήθηκαν για τη δοκιμή των διαφόρων χρωμάτων-τύπων του μορφή PNG. Περιλαμβάνονται οι ασπρόμαυρες, χρώμα, paletted, με άλφα κανάλι, με μορφές της διαφάνειας. Όλοι λίγο-βάθη επιτρέπεται σύμφωνα με το spec είναι παρόντες.",
     "translatedKeyword": "Περιγραφή",
   },
-  Object {
+  {
     "keyword": "Software",
     "languageTag": "el",
-    "text": "Δημιουργήθηκε σε ένα χρώμα NeXTstation χρησιμοποιώντας \\"pnmtopng\\".",
+    "text": "Δημιουργήθηκε σε ένα χρώμα NeXTstation χρησιμοποιώντας "pnmtopng".",
     "translatedKeyword": "Λογισμικό",
   },
-  Object {
+  {
     "keyword": "Disclaimer",
     "languageTag": "el",
     "text": "Δωρεάν λογισμικό.",
@@ -124,38 +124,38 @@ Array [
 `;
 
 exports[`Ancillary chunks Text chunk UTF-8 international text - hindi 1`] = `
-Array [
-  Object {
+[
+  {
     "keyword": "Title",
     "languageTag": "hi",
     "text": "PngSuite",
     "translatedKeyword": "शीर्षक",
   },
-  Object {
+  {
     "keyword": "Author",
     "languageTag": "hi",
     "text": "Willem van Schaik (willem@schaik.com)",
     "translatedKeyword": "लेखक",
   },
-  Object {
+  {
     "keyword": "Copyright",
     "languageTag": "hi",
     "text": "कॉपीराइट Willem van Schaik, 2011 कनाडा",
     "translatedKeyword": "कॉपीराइट",
   },
-  Object {
+  {
     "keyword": "Description",
     "languageTag": "hi",
     "text": "करने के लिए PNG प्रारूप के विभिन्न रंग प्रकार परीक्षण बनाया छवियों का एक सेट का एक संकलन. शामिल काले और सफेद, रंग, पैलेटेड हैं, अल्फा चैनल के साथ पारदर्शिता स्वरूपों के साथ. सभी बिट गहराई कल्पना के अनुसार की अनुमति दी मौजूद हैं.",
     "translatedKeyword": "विवरण",
   },
-  Object {
+  {
     "keyword": "Software",
     "languageTag": "hi",
-    "text": "एक NeXTstation \\"pnmtopng 'का उपयोग कर रंग पर बनाया गया.",
+    "text": "एक NeXTstation "pnmtopng 'का उपयोग कर रंग पर बनाया गया.",
     "translatedKeyword": "सॉफ्टवेयर",
   },
-  Object {
+  {
     "keyword": "Disclaimer",
     "languageTag": "hi",
     "text": "फ्रीवेयर.",
@@ -165,38 +165,38 @@ Array [
 `;
 
 exports[`Ancillary chunks Text chunk UTF-8 international text - japanese 1`] = `
-Array [
-  Object {
+[
+  {
     "keyword": "Title",
     "languageTag": "ja",
     "text": "PngSuite",
     "translatedKeyword": "タイトル",
   },
-  Object {
+  {
     "keyword": "Author",
     "languageTag": "ja",
     "text": "Willem van Schaik (willem@schaik.com)",
     "translatedKeyword": "著者",
   },
-  Object {
+  {
     "keyword": "Copyright",
     "languageTag": "ja",
     "text": "著作権ウィレムヴァンシャイク、カナダ2011",
     "translatedKeyword": "本文へ",
   },
-  Object {
+  {
     "keyword": "Description",
     "languageTag": "ja",
     "text": "PNG形式の様々な色の種類をテストするために作成されたイメージのセットのコンパイル。含まれているのは透明度のフォーマットで、アルファチャネルを持つ、白黒、カラー、パレットです。すべてのビット深度が存在している仕様に従ったことができました。",
     "translatedKeyword": "概要",
   },
-  Object {
+  {
     "keyword": "Software",
     "languageTag": "ja",
-    "text": "\\"pnmtopng\\"を使用してNeXTstation色上に作成されます。",
+    "text": ""pnmtopng"を使用してNeXTstation色上に作成されます。",
     "translatedKeyword": "ソフトウェア",
   },
-  Object {
+  {
     "keyword": "Disclaimer",
     "languageTag": "ja",
     "text": "フリーウェア。",
@@ -206,21 +206,21 @@ Array [
 `;
 
 exports[`Ancillary chunks Text chunk With compressed textual data 1`] = `
-Array [
-  Object {
+[
+  {
     "keyword": "Title",
     "text": "PngSuite",
   },
-  Object {
+  {
     "keyword": "Author",
     "text": "Willem A.J. van Schaik
 (willem@schaik.com)",
   },
-  Object {
+  {
     "keyword": "Copyright",
     "text": "Copyright Willem van Schaik, Singapore 1995-96",
   },
-  Object {
+  {
     "keyword": "Description",
     "text": "A compilation of a set of images created to test the
 various color-types of the PNG format. Included are
@@ -228,11 +228,11 @@ black&white, color, paletted, with alpha channel, with
 transparency formats. All bit-depths allowed according
 to the spec are present.",
   },
-  Object {
+  {
     "keyword": "Software",
-    "text": "Created on a NeXTstation color using \\"pnmtopng\\".",
+    "text": "Created on a NeXTstation color using "pnmtopng".",
   },
-  Object {
+  {
     "keyword": "Disclaimer",
     "text": "Freeware.",
   },
@@ -240,21 +240,21 @@ to the spec are present.",
 `;
 
 exports[`Ancillary chunks Text chunk With textual data 1`] = `
-Array [
-  Object {
+[
+  {
     "keyword": "Title",
     "text": "PngSuite",
   },
-  Object {
+  {
     "keyword": "Author",
     "text": "Willem A.J. van Schaik
 (willem@schaik.com)",
   },
-  Object {
+  {
     "keyword": "Copyright",
     "text": "Copyright Willem van Schaik, Singapore 1995-96",
   },
-  Object {
+  {
     "keyword": "Description",
     "text": "A compilation of a set of images created to test the
 various color-types of the PNG format. Included are
@@ -262,11 +262,11 @@ black&white, color, paletted, with alpha channel, with
 transparency formats. All bit-depths allowed according
 to the spec are present.",
   },
-  Object {
+  {
     "keyword": "Software",
-    "text": "Created on a NeXTstation color using \\"pnmtopng\\".",
+    "text": "Created on a NeXTstation color using "pnmtopng".",
   },
-  Object {
+  {
     "keyword": "Disclaimer",
     "text": "Freeware.",
   },

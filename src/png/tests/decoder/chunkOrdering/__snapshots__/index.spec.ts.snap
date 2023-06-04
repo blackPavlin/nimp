@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Chunk ordering Color image with 2 idat-chunks 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
@@ -4105,8 +4105,8 @@ Object {
 `;
 
 exports[`Chunk ordering Color image with 4 unequal sized idat-chunks 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
@@ -8209,8 +8209,8 @@ Object {
 `;
 
 exports[`Chunk ordering Color image with all idat-chunks length one 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
@@ -12313,8 +12313,8 @@ Object {
 `;
 
 exports[`Chunk ordering Color mother image with 1 idat-chunk 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
@@ -16417,8 +16417,8 @@ Object {
 `;
 
 exports[`Chunk ordering Grayscale image with 2 idat-chunks 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -20521,8 +20521,8 @@ Object {
 `;
 
 exports[`Chunk ordering Grayscale image with 4 unequal sized idat-chunks 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -24625,8 +24625,8 @@ Object {
 `;
 
 exports[`Chunk ordering Grayscale image with all idat-chunks length one 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -28729,8 +28729,8 @@ Object {
 `;
 
 exports[`Chunk ordering Grayscale mother image with 1 idat-chunk 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,

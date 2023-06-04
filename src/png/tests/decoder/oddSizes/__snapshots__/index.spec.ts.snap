@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Odd sizes no interlacing 1x1 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     255,
@@ -13,8 +13,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 2x2 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     255,
     255,
@@ -37,8 +37,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 3x3 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     255,
     0,
@@ -81,8 +81,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 4x4 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
@@ -153,8 +153,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 5x5 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     0,
     0,
@@ -261,8 +261,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 6x6 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     0,
     255,
@@ -413,8 +413,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 7x7 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     255,
@@ -617,8 +617,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 8x8 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     255,
     255,
@@ -881,8 +881,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 9x9 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     255,
     0,
@@ -1213,8 +1213,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 32x32 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -5317,8 +5317,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 33x33 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -9681,8 +9681,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 34x34 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -14313,8 +14313,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 35x35 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -19221,8 +19221,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 36x36 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -24413,8 +24413,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 37x37 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -29897,8 +29897,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 38x38 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -35681,8 +35681,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 39x39 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -41773,8 +41773,8 @@ Object {
 `;
 
 exports[`Odd sizes no interlacing 40x40 paletted file 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     0,
     0,

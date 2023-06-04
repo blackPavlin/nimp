@@ -12,7 +12,7 @@ import {
 } from '../types';
 import Filter from './filter';
 
-class E {
+export class E {
 	constructor(options: EncodePNGOptions) {
 		if (options.width <= 0 || options.height <= 0) {
 			throw new Error('Non-positive dimension');

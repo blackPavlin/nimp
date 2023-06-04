@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Image filtering Bit-depth 4, filter changing per scanline 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -4105,8 +4105,8 @@ Object {
 `;
 
 exports[`Image filtering Color, no interlacing, filter-type 0 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     0,
     8,
@@ -8209,8 +8209,8 @@ Object {
 `;
 
 exports[`Image filtering Color, no interlacing, filter-type 1 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     0,
     8,
@@ -12313,8 +12313,8 @@ Object {
 `;
 
 exports[`Image filtering Color, no interlacing, filter-type 2 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     0,
     8,
@@ -16417,8 +16417,8 @@ Object {
 `;
 
 exports[`Image filtering Color, no interlacing, filter-type 3 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     0,
     8,
@@ -20521,8 +20521,8 @@ Object {
 `;
 
 exports[`Image filtering Color, no interlacing, filter-type 4 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     0,
     8,
@@ -24625,8 +24625,8 @@ Object {
 `;
 
 exports[`Image filtering Grayscale, no interlacing, filter-type 0 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     127,
     127,
     127,
@@ -28729,8 +28729,8 @@ Object {
 `;
 
 exports[`Image filtering Grayscale, no interlacing, filter-type 1 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     127,
     127,
     127,
@@ -32833,8 +32833,8 @@ Object {
 `;
 
 exports[`Image filtering Grayscale, no interlacing, filter-type 2 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     127,
     127,
     127,
@@ -36937,8 +36937,8 @@ Object {
 `;
 
 exports[`Image filtering Grayscale, no interlacing, filter-type 3 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     127,
     127,
     127,
@@ -41041,8 +41041,8 @@ Object {
 `;
 
 exports[`Image filtering Grayscale, no interlacing, filter-type 4 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     127,
     127,
     127,

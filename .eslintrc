@@ -2,27 +2,24 @@
     "root": true,
     "env": {
         "node": true,
-        "jest": true,
-        "es2020": true
+        "jest": true
     },
     "extends": [
         "prettier",
         "eslint:recommended",
         "plugin:prettier/recommended",
-        "plugin:@typescript-eslint/recommended",
-        "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "plugins": [
+        "jest",
+        "prettier",
+        "@typescript-eslint"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "project": "./tsconfig.eslint.json",
         "tsconfigRootDir": "."
     },
-    "plugins": [
-        "@typescript-eslint",
-        "prettier",
-        "jest"
-    ],
     "ignorePatterns": ["*.js"],
     "rules": {
         "prettier/prettier": [

@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Additional palettes Six-cube palette-chunk in true-color image 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
@@ -4105,8 +4105,8 @@ Object {
 `;
 
 exports[`Additional palettes Six-cube palette-chunk in true-color+alpha image 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     255,
@@ -8209,8 +8209,8 @@ Object {
 `;
 
 exports[`Additional palettes Six-cube suggested palette (1 byte) in grayscale image, 8 bit depth 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -12313,8 +12313,8 @@ Object {
 `;
 
 exports[`Additional palettes Six-cube suggested palette (1 byte) in true-color image, 16 bit depth 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
@@ -16417,8 +16417,8 @@ Object {
 `;
 
 exports[`Additional palettes Six-cube suggested palette (2 bytes) in grayscale image, 8 bit depth 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     0,
     0,
     0,
@@ -20521,8 +20521,8 @@ Object {
 `;
 
 exports[`Additional palettes Six-cube suggested palette (2 bytes) in true-color image 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,

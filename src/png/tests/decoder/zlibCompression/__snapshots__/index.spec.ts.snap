@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Zlib compression level Color, no interlacing, compression level 0 (none) 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
@@ -4105,8 +4105,8 @@ Object {
 `;
 
 exports[`Zlib compression level Color, no interlacing, compression level 3 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
@@ -8209,8 +8209,8 @@ Object {
 `;
 
 exports[`Zlib compression level Color, no interlacing, compression level 6 (default) 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
@@ -12313,8 +12313,8 @@ Object {
 `;
 
 exports[`Zlib compression level Color, no interlacing, compression level 9 (maximum) 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     255,
     255,
     0,
