@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { Suite, Event } from 'benchmark';
 import Decoder from '../../../src/png/decoder';
 

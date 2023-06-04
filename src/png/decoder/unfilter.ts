@@ -1,5 +1,5 @@
-import { FilterTypes } from '../types';
-import paethPredictor from '../paeth';
+import { FilterTypes } from '../types.js';
+import paethPredictor from '../paeth.js';
 
 /*
 	Recon(x) = Filt(x)

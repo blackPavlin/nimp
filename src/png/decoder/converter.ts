@@ -1,4 +1,4 @@
-import { BitDepth } from '../types';
+import { BitDepth } from '../types.js';
 
 /**
  * Converter 1, 2, 4, 16 bit to 8 bit

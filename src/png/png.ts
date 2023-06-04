@@ -1,4 +1,4 @@
-import { PngSignature } from './constants';
+import { PngSignature } from './constants.js';
 import {
 	BitDepth,
 	Chromaticities,
@@ -8,7 +8,7 @@ import {
 	PhisicalDimensions,
 	SuggestedPalette,
 	TextData,
-} from './types';
+} from './types.js';
 
 export default class PNG {
 	public static isPNG(buffer: Buffer): boolean {

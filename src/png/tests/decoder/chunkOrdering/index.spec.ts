@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import Decoder from '../../../decoder';
-import { ColorTypes } from '../../../types';
+import fs from 'node:fs';
+import path from 'node:path';
+import Decoder from '../../../decoder/index.js';
+import { ColorTypes } from '../../../types.js';
 
 describe('Chunk ordering', () => {
 	it('Grayscale mother image with 1 idat-chunk', () => {

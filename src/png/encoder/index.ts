@@ -1,6 +1,6 @@
-import zlib, { ZlibOptions } from 'zlib';
-import { PngSignature } from '../constants';
-import crc32 from '../../hash/crc32';
+import zlib, { ZlibOptions } from 'node:zlib';
+import { PngSignature } from '../constants.js';
+import crc32 from '../../hash/crc32.js';
 import {
 	EncodePNGOptions,
 	BitDepth,
@@ -9,8 +9,8 @@ import {
 	ChunkTypes,
 	FilterTypes,
 	InterlaceMethods,
-} from '../types';
-import Filter from './filter';
+} from '../types.js';
+import Filter from './filter.js';
 
 export class E {
 	constructor(options: EncodePNGOptions) {

@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import Decoder from '../../../decoder';
+import fs from 'node:fs';
+import path from 'node:path';
+import Decoder from '../../../decoder/index.js';
 
 describe('Ancillary chunks', () => {
 	describe('Chroma chunk', () => {

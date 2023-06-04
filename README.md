@@ -12,6 +12,7 @@ Portable Network Graphics, is a ubiquitous, lossless image file format, based on
 - Support all ancillary chunks;
 - Full unit test coverage;
 - Typescript;
+- Zero dependency;
 
 ### Plans:
 - Add support streams;

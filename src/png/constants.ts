@@ -1,4 +1,4 @@
-import { InterlaceScan } from './types';
+import { InterlaceScan } from './types.js';
 
 /**
  * PNG signature

@@ -1,5 +1,5 @@
-import { FilterTypes } from '../types';
-import paethPredictor from '../paeth';
+import { FilterTypes } from '../types.js';
+import paethPredictor from '../paeth.js';
 
 /** https://www.w3.org/TR/PNG/#9Filters */
 export default class Filter {

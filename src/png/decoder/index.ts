@@ -1,6 +1,6 @@
-import zlib from 'zlib';
-import { PngSignature, GammaFactor, ChromaticitiesFactor, Interlacing } from '../constants';
-import crc32 from '../../hash/crc32';
+import zlib from 'node:zlib';
+import { PngSignature, GammaFactor, ChromaticitiesFactor, Interlacing } from '../constants.js';
+import crc32 from '../../hash/crc32.js';
 import {
 	ChunkTypes,
 	BitDepth,
@@ -12,11 +12,11 @@ import {
 	SuggestedPalette,
 	IccProfile,
 	InterlaceMethods,
-} from '../types';
+} from '../types.js';
 
-import unFilter from './unfilter';
-import converter from './converter';
-import normalize from './bitmapper';
+import unFilter from './unfilter.js';
+import converter from './converter.js';
+import normalize from './bitmapper.js';
 
 export default class Decoder {
 	constructor(buffer: Buffer) {

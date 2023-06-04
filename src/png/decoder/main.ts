@@ -1,6 +1,6 @@
-import zlib from 'zlib';
-import crc32 from '../../hash/crc32';
-import { PngSignature, Interlacing } from '../constants';
+import zlib from 'node:zlib';
+import crc32 from '../../hash/crc32.js';
+import { PngSignature, Interlacing } from '../constants.js';
 
 import {
 	BitDepth,
@@ -9,8 +9,8 @@ import {
 	ColorTypes,
 	FilterTypes,
 	InterlaceMethods,
-} from '../types';
-import paethPredictor from '../paeth';
+} from '../types.js';
+import paethPredictor from '../paeth.js';
 
 export default class Decoder {
 	constructor(buffer: Buffer) {

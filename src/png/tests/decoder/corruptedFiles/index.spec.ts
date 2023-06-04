@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import Decoder from '../../../decoder';
+import fs from 'node:fs';
+import path from 'node:path';
+import Decoder from '../../../decoder/index.js';
 
 describe('Corrupted files', () => {
 	it('Signature byte 1 MSBit reset to zero', () => {

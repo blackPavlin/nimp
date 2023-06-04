@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import Decoder from '../../../decoder';
+import fs from 'node:fs';
+import path from 'node:path';
+import Decoder from '../../../decoder/index.js';
 
 describe('Gamma values', () => {
 	it('Grayscale, file-gamma = 0.35', () => {

@@ -1,6 +1,6 @@
-import { Image } from '../image';
-import { PngSignature } from '../../png/constants';
-import { BitDepth, ColorTypes, InterlaceMethods } from '../../png/types';
+import { Image } from '../image.js';
+import { PngSignature } from '../../png/constants.js';
+import { BitDepth, ColorTypes, InterlaceMethods } from '../../png/types.js';
 
 export class PNG extends Image {
 	public static isPNG(buffer: Buffer): boolean {

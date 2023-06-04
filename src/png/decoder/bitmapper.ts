@@ -1,4 +1,4 @@
-import { ColorTypes } from '../types';
+import { ColorTypes } from '../types.js';
 
 /**
  *
