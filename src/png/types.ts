@@ -2,7 +2,7 @@
  * Chunk types
  * @see https://www.w3.org/TR/PNG/#4Concepts.FormatTypes
  */
-export enum ChunkTypes {
+export const enum ChunkTypes {
 	IHDR = 0x49484452,
 	cHRM = 0x6348524d,
 	gAMA = 0x67414d41,
@@ -28,7 +28,7 @@ export enum ChunkTypes {
  * Colour types
  * @see https://www.w3.org/TR/PNG/#6Colour-values
  */
-export enum ColorTypes {
+export const enum ColorTypes {
 	Grayscale = 0,
 	TrueColor = 2,
 	IndexedColor = 3,
@@ -40,7 +40,7 @@ export enum ColorTypes {
  * Filter types
  * @see https://www.w3.org/TR/PNG/#9Filter-types
  */
-export enum FilterTypes {
+export const enum FilterTypes {
 	None = 0,
 	Sub = 1,
 	Up = 2,
@@ -52,7 +52,7 @@ export enum FilterTypes {
  * Interlace methods
  * @see https://www.w3.org/TR/PNG/#8InterlaceMethods
  */
-export enum InterlaceMethods {
+export const enum InterlaceMethods {
 	None = 0,
 	Adam7 = 1,
 }
