@@ -24,4 +24,4 @@ Portable Network Graphics, is a ubiquitous, lossless image file format, based on
 
 ## References:
 - [PngSuite - the official set of PNG test images](http://www.schaik.com/pngsuite2011/pngsuite.html)
-- [Portable Network Graphics (PNG) Specification](https://www.w3.org/TR/2003/REC-PNG-20031110/)
+- [Portable Network Graphics (PNG) Specification](https://www.w3.org/TR/png/)
