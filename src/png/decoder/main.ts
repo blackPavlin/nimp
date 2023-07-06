@@ -289,12 +289,7 @@ export default class Decoder {
 	}
 
 	private decodeImagePass(buffer: Buffer, width: number, height: number): Buffer {
-		const bitsPerPixel = this.channels * this.bitDepth;
-		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
-		// +1 byte filter type
-		const bytesPerLine = 1 + ((bitsPerPixel * width + 7) >> 3);
-
-		const unfiltered = this.unfilter(buffer, bytesPerLine, bytesPerPixel);
+		const unfiltered = this.unfilter(buffer, width, height);
 		const scaled = this.scaleBitDepth(unfiltered, width, height);
 		return this.convertToRGBA(scaled, width, height);
 	}
@@ -313,56 +308,58 @@ export default class Decoder {
 		}
 	}
 
-	private unfilter(buffer: Buffer, bytesPerLine: number, bytesPerPixel: number): Buffer {
-		const width = bytesPerLine - 1;
-		const height = buffer.length / bytesPerLine;
-		const chunk = Buffer.alloc(width * height, 0x00);
-		const previousLine = Buffer.alloc(width, 0x00);
+	private unfilter(buffer: Buffer, width: number, height: number): Buffer {
+		const bitsPerPixel = this.channels * this.bitDepth;
+		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
+		const bytesPerLine = (bitsPerPixel * width + 7) >> 3;
+		// The +1 is for the per-line filter type
+		const bytesPerRow = 1 + bytesPerLine;
 
-		for (let y = 0, offset = 0; y < height; y += 1, offset += bytesPerLine) {
-			const line = buffer.subarray(offset + 1, offset + bytesPerLine);
-			const type = buffer.readUInt8(offset);
+		const chunk = Buffer.alloc(bytesPerLine * height);
+		const previousLine = Buffer.alloc(bytesPerLine);
 
-			switch (type) {
+		for (let offset = 0, y = 0; offset < buffer.length; offset += bytesPerRow, y += 1) {
+			const currentLine = buffer.subarray(offset + 1, offset + bytesPerRow);
+
+			switch (buffer.readUInt8(offset)) {
 				case FilterTypes.None:
-					// No-op
 					break;
 				case FilterTypes.Sub:
-					for (let i = bytesPerPixel; i < line.length; i += 1) {
-						line[i] += line[i - bytesPerPixel];
+					for (let i = bytesPerPixel; i < currentLine.length; i += 1) {
+						currentLine[i] += currentLine[i - bytesPerPixel];
 					}
 					break;
 				case FilterTypes.Up:
-					for (let i = 0; i < line.length; i += 1) {
-						line[i] += previousLine[i];
+					for (let i = 0; i < currentLine.length; i += 1) {
+						currentLine[i] += previousLine[i];
 					}
 					break;
 				case FilterTypes.Average:
 					for (let i = 0; i < bytesPerPixel; i += 1) {
-						line[i] += previousLine[i] >> 1;
+						currentLine[i] += previousLine[i] >> 1;
 					}
-					for (let i = bytesPerPixel; i < line.length; i += 1) {
-						line[i] += (line[i - bytesPerPixel] + previousLine[i]) >> 1;
+					for (let i = bytesPerPixel; i < currentLine.length; i += 1) {
+						currentLine[i] += (currentLine[i - bytesPerPixel] + previousLine[i]) >> 1;
 					}
 					break;
 				case FilterTypes.Paeth:
 					for (let i = 0; i < bytesPerPixel; i += 1) {
-						line[i] += previousLine[i];
+						currentLine[i] += previousLine[i];
 					}
-					for (let i = bytesPerPixel; i < line.length; i += 1) {
-						line[i] += paethPredictor(
-							line[i - bytesPerPixel],
+					for (let i = bytesPerPixel; i < currentLine.length; i += 1) {
+						currentLine[i] += paethPredictor(
+							currentLine[i - bytesPerPixel],
 							previousLine[i],
 							previousLine[i - bytesPerPixel],
 						);
 					}
 					break;
 				default:
-					throw new Error(`Bad filter type: ${type}`);
+					throw new Error(`Bad filter type: ${buffer.readUInt8(offset)}`);
 			}
 
-			line.copy(chunk, y * width);
-			line.copy(previousLine, 0);
+			currentLine.copy(previousLine);
+			currentLine.copy(chunk, y * bytesPerLine);
 		}
 
 		return chunk;
