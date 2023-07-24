@@ -1,5 +1,7 @@
 # <div align="center">Nodejs image manipulation package</div>
 
+[![License][repo_license_img]][repo_license_url]
+
 ## <div align="center">PNG</div>
 
 Portable Network Graphics, is a ubiquitous, lossless image file format, based on the zlib compression format.
@@ -25,3 +27,7 @@ Portable Network Graphics, is a ubiquitous, lossless image file format, based on
 ## References:
 - [PngSuite - the official set of PNG test images](http://www.schaik.com/pngsuite2011/pngsuite.html)
 - [Portable Network Graphics (PNG) Specification](https://www.w3.org/TR/png/)
+
+<!-- Repository -->
+[repo_license_img]: https://img.shields.io/github/license/blackPavlin/nimp?style=for-the-badge&logo=none
+[repo_license_url]: https://github.com/blackPavlin/nimp/blob/master/LICENSE
