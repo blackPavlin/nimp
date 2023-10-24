@@ -33,7 +33,7 @@
     "@types/node": "^20.8.7",
     "@types/pngjs": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^6.9.0",
-    "@typescript-eslint/parser": "^6.7.5",
+    "@typescript-eslint/parser": "^6.9.0",
     "benchmark": "^2.1.4",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
