@@ -1,7 +1,11 @@
 import fs from 'fs';
 import path from 'path';
-import { Suite, Event } from 'benchmark';
+import { fileURLToPath } from 'node:url';
+import Benchmark from 'benchmark';
 import { PNG } from 'pngjs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // basn0g01 x 7,656 ops/sec ±21.65% (81 runs sampled)
 // basn0g02 x 8,830 ops/sec ±1.45% (92 runs sampled)
@@ -69,7 +73,7 @@ const basi4a16 = fs.readFileSync(path.join(__dirname, './images/basi4a16.png'));
 const basi6a08 = fs.readFileSync(path.join(__dirname, './images/basi6a08.png'));
 const basi6a16 = fs.readFileSync(path.join(__dirname, './images/basi6a16.png'));
 
-const suite = new Suite('Pngjs - no-interlacing');
+const suite = new Benchmark.Suite('Pngjs - no-interlacing');
 
 suite.add('basn0g01', () => PNG.sync.read(basn0g01));
 suite.add('basn0g02', () => PNG.sync.read(basn0g02));
@@ -103,7 +107,7 @@ suite.add('basi4a16', () => PNG.sync.read(basi4a16));
 suite.add('basi6a08', () => PNG.sync.read(basi6a08));
 suite.add('basi6a16', () => PNG.sync.read(basi6a16));
 
-suite.on('cycle', (event: Event) => {
+suite.on('cycle', (event: Benchmark.Event) => {
 	console.log(String(event.target));
 });
 

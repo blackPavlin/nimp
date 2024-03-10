@@ -1,7 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { Suite, Event } from 'benchmark';
-import Decoder from '../../../src/png/decoder';
+import { fileURLToPath } from 'node:url';
+import Benchmark from 'benchmark';
+import Decoder from '../../decoder/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // basn0g01 x 18,500 ops/sec ±2.22% (89 runs sampled)
 // basn0g02 x 15,581 ops/sec ±2.06% (87 runs sampled)
@@ -69,7 +73,7 @@ const basi4a16 = fs.readFileSync(path.join(__dirname, './images/basi4a16.png'));
 const basi6a08 = fs.readFileSync(path.join(__dirname, './images/basi6a08.png'));
 const basi6a16 = fs.readFileSync(path.join(__dirname, './images/basi6a16.png'));
 
-const suite = new Suite('Png decoder - no-interlacing');
+const suite = new Benchmark.Suite('Png decoder - no-interlacing');
 
 suite.add('basn0g01', () => new Decoder(basn0g01));
 suite.add('basn0g02', () => new Decoder(basn0g02));
@@ -103,7 +107,7 @@ suite.add('basi4a16', () => new Decoder(basi4a16));
 suite.add('basi6a08', () => new Decoder(basi6a08));
 suite.add('basi6a16', () => new Decoder(basi6a16));
 
-suite.on('cycle', (event: Event) => {
+suite.on('cycle', (event: Benchmark.Event) => {
 	console.log(String(event.target));
 });
 
