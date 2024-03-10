@@ -13,7 +13,7 @@
     "test:png": "tsc --noEmit && jest --colors --selectProjects=png",
     "lint": "tsc --noEmit && eslint ./src/**/*.ts",
     "lint:fix": "eslint ./src/**/*.ts --fix",
-    "benchmark": "ts-node ./benchmarks/png/decoder/index.bench.ts"
+    "benchmark": "node --loader ts-node/esm ./src/png/benchmarks/decoder/pngjs.bench.ts"
   },
   "keywords": [
     "png",
