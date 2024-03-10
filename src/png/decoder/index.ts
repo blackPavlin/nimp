@@ -1,6 +1,6 @@
 import zlib from 'node:zlib';
 import { PngSignature, GammaFactor, ChromaticitiesFactor, Interlacing } from '../constants.js';
-import crc32 from '../../hash/crc32.js';
+import { CyclicRedundancyCheck } from '../../hash/crc32.js';
 import {
 	ChunkTypes,
 	BitDepth,
@@ -18,9 +18,9 @@ import unFilter from './unfilter.js';
 import converter from './converter.js';
 import normalize from './bitmapper.js';
 
-export default class Decoder {
+export default class PngDecoder {
 	constructor(buffer: Buffer) {
-		if (buffer.length < 8 || !Decoder.isPNG(buffer)) {
+		if (buffer.length < 8 || !PngDecoder.isPNG(buffer)) {
 			throw new Error('Not a PNG file');
 		}
 
@@ -89,7 +89,7 @@ export default class Decoder {
 					continue;
 			}
 
-			if (!Decoder.verifyChecksum(chunk, buffer.readInt32BE(offset))) {
+			if (!PngDecoder.verifyChecksum(chunk, buffer.readInt32BE(offset))) {
 				throw new Error('Invalid checksum');
 			}
 		}
@@ -182,7 +182,7 @@ export default class Decoder {
 	 * @param {number} checksum
 	 */
 	private static verifyChecksum(chunk: Buffer, checksum: number): boolean {
-		return crc32.sum(chunk) === checksum;
+		return CyclicRedundancyCheck.sum32(chunk) === checksum;
 	}
 
 	public width!: number;

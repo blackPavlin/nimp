@@ -1,12 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import Decoder from '../../../decoder/index.js';
+import PngDecoder from '../../../decoder/index.js';
 import { ColorTypes } from '../../../types.js';
 
 describe('Image filtering', () => {
 	it('Grayscale, no interlacing, filter-type 0', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/f00n0g08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -18,7 +18,7 @@ describe('Image filtering', () => {
 
 	it('Color, no interlacing, filter-type 0', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/f00n2c08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -30,7 +30,7 @@ describe('Image filtering', () => {
 
 	it('Grayscale, no interlacing, filter-type 1', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/f01n0g08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -42,7 +42,7 @@ describe('Image filtering', () => {
 
 	it('Color, no interlacing, filter-type 1', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/f01n2c08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -54,7 +54,7 @@ describe('Image filtering', () => {
 
 	it('Grayscale, no interlacing, filter-type 2', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/f02n0g08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -66,7 +66,7 @@ describe('Image filtering', () => {
 
 	it('Color, no interlacing, filter-type 2', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/f02n2c08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -78,7 +78,7 @@ describe('Image filtering', () => {
 
 	it('Grayscale, no interlacing, filter-type 3', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/f03n0g08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -90,7 +90,7 @@ describe('Image filtering', () => {
 
 	it('Color, no interlacing, filter-type 3', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/f03n2c08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -102,7 +102,7 @@ describe('Image filtering', () => {
 
 	it('Grayscale, no interlacing, filter-type 4', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/f04n0g08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -114,7 +114,7 @@ describe('Image filtering', () => {
 
 	it('Color, no interlacing, filter-type 4', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/f04n2c08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -126,7 +126,7 @@ describe('Image filtering', () => {
 
 	it('Bit-depth 4, filter changing per scanline', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/f99n0g04.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);

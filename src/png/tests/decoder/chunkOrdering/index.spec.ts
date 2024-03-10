@@ -1,12 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import Decoder from '../../../decoder/index.js';
+import PngDecoder from '../../../decoder/index.js';
 import { ColorTypes } from '../../../types.js';
 
 describe('Chunk ordering', () => {
 	it('Grayscale mother image with 1 idat-chunk', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/oi1n0g16.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -18,7 +18,7 @@ describe('Chunk ordering', () => {
 
 	it('Color mother image with 1 idat-chunk', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/oi1n2c16.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -30,7 +30,7 @@ describe('Chunk ordering', () => {
 
 	it('Grayscale image with 2 idat-chunks', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/oi2n0g16.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -42,7 +42,7 @@ describe('Chunk ordering', () => {
 
 	it('Color image with 2 idat-chunks', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/oi2n2c16.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -54,7 +54,7 @@ describe('Chunk ordering', () => {
 
 	it('Grayscale image with 4 unequal sized idat-chunks', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/oi4n0g16.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -66,7 +66,7 @@ describe('Chunk ordering', () => {
 
 	it('Color image with 4 unequal sized idat-chunks', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/oi4n2c16.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -78,7 +78,7 @@ describe('Chunk ordering', () => {
 
 	it('Grayscale image with all idat-chunks length one', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/oi9n0g16.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -90,7 +90,7 @@ describe('Chunk ordering', () => {
 
 	it('Color image with all idat-chunks length one', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/oi9n2c16.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);

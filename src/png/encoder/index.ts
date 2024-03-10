@@ -1,6 +1,6 @@
 import zlib, { ZlibOptions } from 'node:zlib';
 import { PngSignature } from '../constants.js';
-import crc32 from '../../hash/crc32.js';
+import { CyclicRedundancyCheck } from '../../hash/crc32.js';
 import {
 	EncodePNGOptions,
 	BitDepth,
@@ -120,7 +120,10 @@ export class E {
 		buff.writeInt32BE(chunk.length, 0); // write length
 		buff.writeInt32BE(type, 4); // write type
 		chunk.copy(buff, 8); // write chunk
-		buff.writeInt32BE(crc32.sum(buff.subarray(4, buff.length - 4)), buff.length - 4); // write crc
+		buff.writeInt32BE(
+			CyclicRedundancyCheck.sum32(buff.subarray(4, buff.length - 4)),
+			buff.length - 4,
+		); // write crc
 
 		this._chunks.push(buff);
 	}
@@ -187,7 +190,7 @@ export default class Encoder {
 
 		buff.writeInt32BE(chunk.length, 0); // write length
 		chunk.copy(buff, 4); // write chunk
-		buff.writeInt32BE(crc32.sum(chunk), buff.length - 4); // write crc
+		buff.writeInt32BE(CyclicRedundancyCheck.sum32(chunk), buff.length - 4); // write crc
 
 		return buff;
 	}

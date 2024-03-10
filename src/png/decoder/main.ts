@@ -1,5 +1,5 @@
 import zlib from 'node:zlib';
-import crc32 from '../../hash/crc32.js';
+import { CyclicRedundancyCheck } from '../../hash/crc32.js';
 import { PngSignature, Interlacing } from '../constants.js';
 
 import {
@@ -12,9 +12,11 @@ import {
 } from '../types.js';
 import paethPredictor from '../paeth.js';
 
-export default class Decoder {
-	constructor(buffer: Buffer) {
-		if (buffer.length < 8 || !Decoder.isPNG(buffer)) {
+export interface PngDecoderOptions {}
+
+export default class PngDecoder {
+	constructor(buffer: Buffer, options?: PngDecoderOptions) {
+		if (buffer.length < 8 || !PngDecoder.isPNG(buffer)) {
 			throw new Error('Not a PNG file');
 		}
 
@@ -42,20 +44,20 @@ export default class Decoder {
 					continue;
 			}
 
-			if (!Decoder.verifyChecksum(chunk, buffer.readInt32BE(offset))) {
+			if (!PngDecoder.verifyChecksum(chunk, buffer.readInt32BE(offset))) {
 				throw new Error('Invalid checksum');
 			}
 		}
 
-		if (this.deflatedIDAT.length === 0) {
+		if (this.bitmap.length === 0) {
 			throw new Error('Missing IDAT chunks');
 		}
 
-		const inflatedIDAT = zlib.inflateSync(Buffer.concat(this.deflatedIDAT));
+		const inflatedIDAT = zlib.inflateSync(this.bitmap);
 
 		if (this.interlaceMethod === InterlaceMethods.None) {
 			this.bitmap = this.decodeImagePass(inflatedIDAT, this.width, this.height);
-		} else if (this.interlaceMethod === InterlaceMethods.Adam7) {
+		} else {
 			this.bitmap = Buffer.alloc(this.height * this.width * 4);
 
 			for (let i = 0, offset = 0; i < 7; i += 1) {
@@ -84,12 +86,12 @@ export default class Decoder {
 	}
 
 	private static verifyChecksum(chunk: Buffer, checksum: number): boolean {
-		return crc32.sum(chunk) === checksum;
+		return CyclicRedundancyCheck.sum32(chunk) === checksum;
 	}
 
-	public width!: number;
+	public width = 0;
 
-	public height!: number;
+	public height = 0;
 
 	public bitDepth!: BitDepth;
 
@@ -99,7 +101,7 @@ export default class Decoder {
 
 	public interlaceMethod!: InterlaceMethods;
 
-	public bitmap!: Buffer;
+	public bitmap: Buffer = Buffer.alloc(0);
 
 	private parseIHDR(chunk: Buffer): void {
 		if (chunk.length !== 13) {
@@ -274,12 +276,8 @@ export default class Decoder {
 		}
 	}
 
-	private deflatedIDAT: Buffer[] = [];
-
 	private parseIDAT(chunk: Buffer): void {
-		if (chunk.length !== 0) {
-			this.deflatedIDAT.push(chunk);
-		}
+		this.bitmap = Buffer.concat([this.bitmap, chunk]);
 	}
 
 	private parseIEND(chunk: Buffer): void {

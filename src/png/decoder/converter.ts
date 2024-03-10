@@ -13,6 +13,10 @@ export default function bitConverter(
 	bitsPerLine: number,
 	scale: boolean,
 ): Buffer[] {
+	if (bitDepth === 8) {
+		return chunks;
+	}
+
 	const buffers = new Array<Buffer>(chunks.length);
 
 	switch (bitDepth) {
@@ -98,8 +102,6 @@ export default function bitConverter(
 				buffers[i] = buffer;
 			}
 			break;
-		case 8:
-			return chunks;
 		case 16:
 			for (let i = 0; i < chunks.length; i += 1) {
 				const chunk = chunks[i];

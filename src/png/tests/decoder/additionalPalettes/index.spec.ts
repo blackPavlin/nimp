@@ -1,12 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import Decoder from '../../../decoder/index.js';
+import PngDecoder from '../../../decoder/index.js';
 import { ColorTypes } from '../../../types.js';
 
 describe('Additional palettes', () => {
 	it('Six-cube palette-chunk in true-color image', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/pp0n2c16.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -18,7 +18,7 @@ describe('Additional palettes', () => {
 
 	it('Six-cube palette-chunk in true-color+alpha image', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/pp0n6a08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -30,7 +30,7 @@ describe('Additional palettes', () => {
 
 	it('Six-cube suggested palette (1 byte) in grayscale image, 8 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ps1n0g08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -45,7 +45,7 @@ describe('Additional palettes', () => {
 
 	it('Six-cube suggested palette (1 byte) in true-color image, 16 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ps1n2c16.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -57,7 +57,7 @@ describe('Additional palettes', () => {
 
 	it('Six-cube suggested palette (2 bytes) in grayscale image, 8 bit depth', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ps2n0g08.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);
@@ -72,7 +72,7 @@ describe('Additional palettes', () => {
 
 	it('Six-cube suggested palette (2 bytes) in true-color image', () => {
 		const image = fs.readFileSync(path.join(__dirname, './images/ps2n2c16.png'));
-		const png = new Decoder(image);
+		const png = new PngDecoder(image);
 
 		expect(png.width).toBe(32);
 		expect(png.height).toBe(32);

@@ -2,14 +2,20 @@
  * Cyclic Redundancy Check
  * @see https://www.w3.org/TR/2003/REC-PNG-20031110/#D-CRCAppendix
  */
-class Crc32 {
-	constructor() {
-		this.makeTable();
+export class CyclicRedundancyCheck {
+	private static readonly table = new Array<number>(256);
+
+	public static sum32(buffer: Buffer): number {
+		let crc = 0xffffffff;
+
+		for (const byte of buffer) {
+			crc = this.table[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+		}
+
+		return crc ^ 0xffffffff;
 	}
 
-	private readonly table = new Array<number>(256);
-
-	private makeTable(): void {
+	static {
 		for (let n = 0; n < 256; n += 1) {
 			let c = n;
 
@@ -20,16 +26,4 @@ class Crc32 {
 			this.table[n] = c;
 		}
 	}
-
-	public sum(buffer: Buffer): number {
-		let crc = 0xffffffff;
-
-		for (const byte of buffer) {
-			crc = this.table[(crc ^ byte) & 0xff] ^ (crc >>> 8);
-		}
-
-		return crc ^ 0xffffffff;
-	}
 }
-
-export default new Crc32();
