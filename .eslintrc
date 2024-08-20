@@ -1,8 +1,7 @@
 {
     "root": true,
     "env": {
-        "node": true,
-        "jest": true
+        "node": true
     },
     "extends": [
         "prettier",
@@ -11,13 +10,12 @@
         "plugin:@typescript-eslint/recommended"
     ],
     "plugins": [
-        "jest",
         "prettier",
         "@typescript-eslint"
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "./tsconfig.eslint.json",
+        "project": "./tsconfig.json",
         "tsconfigRootDir": "."
     },
     "ignorePatterns": ["*.js"],
