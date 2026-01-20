@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, it, TestContext } from 'node:test';
-import { PngDecoder } from '../../../lib/png/decoder.js';
-import { ColorTypes } from '../../../lib/png/types.js';
+import { PngDecoder } from '../../decoder.js';
+import { COLOR_TYPE } from '../../constants.js';
 
-const testdataDir = path.join(import.meta.dirname, '..', '..', '..', '..', 'testdata', 'pngsuite');
+const testdataDir = path.join(import.meta.dirname, '..', '..', '..', '..', 'tests', 'fixtures');
 
 describe('Odd sizes', () => {
 	describe('No interlacing', () => {
@@ -15,7 +15,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 1);
 			t.assert.strictEqual(png.height, 1);
 			t.assert.strictEqual(png.bitDepth, 1);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -27,7 +27,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 2);
 			t.assert.strictEqual(png.height, 2);
 			t.assert.strictEqual(png.bitDepth, 1);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -39,7 +39,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 3);
 			t.assert.strictEqual(png.height, 3);
 			t.assert.strictEqual(png.bitDepth, 1);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -51,7 +51,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 4);
 			t.assert.strictEqual(png.height, 4);
 			t.assert.strictEqual(png.bitDepth, 1);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -63,7 +63,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 5);
 			t.assert.strictEqual(png.height, 5);
 			t.assert.strictEqual(png.bitDepth, 2);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -75,7 +75,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 6);
 			t.assert.strictEqual(png.height, 6);
 			t.assert.strictEqual(png.bitDepth, 2);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -87,7 +87,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 7);
 			t.assert.strictEqual(png.height, 7);
 			t.assert.strictEqual(png.bitDepth, 2);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -99,7 +99,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 8);
 			t.assert.strictEqual(png.height, 8);
 			t.assert.strictEqual(png.bitDepth, 2);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -111,7 +111,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 9);
 			t.assert.strictEqual(png.height, 9);
 			t.assert.strictEqual(png.bitDepth, 2);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -123,7 +123,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 32);
 			t.assert.strictEqual(png.height, 32);
 			t.assert.strictEqual(png.bitDepth, 4);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -135,7 +135,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 33);
 			t.assert.strictEqual(png.height, 33);
 			t.assert.strictEqual(png.bitDepth, 4);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -147,7 +147,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 34);
 			t.assert.strictEqual(png.height, 34);
 			t.assert.strictEqual(png.bitDepth, 4);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -159,7 +159,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 35);
 			t.assert.strictEqual(png.height, 35);
 			t.assert.strictEqual(png.bitDepth, 4);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -171,7 +171,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 36);
 			t.assert.strictEqual(png.height, 36);
 			t.assert.strictEqual(png.bitDepth, 4);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -183,7 +183,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 37);
 			t.assert.strictEqual(png.height, 37);
 			t.assert.strictEqual(png.bitDepth, 4);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -195,7 +195,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 38);
 			t.assert.strictEqual(png.height, 38);
 			t.assert.strictEqual(png.bitDepth, 4);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -207,7 +207,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 39);
 			t.assert.strictEqual(png.height, 39);
 			t.assert.strictEqual(png.bitDepth, 4);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});
@@ -219,7 +219,7 @@ describe('Odd sizes', () => {
 			t.assert.strictEqual(png.width, 40);
 			t.assert.strictEqual(png.height, 40);
 			t.assert.strictEqual(png.bitDepth, 4);
-			t.assert.strictEqual(png.colorType, ColorTypes.IndexedColor);
+			t.assert.strictEqual(png.colorType, COLOR_TYPE.IndexedColor);
 			t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 			t.assert.snapshot(png.bitmap);
 		});

@@ -1,24 +1,22 @@
 import zlib from 'node:zlib';
-import { PngSignature, GammaFactor, ChromaticitiesFactor, Interlacing } from './constants.js';
+import { Buffer } from 'node:buffer';
+import { PNG_SIGNATURE, CHUNK_TYPE, COLOR_TYPE, INTERLACING, GammaFactor, ChromaticitiesFactor, Interlacing } from './constants.js';
 import {
-	ChunkTypes,
 	BitDepth,
 	Channels,
-	ColorTypes,
 	TextData,
 	Chromaticities,
 	PhisicalDimensions,
 	SuggestedPalette,
 	IccProfile,
-	InterlaceMethods,
 } from './types.js';
 
-import unFilter from './unfilter.js';
-import converter from './converter.js';
-import normalize from './bitmapper.js';
+import { unFilter } from './unfilter.js';
+import { bitConverter } from './converter.js';
+import { normalize } from './bitmapper.js';
 
 export class PngDecoder {
-	constructor(buffer: Buffer) {
+	constructor(buffer: Buffer<ArrayBuffer>) {
 		if (buffer.length < 8 || !PngDecoder.isPNG(buffer)) {
 			throw new Error('Not a PNG file');
 		}
@@ -28,64 +26,64 @@ export class PngDecoder {
 			const chunk = buffer.subarray((offset += 4), (offset += 4 + length));
 
 			switch (chunk.readUInt32BE()) {
-				// Critical chunks
-				case ChunkTypes.IHDR:
-					this.parseIHDR(chunk.subarray(4));
-					break;
-				case ChunkTypes.PLTE:
-					this.parsePLTE(chunk.subarray(4));
-					break;
-				case ChunkTypes.tRNS:
-					this.parsetRNS(chunk.subarray(4));
-					break;
-				case ChunkTypes.IDAT:
-					this.parseIDAT(chunk.subarray(4));
-					break;
-				case ChunkTypes.IEND:
-					this.parseIEND(chunk.subarray(4));
-					break;
-				// Ancillary chunks
-				case ChunkTypes.cHRM:
-					this.parsecHRM(chunk.subarray(4));
-					break;
-				case ChunkTypes.gAMA:
-					this.parsegAMA(chunk.subarray(4));
-					break;
-				case ChunkTypes.iCCP:
-					this.parseiCCP(chunk.subarray(4));
-					break;
-				case ChunkTypes.sBIT:
-					this.parsesBIT(chunk.subarray(4));
-					break;
-				case ChunkTypes.sRGB:
-					this.parsesRGB(chunk.subarray(4));
-					break;
-				case ChunkTypes.bKGD:
-					this.parsebKGD(chunk.subarray(4));
-					break;
-				case ChunkTypes.hIST:
-					this.parsehIST(chunk.subarray(4));
-					break;
-				case ChunkTypes.pHYs:
-					this.parsepHYS(chunk.subarray(4));
-					break;
-				case ChunkTypes.sPLT:
-					this.parsesPLT(chunk.subarray(4));
-					break;
-				case ChunkTypes.tEXt:
-					this.parsetEXT(chunk.subarray(4));
-					break;
-				case ChunkTypes.zTXt:
-					this.parsezTXT(chunk.subarray(4));
-					break;
-				case ChunkTypes.iTXt:
-					this.parseiTXT(chunk.subarray(4));
-					break;
-				case ChunkTypes.tIME:
-					this.parsetIME(chunk.subarray(4));
-					break;
-				default:
-					continue;
+			// Critical chunks
+			case CHUNK_TYPE.IHDR:
+				this.parseIHDR(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.PLTE:
+				this.parsePLTE(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.tRNS:
+				this.parsetRNS(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.IDAT:
+				this.parseIDAT(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.IEND:
+				this.parseIEND(chunk.subarray(4));
+				break;
+			// Ancillary chunks
+			case CHUNK_TYPE.cHRM:
+				this.parsecHRM(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.gAMA:
+				this.parsegAMA(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.iCCP:
+				this.parseiCCP(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.sBIT:
+				this.parsesBIT(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.sRGB:
+				this.parsesRGB(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.bKGD:
+				this.parsebKGD(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.hIST:
+				this.parsehIST(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.pHYs:
+				this.parsepHYS(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.sPLT:
+				this.parsesPLT(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.tEXt:
+				this.parsetEXT(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.zTXt:
+				this.parsezTXT(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.iTXt:
+				this.parseiTXT(chunk.subarray(4));
+				break;
+			case CHUNK_TYPE.tIME:
+				this.parsetIME(chunk.subarray(4));
+				break;
+			default:
+				continue;
 			}
 
 			if (!PngDecoder.verifyChecksum(chunk, buffer.readUInt32BE(offset))) {
@@ -101,9 +99,9 @@ export class PngDecoder {
 
 		const inflatedIDAT = zlib.inflateSync(Buffer.concat(this.deflatedIDAT));
 
-		if (this.interlaceMethod === InterlaceMethods.None) {
+		if (this.interlaceMethod === INTERLACING.None) {
 			this.bitmap = this.decodeImagePass(inflatedIDAT, this.width);
-		} else if (this.interlaceMethod === InterlaceMethods.Adam7) {
+		} else if (this.interlaceMethod === INTERLACING.Adam7) {
 			const bitsPerPixel = this.channels * this.bitDepth;
 
 			this.bitmap = Buffer.alloc(this.width * this.height * 4);
@@ -128,7 +126,7 @@ export class PngDecoder {
 		}
 	}
 
-	private decodeImagePass(inflatedData: Buffer, width: number): Buffer {
+	private decodeImagePass(inflatedData: Buffer<ArrayBuffer>, width: number): Buffer {
 		const bitsPerPixel = this.channels * this.bitDepth;
 		const bytesPerPixel = (bitsPerPixel + 7) >> 3;
 		// +1 byte filter type
@@ -136,11 +134,11 @@ export class PngDecoder {
 
 		const unfilteredChunks = unFilter(inflatedData, bytesPerPixel, bytesPerLine);
 
-		const convertedData = converter(
+		const convertedData = bitConverter(
 			unfilteredChunks,
 			this.bitDepth,
 			width * this.channels,
-			this.colorType !== ColorTypes.IndexedColor,
+			this.colorType !== COLOR_TYPE.IndexedColor,
 		);
 
 		const normalizedData = normalize(
@@ -172,7 +170,7 @@ export class PngDecoder {
 	 * @param {Buffer} buffer
 	 */
 	public static isPNG(buffer: Buffer): boolean {
-		return PngSignature.compare(buffer, 0, 8) === 0;
+		return PNG_SIGNATURE.compare(buffer, 0, 8) === 0;
 	}
 
 	/**
@@ -190,11 +188,11 @@ export class PngDecoder {
 
 	public bitDepth!: BitDepth;
 
-	public colorType!: ColorTypes;
+	public colorType!: COLOR_TYPE;
 
 	private channels!: Channels;
 
-	public interlaceMethod!: InterlaceMethods;
+	public interlaceMethod!: INTERLACING;
 
 	public bitmap!: Buffer;
 
@@ -226,46 +224,46 @@ export class PngDecoder {
 			throw new Error(`Bad bit depth: ${this.bitDepth as number}`);
 		}
 
-		this.colorType = chunk.readUInt8(9) as ColorTypes;
+		this.colorType = chunk.readUInt8(9) as COLOR_TYPE;
 
 		switch (this.colorType) {
-			case ColorTypes.Grayscale:
-				this.channels = 1;
-				break;
-			case ColorTypes.TrueColor:
-				if (this.bitDepth !== 8 && this.bitDepth !== 16) {
-					throw new Error(
-						`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth}`,
-					);
-				}
-				this.channels = 3;
-				break;
-			case ColorTypes.IndexedColor:
-				if (this.bitDepth === 16) {
-					throw new Error(
-						`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth}`,
-					);
-				}
-				this.channels = 1;
-				break;
-			case ColorTypes.GrayscaleAlpha:
-				if (this.bitDepth !== 8 && this.bitDepth !== 16) {
-					throw new Error(
-						`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth}`,
-					);
-				}
-				this.channels = 2;
-				break;
-			case ColorTypes.TrueColorAlpha:
-				if (this.bitDepth !== 8 && this.bitDepth !== 16) {
-					throw new Error(
-						`Unsupported color type: ${this.colorType} and bit depth ${this.bitDepth}`,
-					);
-				}
-				this.channels = 4;
-				break;
-			default:
-				throw new Error(`Bad color type: ${this.colorType as number}`);
+		case COLOR_TYPE.Grayscale:
+			this.channels = 1;
+			break;
+		case COLOR_TYPE.TrueColor:
+			if (this.bitDepth !== 8 && this.bitDepth !== 16) {
+				throw new Error(
+					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth}`,
+				);
+			}
+			this.channels = 3;
+			break;
+		case COLOR_TYPE.IndexedColor:
+			if (this.bitDepth === 16) {
+				throw new Error(
+					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth}`,
+				);
+			}
+			this.channels = 1;
+			break;
+		case COLOR_TYPE.GrayscaleAlpha:
+			if (this.bitDepth !== 8 && this.bitDepth !== 16) {
+				throw new Error(
+					`Unsupported color type ${this.colorType} and bit depth ${this.bitDepth}`,
+				);
+			}
+			this.channels = 2;
+			break;
+		case COLOR_TYPE.TrueColorAlpha:
+			if (this.bitDepth !== 8 && this.bitDepth !== 16) {
+				throw new Error(
+					`Unsupported color type: ${this.colorType} and bit depth ${this.bitDepth}`,
+				);
+			}
+			this.channels = 4;
+			break;
+		default:
+			throw new Error(`Bad color type: ${this.colorType as number}`);
 		}
 
 		if (chunk.readUInt8(10) !== 0) {
@@ -276,11 +274,11 @@ export class PngDecoder {
 			throw new Error(`Unsupported filter method: ${chunk.readUInt8(11)}`);
 		}
 
-		this.interlaceMethod = chunk.readUInt8(12) as InterlaceMethods;
+		this.interlaceMethod = chunk.readUInt8(12) as INTERLACING;
 
 		if (
-			this.interlaceMethod !== InterlaceMethods.None &&
-			this.interlaceMethod !== InterlaceMethods.Adam7
+			this.interlaceMethod !== INTERLACING.None &&
+			this.interlaceMethod !== INTERLACING.Adam7
 		) {
 			throw new Error(`Unsupported interlace method: ${this.interlaceMethod as number}`);
 		}
@@ -305,20 +303,20 @@ export class PngDecoder {
 		}
 
 		switch (this.colorType) {
-			case ColorTypes.IndexedColor:
-				this.palette = [];
+		case COLOR_TYPE.IndexedColor:
+			this.palette = [];
 
-				// TODO: Use chunk.subarray(i, i + 3);
-				for (let i = 0; i < chunk.length; i += 3) {
-					this.palette.push(Buffer.of(chunk[i], chunk[i + 1], chunk[i + 2], 0xff));
-				}
-				break;
-			case ColorTypes.TrueColor:
-			case ColorTypes.TrueColorAlpha:
-				// Ignore PLTE for color types TrueColor and TrueColorAlpha
-				break;
-			default:
-				throw new Error('PLTE, color type mismatch');
+			// TODO: Use chunk.subarray(i, i + 3);
+			for (let i = 0; i < chunk.length; i += 3) {
+				this.palette.push(Buffer.of(chunk[i], chunk[i + 1], chunk[i + 2], 0xff));
+			}
+			break;
+		case COLOR_TYPE.TrueColor:
+		case COLOR_TYPE.TrueColorAlpha:
+			// Ignore PLTE for color types TrueColor and TrueColorAlpha
+			break;
+		default:
+			throw new Error('PLTE, color type mismatch');
 		}
 	}
 
@@ -463,12 +461,12 @@ export class PngDecoder {
 	 * @param {Buffer} chunk
 	 */
 	private parsesBIT(chunk: Buffer): void {
-		if (this.colorType === ColorTypes.Grayscale) {
+		if (this.colorType === COLOR_TYPE.Grayscale) {
 			const sBit = chunk.readUInt8();
 			this.significantBits = [sBit, sBit, sBit, this.bitDepth];
 		}
 
-		if (this.colorType === ColorTypes.TrueColor || this.colorType === ColorTypes.IndexedColor) {
+		if (this.colorType === COLOR_TYPE.TrueColor || this.colorType === COLOR_TYPE.IndexedColor) {
 			this.significantBits = [
 				chunk.readUInt8(0),
 				chunk.readUInt8(1),
@@ -477,12 +475,12 @@ export class PngDecoder {
 			];
 		}
 
-		if (this.colorType === ColorTypes.GrayscaleAlpha) {
+		if (this.colorType === COLOR_TYPE.GrayscaleAlpha) {
 			const sBit = chunk.readUInt8();
 			this.significantBits = [sBit, sBit, sBit, chunk.readUInt8(1)];
 		}
 
-		if (this.colorType === ColorTypes.TrueColorAlpha) {
+		if (this.colorType === COLOR_TYPE.TrueColorAlpha) {
 			this.significantBits = [
 				chunk.readUInt8(0),
 				chunk.readUInt8(1),
@@ -514,72 +512,72 @@ export class PngDecoder {
 	 */
 	private parsebKGD(chunk: Buffer): void {
 		switch (this.colorType) {
-			case ColorTypes.Grayscale:
-			case ColorTypes.GrayscaleAlpha:
-				this.background = [
-					chunk.readUInt16BE(),
-					chunk.readUInt16BE(),
-					chunk.readUInt16BE(),
-					0xff,
-				];
+		case COLOR_TYPE.Grayscale:
+		case COLOR_TYPE.GrayscaleAlpha:
+			this.background = [
+				chunk.readUInt16BE(),
+				chunk.readUInt16BE(),
+				chunk.readUInt16BE(),
+				0xff,
+			];
 
-				switch (this.bitDepth) {
-					case 1:
-						this.background[0] *= 0xff;
-						this.background[1] *= 0xff;
-						this.background[2] *= 0xff;
-						break;
-					case 2:
-						this.background[0] *= 0x55;
-						this.background[1] *= 0x55;
-						this.background[2] *= 0x55;
-						break;
-					case 4:
-						this.background[0] *= 0x11;
-						this.background[1] *= 0x11;
-						this.background[2] *= 0x11;
-						break;
-					case 8:
-						// No-op.
-						break;
-					case 16:
-						this.background[0] = (this.background[0] / 0x101 + 0.5) | 0;
-						this.background[1] = (this.background[1] / 0x101 + 0.5) | 0;
-						this.background[2] = (this.background[2] / 0x101 + 0.5) | 0;
-						break;
-					default:
-						throw new Error();
-				}
+			switch (this.bitDepth) {
+			case 1:
+				this.background[0] *= 0xff;
+				this.background[1] *= 0xff;
+				this.background[2] *= 0xff;
 				break;
-			case ColorTypes.TrueColor:
-			case ColorTypes.TrueColorAlpha:
-				this.background = [
-					chunk.readUInt16BE(0),
-					chunk.readUInt16BE(2),
-					chunk.readUInt16BE(4),
-					0xff,
-				];
-
-				if (this.bitDepth === 16) {
-					this.background[0] = (this.background[0] / 0x101 + 0.5) | 0;
-					this.background[1] = (this.background[1] / 0x101 + 0.5) | 0;
-					this.background[2] = (this.background[2] / 0x101 + 0.5) | 0;
-				}
+			case 2:
+				this.background[0] *= 0x55;
+				this.background[1] *= 0x55;
+				this.background[2] *= 0x55;
 				break;
-			case ColorTypes.IndexedColor:
-				if (!this.palette) {
-					throw new Error('Missing palette');
-				}
-
-				this.background = [
-					this.palette[chunk.readUInt8()][0],
-					this.palette[chunk.readUInt8()][1],
-					this.palette[chunk.readUInt8()][2],
-					this.palette[chunk.readUInt8()][3],
-				];
+			case 4:
+				this.background[0] *= 0x11;
+				this.background[1] *= 0x11;
+				this.background[2] *= 0x11;
+				break;
+			case 8:
+				// No-op.
+				break;
+			case 16:
+				this.background[0] = (this.background[0] / 0x101 + 0.5) | 0;
+				this.background[1] = (this.background[1] / 0x101 + 0.5) | 0;
+				this.background[2] = (this.background[2] / 0x101 + 0.5) | 0;
 				break;
 			default:
 				throw new Error();
+			}
+			break;
+		case COLOR_TYPE.TrueColor:
+		case COLOR_TYPE.TrueColorAlpha:
+			this.background = [
+				chunk.readUInt16BE(0),
+				chunk.readUInt16BE(2),
+				chunk.readUInt16BE(4),
+				0xff,
+			];
+
+			if (this.bitDepth === 16) {
+				this.background[0] = (this.background[0] / 0x101 + 0.5) | 0;
+				this.background[1] = (this.background[1] / 0x101 + 0.5) | 0;
+				this.background[2] = (this.background[2] / 0x101 + 0.5) | 0;
+			}
+			break;
+		case COLOR_TYPE.IndexedColor:
+			if (!this.palette) {
+				throw new Error('Missing palette');
+			}
+
+			this.background = [
+				this.palette[chunk.readUInt8()][0],
+				this.palette[chunk.readUInt8()][1],
+				this.palette[chunk.readUInt8()][2],
+				this.palette[chunk.readUInt8()][3],
+			];
+			break;
+		default:
+			throw new Error();
 		}
 	}
 
@@ -611,60 +609,60 @@ export class PngDecoder {
 	 */
 	private parsetRNS(chunk: Buffer): void {
 		switch (this.colorType) {
-			case ColorTypes.Grayscale:
-				if (chunk.length !== 2) {
-					throw new Error('Bad tRNS length');
-				}
+		case COLOR_TYPE.Grayscale:
+			if (chunk.length !== 2) {
+				throw new Error('Bad tRNS length');
+			}
 
-				this.transparent = [chunk.readUInt16BE()];
+			this.transparent = [chunk.readUInt16BE()];
 
-				switch (this.bitDepth) {
-					case 1:
-						this.transparent[0] *= 0xff;
-						break;
-					case 2:
-						this.transparent[0] *= 0x55;
-						break;
-					case 4:
-						this.transparent[0] *= 0x11;
-						break;
-					case 16:
-						this.transparent[0] = (this.transparent[0] / 0x101 + 0.5) | 0;
-						break;
-				}
+			switch (this.bitDepth) {
+			case 1:
+				this.transparent[0] *= 0xff;
 				break;
-			case ColorTypes.TrueColor:
-				if (chunk.length !== 6) {
-					throw new Error('Bad tRNS length');
-				}
-
-				this.transparent = [
-					chunk.readUInt16BE(0),
-					chunk.readUInt16BE(2),
-					chunk.readUInt16BE(4),
-				];
-
-				if (this.bitDepth === 16) {
-					this.transparent[0] = (this.transparent[0] / 0x101 + 0.5) | 0;
-					this.transparent[1] = (this.transparent[1] / 0x101 + 0.5) | 0;
-					this.transparent[2] = (this.transparent[2] / 0x101 + 0.5) | 0;
-				}
+			case 2:
+				this.transparent[0] *= 0x55;
 				break;
-			case ColorTypes.IndexedColor:
-				if (!this.palette) {
-					throw new Error('Missing palette');
-				}
-
-				if (chunk.length > this.palette.length) {
-					throw new Error('Bad tRNS length');
-				}
-
-				for (let i = 0; i < chunk.length; i += 1) {
-					this.palette[i][3] = chunk[i];
-				}
+			case 4:
+				this.transparent[0] *= 0x11;
 				break;
-			default:
-				throw new Error('tRNS, color type mismatch');
+			case 16:
+				this.transparent[0] = (this.transparent[0] / 0x101 + 0.5) | 0;
+				break;
+			}
+			break;
+		case COLOR_TYPE.TrueColor:
+			if (chunk.length !== 6) {
+				throw new Error('Bad tRNS length');
+			}
+
+			this.transparent = [
+				chunk.readUInt16BE(0),
+				chunk.readUInt16BE(2),
+				chunk.readUInt16BE(4),
+			];
+
+			if (this.bitDepth === 16) {
+				this.transparent[0] = (this.transparent[0] / 0x101 + 0.5) | 0;
+				this.transparent[1] = (this.transparent[1] / 0x101 + 0.5) | 0;
+				this.transparent[2] = (this.transparent[2] / 0x101 + 0.5) | 0;
+			}
+			break;
+		case COLOR_TYPE.IndexedColor:
+			if (!this.palette) {
+				throw new Error('Missing palette');
+			}
+
+			if (chunk.length > this.palette.length) {
+				throw new Error('Bad tRNS length');
+			}
+
+			for (let i = 0; i < chunk.length; i += 1) {
+				this.palette[i][3] = chunk[i];
+			}
+			break;
+		default:
+			throw new Error('tRNS, color type mismatch');
 		}
 	}
 

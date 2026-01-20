@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, it, TestContext } from 'node:test';
-import { PngDecoder } from '../../../lib/png/decoder.js';
-import { ColorTypes } from '../../../lib/png/types.js';
+import { PngDecoder } from '../../decoder.js';
+import { COLOR_TYPE } from '../../constants.js';
 
-const testdataDir = path.join(import.meta.dirname, '..', '..', '..', '..', 'testdata', 'pngsuite');
+const testdataDir = path.join(import.meta.dirname, '..', '..', '..', '..', 'tests', 'fixtures');
 
 describe('Background colors', () => {
 	it('8 bit grayscale, alpha, no background chunk, interlaced', (t: TestContext) => {
@@ -12,7 +12,7 @@ describe('Background colors', () => {
 		const png = new PngDecoder(image);
 
 		t.assert.strictEqual(png.bitDepth, 8);
-		t.assert.strictEqual(png.colorType, ColorTypes.GrayscaleAlpha);
+		t.assert.strictEqual(png.colorType, COLOR_TYPE.GrayscaleAlpha);
 		t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 		t.assert.deepStrictEqual(png.background, undefined);
 		t.assert.snapshot(png.bitmap);
@@ -23,7 +23,7 @@ describe('Background colors', () => {
 		const png = new PngDecoder(image);
 
 		t.assert.strictEqual(png.bitDepth, 16);
-		t.assert.strictEqual(png.colorType, ColorTypes.GrayscaleAlpha);
+		t.assert.strictEqual(png.colorType, COLOR_TYPE.GrayscaleAlpha);
 		t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 		t.assert.deepStrictEqual(png.background, undefined);
 		t.assert.snapshot(png.bitmap);
@@ -34,7 +34,7 @@ describe('Background colors', () => {
 		const png = new PngDecoder(image);
 
 		t.assert.strictEqual(png.bitDepth, 8);
-		t.assert.strictEqual(png.colorType, ColorTypes.TrueColorAlpha);
+		t.assert.strictEqual(png.colorType, COLOR_TYPE.TrueColorAlpha);
 		t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 		t.assert.deepStrictEqual(png.background, undefined);
 		t.assert.snapshot(png.bitmap);
@@ -45,7 +45,7 @@ describe('Background colors', () => {
 		const png = new PngDecoder(image);
 
 		t.assert.strictEqual(png.bitDepth, 16);
-		t.assert.strictEqual(png.colorType, ColorTypes.TrueColorAlpha);
+		t.assert.strictEqual(png.colorType, COLOR_TYPE.TrueColorAlpha);
 		t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 		t.assert.deepStrictEqual(png.background, undefined);
 		t.assert.snapshot(png.bitmap);
@@ -56,7 +56,7 @@ describe('Background colors', () => {
 		const png = new PngDecoder(image);
 
 		t.assert.strictEqual(png.bitDepth, 8);
-		t.assert.strictEqual(png.colorType, ColorTypes.GrayscaleAlpha);
+		t.assert.strictEqual(png.colorType, COLOR_TYPE.GrayscaleAlpha);
 		t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 		t.assert.deepStrictEqual(png.background, [0, 0, 0, 255]);
 		t.assert.snapshot(png.bitmap);
@@ -67,7 +67,7 @@ describe('Background colors', () => {
 		const png = new PngDecoder(image);
 
 		t.assert.strictEqual(png.bitDepth, 16);
-		t.assert.strictEqual(png.colorType, ColorTypes.GrayscaleAlpha);
+		t.assert.strictEqual(png.colorType, COLOR_TYPE.GrayscaleAlpha);
 		t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 		t.assert.deepStrictEqual(png.background, [171, 171, 171, 255]);
 		t.assert.snapshot(png.bitmap);
@@ -78,7 +78,7 @@ describe('Background colors', () => {
 		const png = new PngDecoder(image);
 
 		t.assert.strictEqual(png.bitDepth, 8);
-		t.assert.strictEqual(png.colorType, ColorTypes.TrueColorAlpha);
+		t.assert.strictEqual(png.colorType, COLOR_TYPE.TrueColorAlpha);
 		t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 		t.assert.deepStrictEqual(png.background, [255, 255, 255, 255]);
 		t.assert.snapshot(png.bitmap);
@@ -89,7 +89,7 @@ describe('Background colors', () => {
 		const png = new PngDecoder(image);
 
 		t.assert.strictEqual(png.bitDepth, 16);
-		t.assert.strictEqual(png.colorType, ColorTypes.TrueColorAlpha);
+		t.assert.strictEqual(png.colorType, COLOR_TYPE.TrueColorAlpha);
 		t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 		t.assert.deepStrictEqual(png.background, [255, 255, 0, 255]);
 		t.assert.snapshot(png.bitmap);

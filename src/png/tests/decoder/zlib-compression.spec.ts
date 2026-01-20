@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, it, TestContext } from 'node:test';
-import { PngDecoder } from '../../../lib/png/decoder.js';
-import { ColorTypes } from '../../../lib/png/types.js';
+import { PngDecoder } from '../../decoder.js';
+import { COLOR_TYPE } from '../../constants.js';
 
-const testdataDir = path.join(import.meta.dirname, '..', '..', '..', '..', 'testdata', 'pngsuite');
+const testdataDir = path.join(import.meta.dirname, '..', '..', '..', '..', 'tests', 'fixtures');
 
 describe('Zlib compression level', () => {
 	it('color, no interlacing, compression level 0 (none)', (t: TestContext) => {
@@ -14,7 +14,7 @@ describe('Zlib compression level', () => {
 		t.assert.strictEqual(png.width, 32);
 		t.assert.strictEqual(png.height, 32);
 		t.assert.strictEqual(png.bitDepth, 8);
-		t.assert.strictEqual(png.colorType, ColorTypes.TrueColor);
+		t.assert.strictEqual(png.colorType, COLOR_TYPE.TrueColor);
 		t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 		t.assert.snapshot(png.bitmap);
 	});
@@ -26,7 +26,7 @@ describe('Zlib compression level', () => {
 		t.assert.strictEqual(png.width, 32);
 		t.assert.strictEqual(png.height, 32);
 		t.assert.strictEqual(png.bitDepth, 8);
-		t.assert.strictEqual(png.colorType, ColorTypes.TrueColor);
+		t.assert.strictEqual(png.colorType, COLOR_TYPE.TrueColor);
 		t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 		t.assert.snapshot(png.bitmap);
 	});
@@ -38,7 +38,7 @@ describe('Zlib compression level', () => {
 		t.assert.strictEqual(png.width, 32);
 		t.assert.strictEqual(png.height, 32);
 		t.assert.strictEqual(png.bitDepth, 8);
-		t.assert.strictEqual(png.colorType, ColorTypes.TrueColor);
+		t.assert.strictEqual(png.colorType, COLOR_TYPE.TrueColor);
 		t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 		t.assert.snapshot(png.bitmap);
 	});
@@ -50,7 +50,7 @@ describe('Zlib compression level', () => {
 		t.assert.strictEqual(png.width, 32);
 		t.assert.strictEqual(png.height, 32);
 		t.assert.strictEqual(png.bitDepth, 8);
-		t.assert.strictEqual(png.colorType, ColorTypes.TrueColor);
+		t.assert.strictEqual(png.colorType, COLOR_TYPE.TrueColor);
 		t.assert.strictEqual(png.bitmap.length, png.width * png.height * 4);
 		t.assert.snapshot(png.bitmap);
 	});

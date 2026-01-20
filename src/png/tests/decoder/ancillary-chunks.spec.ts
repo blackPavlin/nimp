@@ -2,9 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert';
 import { describe, it, TestContext } from 'node:test';
-import { PngDecoder } from '../../../lib/png/decoder.js';
+import { PngDecoder } from '../../decoder.js';
 
-const testdataDir = path.join(import.meta.dirname, '..', '..', '..', '..', 'testdata', 'pngsuite');
+const testdataDir = path.join(import.meta.dirname, '..', '..', '..', '..', 'tests', 'fixtures');
 
 describe('Ancillary chunks', () => {
 	describe('Chroma chunk', () => {
